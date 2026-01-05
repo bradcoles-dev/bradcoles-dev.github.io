@@ -112,6 +112,35 @@
 
         .hero {
             animation: fadeInUp 0.8s ease-out;
+            display: flex;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .hero-content {
+            flex: 1;
+        }
+
+        .hero-image {
+            flex-shrink: 0;
+        }
+
+        .headshot {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 4px solid var(--accent);
+            object-fit: cover;
+            filter: grayscale(100%) brightness(1.1);
+            position: relative;
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .headshot:hover {
+            filter: grayscale(0%) brightness(1);
+            box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+            transform: scale(1.05);
         }
 
         @keyframes fadeInUp {
@@ -122,6 +151,26 @@
             to {
                 opacity: 1;
                 transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                flex-direction: column-reverse;
+                text-align: center;
+            }
+
+            .headshot {
+                width: 150px;
+                height: 150px;
+            }
+
+            .hero-content {
+                width: 100%;
+            }
+
+            .links {
+                justify-content: center;
             }
         }
 
