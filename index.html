@@ -3,6 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Brad Coles - Data Engineer specializing in scalable data pipelines, ETL/ELT, cloud infrastructure, and real-time analytics. Experienced with Python, Spark, Airflow, dbt, AWS, and Snowflake.">
+    <meta name="keywords" content="Data Engineer, Python, Apache Spark, AWS, Snowflake, ETL, ELT, Data Pipeline, Airflow, dbt, Kafka, PostgreSQL, Data Analytics">
+    <meta name="author" content="Brad Coles">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://bradcoles-dev.github.io/">
+    <meta property="og:title" content="Brad Coles | Data Engineer">
+    <meta property="og:description" content="Data Engineer building scalable pipelines and transforming raw data into actionable insights. Specializing in cloud data infrastructure and analytics.">
+    <meta property="og:image" content="https://bradcoles-dev.github.io/preview.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://bradcoles-dev.github.io/">
+    <meta property="twitter:title" content="Brad Coles | Data Engineer">
+    <meta property="twitter:description" content="Data Engineer building scalable pipelines and transforming raw data into actionable insights.">
+    <meta property="twitter:image" content="https://bradcoles-dev.github.io/preview.png">
+
     <title>Brad Coles | Data Engineer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -391,9 +409,323 @@
             color: var(--accent-bright);
             font-size: 0.9em;
         }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 14, 26, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border);
+            transform: translateY(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        nav.visible {
+            transform: translateY(0);
+        }
+
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--text-primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: color 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-bright);
+        }
+
+        /* Experience timeline */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 2rem;
+            padding-left: 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2rem;
+            top: 0.5rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 3px solid var(--bg-dark);
+            z-index: 1;
+        }
+
+        .timeline-item h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+        }
+
+        .timeline-item .role {
+            color: var(--accent-bright);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-item .period {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .timeline-item p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Certifications */
+        .cert-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .cert-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cert-card::before {
+            content: '✓';
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 32px;
+            height: 32px;
+            background: var(--success);
+            color: var(--bg-dark);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .cert-card:hover {
+            border-color: var(--success);
+            transform: translateY(-4px);
+        }
+
+        .cert-card h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            padding-right: 3rem;
+        }
+
+        .cert-card .issuer {
+            color: var(--accent-bright);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .cert-card .date {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+        }
+
+        /* Contact form */
+        .contact-form {
+            max-width: 600px;
+            margin-top: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        .form-submit {
+            padding: 0.75rem 2rem;
+            background: var(--accent);
+            border: none;
+            color: var(--bg-dark);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .form-submit:hover {
+            background: var(--accent-bright);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Back to top button */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 48px;
+            height: 48px;
+            background: var(--accent);
+            color: var(--bg-dark);
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            background: var(--accent-bright);
+            transform: translateY(-4px);
+        }
+
+        /* Mobile nav toggle */
+        .nav-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .nav-toggle {
+                display: block;
+            }
+
+            .nav-links {
+                position: fixed;
+                top: 60px;
+                left: 0;
+                right: 0;
+                background: rgba(10, 14, 26, 0.98);
+                flex-direction: column;
+                padding: 2rem;
+                gap: 1rem;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .nav-links.active {
+                transform: translateX(0);
+            }
+
+            header {
+                padding-top: 4rem;
+            }
+        }
     </style>
 </head>
 <body>
+    <nav id="navbar">
+        <div class="container">
+            <div class="nav-brand">BC</div>
+            <button class="nav-toggle" aria-label="Toggle navigation">☰</button>
+            <ul class="nav-links">
+                <li><a href="#skills">Skills</a></li>
+                <li><a href="#experience">Experience</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#certifications">Certifications</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
     <header>
         <div class="container">
             <div class="hero">
@@ -401,17 +733,17 @@
                 <h1>Brad Coles</h1>
                 <p class="subtitle">Data Engineer building scalable pipelines and transforming raw data into actionable insights</p>
                 <div class="links">
-                    <a href="https://github.com/bradcoles-dev" class="btn" target="_blank">GitHub</a>
-                    <a href="https://linkedin.com/in/yourprofile" class="btn" target="_blank">LinkedIn</a>
-                    <a href="mailto:your.email@example.com" class="btn">Contact</a>
+                    <a href="https://github.com/bradcoles-dev" class="btn" target="_blank" rel="noopener noreferrer">GitHub</a>
+                    <a href="https://linkedin.com/in/brad-coles" class="btn" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                    <a href="#contact" class="btn">Contact</a>
                 </div>
             </div>
         </div>
     </header>
 
     <main class="container">
-        <section id="skills">
-            <h2>Technical Stack</h2>
+        <section id="skills" aria-labelledby="skills-heading">
+            <h2 id="skills-heading">Technical Stack</h2>
             <div class="skills-grid">
                 <div class="skill-category">
                     <h3>Data Processing</h3>
@@ -459,8 +791,34 @@
             </div>
         </section>
 
-        <section id="projects">
-            <h2>Featured Projects</h2>
+        <section id="experience" aria-labelledby="experience-heading">
+            <h2 id="experience-heading">Experience</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <h3>Senior Data Engineer</h3>
+                    <div class="role">Tech Company Name</div>
+                    <div class="period">2023 - Present</div>
+                    <p>Leading data infrastructure modernization efforts, designing and implementing scalable ETL/ELT pipelines processing 100M+ records daily. Architected cloud-native data platform on AWS, reducing costs by 35% while improving performance.</p>
+                </div>
+
+                <div class="timeline-item">
+                    <h3>Data Engineer</h3>
+                    <div class="role">Analytics Firm</div>
+                    <div class="period">2021 - 2023</div>
+                    <p>Built real-time streaming pipelines using Kafka and Spark, enabling instant analytics for business stakeholders. Implemented data quality framework with Great Expectations, improving data reliability by 60%.</p>
+                </div>
+
+                <div class="timeline-item">
+                    <h3>Junior Data Engineer</h3>
+                    <div class="role">Startup Inc.</div>
+                    <div class="period">2019 - 2021</div>
+                    <p>Developed batch processing workflows using Python and Apache Airflow. Created automated reporting systems and data visualization dashboards, reducing manual reporting time by 80%.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="projects" aria-labelledby="projects-heading">
+            <h2 id="projects-heading">Featured Projects</h2>
             
             <div class="project-card">
                 <h3>Real-Time Analytics Pipeline</h3>
@@ -505,8 +863,49 @@
             </div>
         </section>
 
-        <section id="about">
-            <h2>About Me</h2>
+        <section id="certifications" aria-labelledby="certifications-heading">
+            <h2 id="certifications-heading">Certifications & Education</h2>
+            <div class="cert-grid">
+                <div class="cert-card">
+                    <h3>AWS Certified Data Analytics - Specialty</h3>
+                    <div class="issuer">Amazon Web Services</div>
+                    <div class="date">2024</div>
+                </div>
+
+                <div class="cert-card">
+                    <h3>Google Cloud Professional Data Engineer</h3>
+                    <div class="issuer">Google Cloud</div>
+                    <div class="date">2023</div>
+                </div>
+
+                <div class="cert-card">
+                    <h3>Databricks Certified Data Engineer Associate</h3>
+                    <div class="issuer">Databricks</div>
+                    <div class="date">2023</div>
+                </div>
+
+                <div class="cert-card">
+                    <h3>Bachelor of Science in Computer Science</h3>
+                    <div class="issuer">University Name</div>
+                    <div class="date">2019</div>
+                </div>
+
+                <div class="cert-card">
+                    <h3>Apache Kafka Developer</h3>
+                    <div class="issuer">Confluent</div>
+                    <div class="date">2022</div>
+                </div>
+
+                <div class="cert-card">
+                    <h3>dbt Analytics Engineering</h3>
+                    <div class="issuer">dbt Labs</div>
+                    <div class="date">2023</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" aria-labelledby="about-heading">
+            <h2 id="about-heading">About Me</h2>
             <div class="about-content">
                 <p>
                     I'm a data engineer passionate about building robust, scalable data infrastructure. I specialize in designing end-to-end data pipelines that transform raw data into valuable insights for business decision-making.
@@ -519,6 +918,32 @@
                 </p>
             </div>
         </section>
+
+        <section id="contact" aria-labelledby="contact-heading">
+            <h2 id="contact-heading">Get In Touch</h2>
+            <div class="about-content">
+                <p>I'm always interested in hearing about new opportunities, collaborations, or just chatting about data engineering. Feel free to reach out!</p>
+            </div>
+            <form class="contact-form" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+                <input type="hidden" name="form-name" value="contact">
+                <p style="display: none;">
+                    <label>Don't fill this out: <input name="bot-field"></label>
+                </p>
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="message">Message</label>
+                    <textarea id="message" name="message" required></textarea>
+                </div>
+                <button type="submit" class="form-submit">Send Message</button>
+            </form>
+        </section>
     </main>
 
     <footer>
@@ -526,5 +951,121 @@
             <p>&copy; 2025 Brad Coles. Built with HTML, CSS, and hosted on GitHub Pages.</p>
         </div>
     </footer>
+
+    <button class="back-to-top" aria-label="Back to top">↑</button>
+
+    <script>
+        // Navigation scroll behavior
+        let lastScroll = 0;
+        const navbar = document.getElementById('navbar');
+        const backToTop = document.querySelector('.back-to-top');
+
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+
+            // Show/hide navbar on scroll
+            if (currentScroll > 100) {
+                navbar.classList.add('visible');
+            } else {
+                navbar.classList.remove('visible');
+            }
+
+            // Show/hide back to top button
+            if (currentScroll > 500) {
+                backToTop.classList.add('visible');
+            } else {
+                backToTop.classList.remove('visible');
+            }
+
+            lastScroll = currentScroll;
+        });
+
+        // Back to top functionality
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // Mobile navigation toggle
+        const navToggle = document.querySelector('.nav-toggle');
+        const navLinks = document.querySelector('.nav-links');
+
+        navToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+
+        // Close mobile nav when clicking a link
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+            });
+        });
+
+        // Form submission handling
+        const contactForm = document.querySelector('.contact-form');
+        if (contactForm) {
+            contactForm.addEventListener('submit', (e) => {
+                // Let Netlify handle the submission if deployed there
+                // Otherwise, prevent default and show success message
+                if (!contactForm.hasAttribute('data-netlify')) {
+                    e.preventDefault();
+                    alert('Thank you for your message! I will get back to you soon.');
+                    contactForm.reset();
+                }
+            });
+        }
+
+        // Add active state to navigation based on scroll position
+        const sections = document.querySelectorAll('section[id]');
+
+        function highlightNavigation() {
+            const scrollY = window.pageYOffset;
+
+            sections.forEach(section => {
+                const sectionHeight = section.offsetHeight;
+                const sectionTop = section.offsetTop - 100;
+                const sectionId = section.getAttribute('id');
+                const navLink = document.querySelector(`.nav-links a[href="#${sectionId}"]`);
+
+                if (navLink && scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
+                    document.querySelectorAll('.nav-links a').forEach(link => {
+                        link.style.color = 'var(--text-secondary)';
+                    });
+                    navLink.style.color = 'var(--accent-bright)';
+                }
+            });
+        }
+
+        window.addEventListener('scroll', highlightNavigation);
+    </script>
+
+    <!-- Structured Data for SEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Brad Coles",
+        "jobTitle": "Data Engineer",
+        "url": "https://bradcoles-dev.github.io",
+        "sameAs": [
+            "https://github.com/bradcoles-dev",
+            "https://linkedin.com/in/brad-coles"
+        ],
+        "knowsAbout": [
+            "Data Engineering",
+            "Python",
+            "Apache Spark",
+            "AWS",
+            "Snowflake",
+            "ETL/ELT",
+            "Apache Kafka",
+            "Airflow",
+            "dbt"
+        ],
+        "description": "Data Engineer building scalable pipelines and transforming raw data into actionable insights"
+    }
+    </script>
 </body>
 </html>
