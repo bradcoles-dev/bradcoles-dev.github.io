@@ -1,0 +1,38 @@
+{
+  "projectName": "Brad Coles Portfolio",
+  "description": "Personal portfolio website for Brad Coles, Senior Data Engineering Consultant",
+  "context": {
+    "stack": "HTML, CSS, JavaScript (vanilla)",
+    "hosting": "GitHub Pages with Jekyll",
+    "deployment": "Automatic deployment on push to main branch"
+  },
+  "preferences": {
+    "codeStyle": {
+      "indentation": "4 spaces",
+      "quotes": "double",
+      "lineLength": 120
+    },
+    "documentation": {
+      "inlineComments": "Use sparingly, code should be self-documenting",
+      "updateReadme": "Always update README.md when adding new features or changing structure"
+    }
+  },
+  "guidelines": [
+    "Keep the single-page design pattern - do not split into multiple HTML files",
+    "Maintain responsive design - test on mobile, tablet, and desktop",
+    "Preserve accessibility features (ARIA labels, semantic HTML)",
+    "Update structured data (JSON-LD) when changing content",
+    "Keep CSS variables for consistent theming",
+    "Use semantic commit messages following conventional commits",
+    "Test contact form functionality when making changes",
+    "Optimize images before adding (compress, appropriate dimensions)",
+    "Maintain SEO meta tags and Open Graph data"
+  ],
+  "commonTasks": {
+    "addCertification": "Add new cert-card div in the certifications section (lines 914-1025)",
+    "addProject": "Add new project-card div in the projects section (lines 875-912)",
+    "updateExperience": "Add new timeline-item in the experience section (lines 849-872)",
+    "modifyTheme": "Update CSS variables in :root (lines 29-40)",
+    "addSkill": "Add skill-tag to appropriate skill-category (lines 794-846)"
+  }
+}
