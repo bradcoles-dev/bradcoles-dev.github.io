@@ -6,6 +6,8 @@ This file provides important context for AI assistants working on this portfolio
 
 Single-page portfolio website for Brad Coles, a Senior Data Engineering Consultant based in Adelaide, South Australia. The site showcases professional experience, technical skills, projects, certifications, and contact information.
 
+**Language:** Australian English (en-AU) - Use Australian spelling conventions throughout (e.g., "optimisation" not "optimization", "utilisation" not "utilization", "colour" not "color" in text content).
+
 ## Architecture Decisions
 
 ### Single-Page Design
@@ -78,6 +80,7 @@ Tech-focused dark theme with blue accents:
 - Remove structured data (JSON-LD schema)
 
 ### ALWAYS:
+- Use Australian English spelling (optimisation, utilisation, colour, etc.)
 - Update README.md when adding features
 - Maintain line number references in README when editing
 - Test on multiple screen sizes

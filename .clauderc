@@ -4,7 +4,8 @@
   "context": {
     "stack": "HTML, CSS, JavaScript (vanilla)",
     "hosting": "GitHub Pages with Jekyll",
-    "deployment": "Automatic deployment on push to main branch"
+    "deployment": "Automatic deployment on push to main branch",
+    "language": "Australian English (en-AU)"
   },
   "preferences": {
     "codeStyle": {
@@ -18,6 +19,7 @@
     }
   },
   "guidelines": [
+    "Use Australian English spelling throughout (optimisation, utilisation, colour, etc.)",
     "Keep the single-page design pattern - do not split into multiple HTML files",
     "Maintain responsive design - test on mobile, tablet, and desktop",
     "Preserve accessibility features (ARIA labels, semantic HTML)",
@@ -25,7 +27,7 @@
     "Keep CSS variables for consistent theming",
     "Use semantic commit messages following conventional commits",
     "Test contact form functionality when making changes",
-    "Optimize images before adding (compress, appropriate dimensions)",
+    "Optimise images before adding (compress, appropriate dimensions)",
     "Maintain SEO meta tags and Open Graph data"
   ],
   "commonTasks": {
