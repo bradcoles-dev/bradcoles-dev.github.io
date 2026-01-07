@@ -13,7 +13,8 @@ This is a single-page portfolio website built with vanilla HTML, CSS, and JavaSc
 ```
 bradcoles-dev.github.io/
 ├── index.html              # Main portfolio page (single-page application)
-├── Head_shot-removebg-preview.png  # Profile headshot image
+├── images/                 # Image assets
+│   └── Head_shot-removebg-preview.png  # Profile headshot image
 ├── _config.yml             # Jekyll configuration (GitHub Pages)
 └── README.md               # This file
 ```
