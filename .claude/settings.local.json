@@ -7,7 +7,8 @@
       "Bash(gh auth:*)",
       "Bash(where gh:*)",
       "Bash(gh repo view:*)",
-      "Bash(gh api:*)"
+      "Bash(gh api:*)",
+      "Bash(git mv:*)"
     ],
     "deny": [],
     "ask": []
