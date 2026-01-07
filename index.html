@@ -259,9 +259,12 @@
             animation-fill-mode: both;
         }
 
+        section:nth-child(1) { animation-delay: 0.1s; }
         section:nth-child(2) { animation-delay: 0.2s; }
-        section:nth-child(3) { animation-delay: 0.4s; }
-        section:nth-child(4) { animation-delay: 0.6s; }
+        section:nth-child(3) { animation-delay: 0.3s; }
+        section:nth-child(4) { animation-delay: 0.4s; }
+        section:nth-child(5) { animation-delay: 0.5s; }
+        section:nth-child(6) { animation-delay: 0.6s; }
 
         h2 {
             font-family: 'Syne', sans-serif;
@@ -766,12 +769,12 @@
             <div class="nav-brand">BC</div>
             <button class="nav-toggle" aria-label="Toggle navigation">☰</button>
             <ul class="nav-links">
+                <li><a href="#about">About</a></li>
                 <li><a href="#skills">Skills</a></li>
                 <li><a href="#experience">Experience</a></li>
                 <li><a href="#projects">Projects</a></li>
                 <li><a href="#certifications">Certifications</a></li>
                 <li><a href="#education">Education</a></li>
-                <li><a href="#about">About</a></li>
                 <li><a href="#contact">Contact</a></li>
             </ul>
         </div>
@@ -779,19 +782,39 @@
     <header>
         <div class="container">
             <div class="hero">
-                <div class="tag">● Senior Consultant & Capability Lead</div>
-                <h1>Brad Coles</h1>
-                <p class="subtitle">Senior Data Engineering Consultant specialising in Microsoft Fabric, Azure, and medallion Lakehouse architectures. 10+ years driving business impact through scalable, metadata-driven data platforms.</p>
-                <div class="links">
-                    <a href="https://github.com/bradcoles-dev" class="btn" target="_blank" rel="noopener noreferrer">GitHub</a>
-                    <a href="https://linkedin.com/in/brad-coles" class="btn" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-                    <a href="#contact" class="btn">Contact</a>
+                <div class="hero-content">
+                    <div class="tag">● Senior Consultant & Capability Lead</div>
+                    <h1>Brad Coles</h1>
+                    <p class="subtitle">Senior Data Engineering Consultant specialising in Microsoft Fabric, Azure, and medallion Lakehouse architectures. 10+ years driving business impact through scalable, metadata-driven data platforms.</p>
+                    <div class="links">
+                        <a href="https://github.com/bradcoles-dev" class="btn" target="_blank" rel="noopener noreferrer">GitHub</a>
+                        <a href="https://linkedin.com/in/brad-coles" class="btn" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                        <a href="#contact" class="btn">Contact</a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <img src="Head_shot-removebg-preview.png" alt="Brad Coles headshot" class="headshot">
                 </div>
             </div>
         </div>
     </header>
 
     <main class="container">
+        <section id="about" aria-labelledby="about-heading">
+            <h2 id="about-heading">About Me</h2>
+            <div class="about-content">
+                <p>
+                    I'm a Senior Data Engineering Consultant with 10+ years of experience spanning data engineering, analytics, and actuarial domains. Based in Adelaide, South Australia, I specialise in Microsoft Fabric, Azure, and modern medallion Lakehouse architectures.
+                </p>
+                <p>
+                    My expertise lies in designing and delivering scalable, metadata-driven data platforms that optimise cloud performance and cost while driving measurable business impact. I'm passionate about thought leadership in data engineering, producing blogs, case studies, and enablement content to promote modern practices and innovations.
+                </p>
+                <p>
+                    I lead teams to technical excellence, define engineering standards, and thrive in hands-on roles where I code daily in Spark, SQL, and Python. Whether it's reducing costs by 80%, influencing Microsoft product strategy, or presenting to C-level executives, I'm driven by continuous improvement and delivering real value through data.
+                </p>
+            </div>
+        </section>
+
         <section id="skills" aria-labelledby="skills-heading">
             <h2 id="skills-heading">Technical Stack</h2>
             <div class="skills-grid">
@@ -1063,21 +1086,6 @@
                     <div class="issuer">Financial Services Council</div>
                     <div class="date">2015</div>
                 </div>
-            </div>
-        </section>
-
-        <section id="about" aria-labelledby="about-heading">
-            <h2 id="about-heading">About Me</h2>
-            <div class="about-content">
-                <p>
-                    I'm a Senior Data Engineering Consultant with 10+ years of experience spanning data engineering, analytics, and actuarial domains. Based in Adelaide, South Australia, I specialise in Microsoft Fabric, Azure, and modern medallion Lakehouse architectures.
-                </p>
-                <p>
-                    My expertise lies in designing and delivering scalable, metadata-driven data platforms that optimise cloud performance and cost while driving measurable business impact. I'm passionate about thought leadership in data engineering, producing blogs, case studies, and enablement content to promote modern practices and innovations.
-                </p>
-                <p>
-                    I lead teams to technical excellence, define engineering standards, and thrive in hands-on roles where I code daily in Spark, SQL, and Python. Whether it's reducing costs by 80%, influencing Microsoft product strategy, or presenting to C-level executives, I'm driven by continuous improvement and delivering real value through data.
-                </p>
             </div>
         </section>
 
