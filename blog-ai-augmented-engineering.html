@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Exploring repository-centric AI-augmented data engineering with Claude - from code completion to autonomous teams.">
-    <meta name="keywords" content="AI-Augmented Engineering, Claude, Repository-Centric Development, Data Engineering, GenAI, Microsoft Fabric">
+    <meta name="description" content="My journey upskilling from AI code completion to human-directed local agents, using my portfolio website as a learning experiment.">
+    <meta name="keywords" content="AI Learning, Claude, Repository-Centric Development, Personal Development, GenAI, Upskilling">
     <meta name="author" content="Brad Coles">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://bradcoles-dev.github.io/blog-ai-augmented-engineering.html">
-    <meta property="og:title" content="Building My Portfolio with Claude: A Repository-Centric Approach to AI-Augmented Data Engineering">
-    <meta property="og:description" content="Exploring the journey from code completion to human-directed local agents in AI-augmented data engineering.">
+    <meta property="og:title" content="Building My Portfolio with Claude: A Personal Upskilling Journey">
+    <meta property="og:description" content="My journey from Level 1 (Code Completion) to Level 2 (Human-Directed Local Agents), using my portfolio website as the guinea pig.">
     <meta property="og:image" content="https://bradcoles-dev.github.io/preview.png">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://bradcoles-dev.github.io/blog-ai-augmented-engineering.html">
-    <meta property="twitter:title" content="Building My Portfolio with Claude: A Repository-Centric Approach">
-    <meta property="twitter:description" content="Exploring repository-centric AI-augmented data engineering.">
+    <meta property="twitter:title" content="Building My Portfolio with Claude: A Personal Upskilling Journey">
+    <meta property="twitter:description" content="My journey from code completion to human-directed local agents.">
     <meta property="twitter:image" content="https://bradcoles-dev.github.io/preview.png">
 
     <title>Building My Portfolio with Claude | Brad Coles</title>
@@ -193,95 +193,87 @@
             <a href="index.html" class="back-link">Back to Portfolio</a>
             <div class="blog-meta">
                 <span class="blog-date">January 2026</span>
-                <span class="blog-category">AI & Data Engineering</span>
+                <span class="blog-category">Personal Development</span>
             </div>
-            <h1>Building My Portfolio with Claude: A Repository-Centric Approach to AI-Augmented Data Engineering</h1>
+            <h1>Building My Portfolio with Claude: A Personal Upskilling Journey</h1>
         </header>
 
         <article>
             <p>
-                Over the recent holiday period, I embarked on a small personal project that served as both a practical experiment and a proof-of-concept: building this portfolio website entirely with Claude in VS Code. As a data engineer constantly exploring how AI can augment technical work, this project allowed me to test a repository-centric approach to AI-augmented engineering that I believe has significant implications for our field.
+                Over the recent holiday period, I decided to use my portfolio website as a guinea pig for a personal upskilling experiment. My goal was simple: progress from <strong>Level 1 (Code Completion)</strong> to <strong>Level 2 (Human-Directed Local Agents)</strong> in my understanding and use of AI tools. Building this entire portfolio with Claude in VS Code turned out to be the perfect learning project.
             </p>
 
-            <h2>The Repository-Centric Philosophy</h2>
+            <h2>The Learning Objective</h2>
             <p>
-                I'm particularly keen on repository-centric AI-augmented engineering for a simple reason: context is everything. When your AI assistant has access to the entire project repository—including code, documentation, helper files, configuration, and metadata—it can make informed decisions that align with your project's architecture, standards, and patterns. Every file is source-controlled by default, creating a natural audit trail of what was generated and when.
-            </p>
-
-            <h2>The Limitations of Native GenAI Tools</h2>
-            <p>
-                Contrast this with native GenAI implementations like Microsoft Fabric's Copilot in pipelines or Spark Notebooks. While these tools are undoubtedly useful for specific tasks, their scope is fundamentally limited. You can't simultaneously have the AI generate code or build pipelines while also updating documentation, maintaining metadata files, or ensuring consistency across your entire data platform. Each interaction exists in isolation, confined to the specific editor or notebook where you're working.
+                I've been using AI code completion tools for a while—helpful autocomplete suggestions, snippet generation, that sort of thing. But I wanted to understand what changes when you give an AI assistant full repository context. What does Level 2 actually feel like compared to Level 1? What new capabilities unlock? And critically, what limitations or challenges emerge?
             </p>
 
             <p>
-                This fragmentation means you're still manually coordinating between different aspects of your project. The AI might help you write a Spark transformation, but it won't update your data lineage documentation, adjust your CI/CD configuration, or ensure your code comments follow team standards. You're left doing the boring, repetitive work that AI should be automating.
+                The only way to truly learn was to build something real. Since I'm not a web developer, building a portfolio site from scratch seemed like an ideal challenge—complex enough to be meaningful, but not so critical that mistakes would matter.
             </p>
 
-            <h2>The Power of Full Context</h2>
+            <h2>Why Repository-Centric?</h2>
             <p>
-                With a repository-centric approach using tools like Claude in VS Code, the AI has visibility across your entire project structure. It can:
+                I'm particularly keen on the repository-centric approach for a straightforward reason: context is everything. When your AI assistant has access to the entire project—code, documentation, configuration files, and all—it can make decisions that align with your project's structure and patterns. Everything stays source-controlled by default, creating a natural audit trail.
+            </p>
+
+            <p>
+                This contrasts with in-editor AI tools where each interaction exists in isolation. Those tools are great for what they do, but they can't simultaneously update your documentation when they write code, or ensure consistency across multiple files. They're Level 1—helpful, but limited in scope.
+            </p>
+
+            <h2>What I Learned: The Benefits</h2>
+            <p>
+                Working with Claude across my entire repository revealed capabilities I hadn't fully appreciated:
             </p>
             <ul>
-                <li>Write pipeline code while simultaneously updating technical documentation</li>
-                <li>Maintain metadata files that track data lineage and transformations</li>
-                <li>Ensure consistency across configuration files, scripts, and documentation</li>
-                <li>Follow project-specific conventions it learns from existing code and style guides</li>
-                <li>Update README files, changelog entries, and inline documentation as it codes</li>
+                <li>The AI could write HTML while simultaneously updating related CSS, keeping the design consistent without me manually coordinating between files</li>
+                <li>It followed project-specific conventions by learning from existing code—once I established a pattern, it maintained that pattern throughout</li>
+                <li>Documentation and code stayed in sync because the AI could update both simultaneously</li>
+                <li>I could describe high-level goals ("make the navigation responsive") and the AI would handle implementation details across multiple files</li>
             </ul>
 
             <p>
-                This holistic approach means the AI genuinely automates the boring stuff—not just code generation, but all the essential-but-tedious work that surrounds it.
+                This holistic approach meant I spent less time on tedious coordination work and more time on creative decisions and learning.
             </p>
 
-            <h2>Guardrails and Human-in-the-Loop</h2>
+            <h2>Quality Control and Guardrails</h2>
             <p>
-                One concern with AI-generated code is quality control and review. The repository-centric approach naturally supports proper engineering guardrails. You can configure your workflow so the AI can only develop locally and raise pull requests, never committing directly to main. This creates a "human in the loop" checkpoint where you review the AI's work—including code, tests, and documentation—before merging to production.
+                One concern with AI-generated code is quality. The repository-centric approach naturally supports proper guardrails. I configured my workflow so Claude could only work locally—it couldn't push directly to my main branch. This created a "human in the loop" checkpoint where I reviewed everything before publishing.
             </p>
 
             <p>
-                This workflow mirrors how you'd collaborate with a junior engineer: give them context, let them work autonomously, then review their output. The difference is the AI never gets tired, never has an off day, and can work across your entire codebase simultaneously.
+                This workflow felt like collaborating with a very capable but junior team member: I provided context and direction, Claude worked autonomously, and I reviewed the output. The difference is Claude never gets tired and can work across the entire codebase simultaneously.
             </p>
 
             <h2>The Portfolio Project: Vibe-Coding to a Solution</h2>
             <p>
-                I'll be honest: I'm not a web developer. If I'd tried to build this portfolio site from scratch using traditional methods, it would have taken considerably longer and likely looked far worse. A professional web developer would undoubtedly have produced something more polished.
+                I'll be honest: I'm not a web developer. If I'd tried to build this portfolio from scratch the traditional way, it would have taken considerably longer and likely looked far worse. A professional web developer would undoubtedly produce something more polished.
             </p>
 
             <p>
-                But that wasn't the point. This project was about demonstrating that I can "vibe-code" my way through to a functional solution, with Claude in the driver's seat. I provided high-level direction, architectural decisions, and feedback on the output. Claude handled the implementation details, maintained consistency across the codebase, and even helped optimise for GitHub Pages hosting.
+                But that wasn't the point. This was about learning Level 2 capabilities—understanding what "vibe-coding" with an AI agent actually feels like. I provided high-level direction and architectural decisions. Claude handled implementation details, maintained consistency, and optimised for GitHub Pages hosting.
             </p>
 
             <p>
-                The entire website—hosted for free on GitHub Pages—came together over a few days of casual work during the holidays. More importantly, I learned valuable lessons about AI-augmented workflows that I'm now applying to data engineering projects.
+                The entire website came together over a few days of casual holiday work. More importantly, I now understand the practical differences between Level 1 and Level 2, which informs how I think about using these tools professionally.
             </p>
 
-            <h2>Implications for Data Engineering</h2>
+            <h2>Looking Ahead: Professional Applications</h2>
             <p>
-                The same principles that made this portfolio project successful apply directly to data engineering work:
-            </p>
-            <ul>
-                <li><strong>Metadata-driven pipelines:</strong> AI can maintain configuration files and metadata that drive dynamic pipeline generation</li>
-                <li><strong>Documentation automation:</strong> Data lineage, transformation logic, and data dictionaries can be updated automatically as pipelines evolve</li>
-                <li><strong>Consistency at scale:</strong> Across dozens or hundreds of tables and transformations, AI ensures naming conventions, patterns, and standards are maintained</li>
-                <li><strong>Test generation:</strong> Unit tests, integration tests, and data quality checks can be generated alongside the code they validate</li>
-            </ul>
-
-            <h2>Different Approaches, Different Use Cases</h2>
-            <p>
-                To be clear, I'm not suggesting native GenAI tools like Fabric Copilot don't have their place. For quick ad-hoc queries, one-off transformations, or learning how to use a specific API, they're excellent. They lower the barrier to entry and help teams become more productive immediately.
+                This was a personal learning project, not a professional one. But I'm keen to see how these capabilities might translate to my professional work. The ability to maintain consistency across complex projects, keep documentation in sync with code, and work at a higher level of abstraction—these feel like valuable skills worth developing further.
             </p>
 
             <p>
-                But for comprehensive data engineering projects where maintainability, documentation, and consistency matter—where you're building platforms rather than one-off solutions—a repository-centric approach offers substantial advantages. It's the difference between AI as a helpful assistant for specific tasks and AI as a genuine engineering partner across your entire project.
+                Of course, professional contexts bring different requirements, constraints, and quality standards. That's why this was an experiment with my personal portfolio rather than a production system. But as a learning vehicle, it served its purpose perfectly.
             </p>
 
-            <h2>The Maturity Journey: From Code Completion to Autonomous Teams</h2>
+            <h2>The Maturity Journey: Understanding the Levels</h2>
             <p>
-                This portfolio project represents my deliberate progression from <strong>Level 1: Code Completion</strong> to <strong>Level 2: Human-Directed Local Agents</strong> in AI-augmented engineering. At Level 1, AI suggests code snippets and completions within your editor—helpful, but limited in scope. At Level 2, you're directing an AI agent that can work across your entire local repository, understanding context, maintaining consistency, and handling multiple related tasks simultaneously.
+                Through this project, I've gained practical experience with the progression from <strong>Level 1 (Code Completion)</strong> to <strong>Level 2 (Human-Directed Local Agents)</strong>. At Level 1, AI suggests code snippets and completions within your editor—helpful, but limited in scope. At Level 2, you're directing an AI agent that can work across your entire local repository, understanding context, maintaining consistency, and handling multiple related tasks simultaneously.
             </p>
 
             <p>
-                But the journey doesn't end here. The remaining progression looks like this:
+                The learning journey doesn't end here. The remaining progression looks like this:
             </p>
             <ul>
                 <li><strong>Level 3: Human-Supervised Remote Agents</strong> — AI agents that can work asynchronously on tasks, potentially across distributed systems, with periodic human checkpoints</li>
@@ -290,20 +282,24 @@
             </ul>
 
             <p>
-                We're still in the early stages of this evolution, but understanding this progression helps frame where current tools sit and where the technology is heading. This project was specifically aimed at mastering Level 2 capabilities before exploring higher levels.
+                Understanding this progression helps frame where current tools sit and where the technology is heading. This project was specifically about mastering Level 2 capabilities through hands-on experience before considering what higher levels might look like.
             </p>
 
-            <h2>The Future of AI-Augmented Engineering</h2>
+            <h2>Final Thoughts</h2>
             <p>
-                As these tools mature and we develop better patterns for human-AI collaboration, I believe we'll see a shift from AI as a code completion tool to AI as a comprehensive development partner. Each level brings new capabilities and requires new guardrails, workflows, and trust mechanisms.
-            </p>
-
-            <p>
-                The key is giving AI the context it needs—not just the current file or function, but the entire repository, documentation, standards, and architectural decisions that make a project coherent. That's what repository-centric approaches enable, and it's why I'm excited about their potential to transform how we build data platforms.
+                This portfolio project achieved its goal: I now have practical, hands-on experience with repository-centric AI development. I understand the difference between Level 1 and Level 2 not just theoretically, but through actually building something.
             </p>
 
             <p>
-                If you're interested in discussing AI-augmented data engineering approaches or want to share your own experiments, I'd love to hear from you. Reach out via the <a href="index.html#contact" style="color: var(--accent-bright); text-decoration: none;">contact form</a> or connect with me on <a href="https://linkedin.com/in/brad-coles" style="color: var(--accent-bright); text-decoration: none;" target="_blank" rel="noopener noreferrer">LinkedIn</a>.
+                The key insight? Giving AI full repository context unlocks capabilities that go beyond code completion. It's not just about writing code faster—it's about working at a higher level of abstraction while maintaining consistency across complex projects.
+            </p>
+
+            <p>
+                Whether these skills translate meaningfully to professional work remains to be seen. But as a personal upskilling exercise, this was time well spent. And hey, I got a portfolio website out of it too.
+            </p>
+
+            <p>
+                If you're interested in discussing AI learning approaches or want to share your own upskilling experiments, I'd love to hear from you. Reach out via the <a href="index.html#contact" style="color: var(--accent-bright); text-decoration: none;">contact form</a> or connect with me on <a href="https://linkedin.com/in/brad-coles" style="color: var(--accent-bright); text-decoration: none;" target="_blank" rel="noopener noreferrer">LinkedIn</a>.
             </p>
         </article>
 
