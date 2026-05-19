@@ -272,6 +272,20 @@
             margin: 3rem 0;
         }
 
+        .diagram {
+            margin: 2rem 0;
+            overflow-x: auto;
+        }
+
+        .diagram figcaption {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-top: 0.75rem;
+            font-style: italic;
+            line-height: 1.5;
+        }
+
         .callout {
             background: var(--code-bg);
             border: 1px solid var(--border);
@@ -520,7 +534,7 @@ SET TBLPROPERTIES (<span class="string">'delta.parquet.vorder.enabled'</span> = 
             </p>
 
             <p class="callout">
-                If you would like the reusable PySpark implementation of this pattern, feel free to connect with me on <a href="https://www.linkedin.com/in/brad-coles/" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">LinkedIn</a> or reach out via <a href="https://www.synechron.com" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Synechron</a>.
+                If you would like the reusable PySpark implementation of this pattern, feel free to connect with me on <a href="https://www.linkedin.com/in/brad-coles/" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">LinkedIn</a> or reach out via <a href="https://www.synechron.com/en-au" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Synechron Australia</a>.
             </p>
 
             <hr>
@@ -621,6 +635,71 @@ CLUSTER BY (customer_id, event_date);
 ALTER TABLE my_catalog.gold.my_table
 CLUSTER BY (customer_id, event_date);</code></pre>
 
+            <figure class="diagram">
+                <svg viewBox="0 0 800 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;min-width:560px;" role="img" aria-label="Side-by-side comparison of partitioning versus liquid clustering in Delta Lake">
+                    <rect width="800" height="340" fill="#0d1117" stroke="#1f2937" stroke-width="1" rx="4"/>
+                    <line x1="400" y1="0" x2="400" y2="340" stroke="#1f2937" stroke-width="1"/>
+
+                    <!-- LEFT: Partitioning -->
+                    <text x="200" y="30" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="14" font-weight="bold" fill="#e5e7eb">Partitioning</text>
+
+                    <rect x="20" y="46" width="365" height="22" rx="2" fill="#111827" stroke="#1f2937" stroke-width="1"/>
+                    <text x="35" y="61" font-family="JetBrains Mono, monospace" font-size="11" fill="#9ca3af">date=2024-01/</text>
+                    <rect x="20" y="72" width="40" height="18" rx="1" fill="#1e3a5f" stroke="#3b82f6" stroke-width="0.5"/><text x="40" y="85" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#60a5fa">2 MB</text>
+                    <rect x="64" y="72" width="40" height="18" rx="1" fill="#1e3a5f" stroke="#3b82f6" stroke-width="0.5"/><text x="84" y="85" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#60a5fa">1 MB</text>
+                    <rect x="108" y="72" width="40" height="18" rx="1" fill="#1e3a5f" stroke="#3b82f6" stroke-width="0.5"/><text x="128" y="85" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#60a5fa">3 MB</text>
+                    <rect x="152" y="72" width="40" height="18" rx="1" fill="#1e3a5f" stroke="#3b82f6" stroke-width="0.5"/><text x="172" y="85" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#60a5fa">2 MB</text>
+
+                    <rect x="20" y="98" width="365" height="22" rx="2" fill="#111827" stroke="#1f2937" stroke-width="1"/>
+                    <text x="35" y="113" font-family="JetBrains Mono, monospace" font-size="11" fill="#9ca3af">date=2024-02/</text>
+                    <rect x="20" y="124" width="40" height="18" rx="1" fill="#1e3a5f" stroke="#3b82f6" stroke-width="0.5"/><text x="40" y="137" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#60a5fa">4 MB</text>
+                    <rect x="64" y="124" width="40" height="18" rx="1" fill="#1e3a5f" stroke="#3b82f6" stroke-width="0.5"/><text x="84" y="137" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#60a5fa">1 MB</text>
+                    <rect x="108" y="124" width="40" height="18" rx="1" fill="#1e3a5f" stroke="#3b82f6" stroke-width="0.5"/><text x="128" y="137" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#60a5fa">2 MB</text>
+
+                    <rect x="20" y="150" width="365" height="22" rx="2" fill="#111827" stroke="#1f2937" stroke-width="1"/>
+                    <text x="35" y="165" font-family="JetBrains Mono, monospace" font-size="11" fill="#9ca3af">date=2024-03/</text>
+                    <rect x="20" y="176" width="40" height="18" rx="1" fill="#1e3a5f" stroke="#3b82f6" stroke-width="0.5"/><text x="40" y="189" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#60a5fa">3 MB</text>
+                    <rect x="64" y="176" width="40" height="18" rx="1" fill="#1e3a5f" stroke="#3b82f6" stroke-width="0.5"/><text x="84" y="189" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#60a5fa">2 MB</text>
+                    <rect x="108" y="176" width="40" height="18" rx="1" fill="#1e3a5f" stroke="#3b82f6" stroke-width="0.5"/><text x="128" y="189" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#60a5fa">1 MB</text>
+                    <rect x="152" y="176" width="40" height="18" rx="1" fill="#1e3a5f" stroke="#3b82f6" stroke-width="0.5"/><text x="172" y="189" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#60a5fa">4 MB</text>
+                    <rect x="196" y="176" width="40" height="18" rx="1" fill="#1e3a5f" stroke="#3b82f6" stroke-width="0.5"/><text x="216" y="189" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#60a5fa">1 MB</text>
+
+                    <text x="200" y="224" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#4b5563">... 1,822 more partition directories</text>
+
+                    <circle cx="32" cy="257" r="5" fill="#ef4444"/>
+                    <text x="46" y="261" font-family="JetBrains Mono, monospace" font-size="11" fill="#ef4444">Fragmented row groups &#x2192; Direct Lake penalty</text>
+                    <circle cx="32" cy="282" r="5" fill="#ef4444"/>
+                    <text x="46" y="286" font-family="JetBrains Mono, monospace" font-size="11" fill="#ef4444">Partition key fixed at table creation</text>
+                    <circle cx="32" cy="307" r="5" fill="#ef4444"/>
+                    <text x="46" y="311" font-family="JetBrains Mono, monospace" font-size="11" fill="#ef4444">Changing it requires a full table rewrite</text>
+
+                    <!-- RIGHT: Liquid Clustering -->
+                    <text x="600" y="30" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="14" font-weight="bold" fill="#e5e7eb">Liquid Clustering</text>
+
+                    <rect x="415" y="46" width="370" height="26" rx="2" fill="#0a0e1a" stroke="#1e40af" stroke-width="1"/>
+                    <text x="600" y="63" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#60a5fa">CLUSTER BY (date, customer_id)</text>
+
+                    <text x="600" y="92" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#6b7280">&#x25BC;  clustering applied when OPTIMIZE runs</text>
+
+                    <rect x="415" y="102" width="370" height="36" rx="2" fill="#052e16" stroke="#10b981" stroke-width="0.5"/>
+                    <text x="600" y="124" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#10b981">part-0001.parquet  ·  400 MB</text>
+
+                    <rect x="415" y="144" width="370" height="36" rx="2" fill="#052e16" stroke="#10b981" stroke-width="0.5"/>
+                    <text x="600" y="166" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#10b981">part-0002.parquet  ·  400 MB</text>
+
+                    <rect x="415" y="186" width="370" height="36" rx="2" fill="#052e16" stroke="#10b981" stroke-width="0.5"/>
+                    <text x="600" y="208" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#10b981">part-0003.parquet  ·  400 MB</text>
+
+                    <circle cx="420" cy="257" r="5" fill="#10b981"/>
+                    <text x="434" y="261" font-family="JetBrains Mono, monospace" font-size="11" fill="#10b981">Optimal row groups for Direct Lake &amp; SQL</text>
+                    <circle cx="420" cy="282" r="5" fill="#10b981"/>
+                    <text x="434" y="286" font-family="JetBrains Mono, monospace" font-size="11" fill="#10b981">Cluster key changeable via ALTER TABLE</text>
+                    <circle cx="420" cy="307" r="5" fill="#10b981"/>
+                    <text x="434" y="311" font-family="JetBrains Mono, monospace" font-size="11" fill="#10b981">No directory lock-in · incremental migration</text>
+                </svg>
+                <figcaption>Partitioning bakes a fixed directory structure into your table — difficult to change and damaging at scale for Direct Lake. Liquid clustering co-locates data by key in fewer, larger files without structural lock-in.</figcaption>
+            </figure>
+
             <p>
                 For teams with existing partitioned tables: there is no need to immediately rewrite everything. Liquid clustering is the right default for new tables, and migration can happen incrementally.
             </p>
@@ -644,6 +723,67 @@ CLUSTER BY (customer_id, event_date);</code></pre>
             <p>
                 By default, any DELETE, UPDATE, or MERGE that modifies a row requires rewriting the entire Parquet file containing that row. Deletion vectors avoid this by recording affected rows as soft-deletes in a small sidecar file. The Parquet file is left unchanged; reads resolve the current state by applying the deletion vector. Physical rewriting is deferred until compaction.
             </p>
+
+            <figure class="diagram">
+                <svg viewBox="0 0 800 310" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;min-width:560px;" role="img" aria-label="Diagram showing how deletion vectors defer physical file rewrites compared to the default Delta Lake behaviour">
+                    <defs>
+                        <marker id="arrowRed" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ef4444"/></marker>
+                        <marker id="arrowGreen" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#10b981"/></marker>
+                    </defs>
+
+                    <rect width="800" height="310" fill="#0d1117" stroke="#1f2937" stroke-width="1" rx="4"/>
+                    <line x1="400" y1="0" x2="400" y2="310" stroke="#1f2937" stroke-width="1"/>
+
+                    <!-- LEFT: Without Deletion Vectors -->
+                    <text x="200" y="28" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" font-weight="bold" fill="#e5e7eb">Without Deletion Vectors</text>
+
+                    <text x="200" y="48" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#6b7280">before DELETE</text>
+                    <rect x="20" y="54" width="360" height="44" rx="2" fill="#111827" stroke="#1f2937" stroke-width="1"/>
+                    <text x="200" y="76" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#e5e7eb">part-0001.parquet</text>
+                    <text x="200" y="91" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#9ca3af">50,000 rows · 400 MB</text>
+
+                    <line x1="200" y1="98" x2="200" y2="126" stroke="#ef4444" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+                    <text x="215" y="116" font-family="JetBrains Mono, monospace" font-size="10" fill="#ef4444">DELETE 100 rows</text>
+
+                    <text x="200" y="146" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#6b7280">after DELETE</text>
+                    <rect x="20" y="152" width="360" height="44" rx="2" fill="#1c0a0a" stroke="#ef4444" stroke-width="1"/>
+                    <text x="200" y="174" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#e5e7eb">part-0001.parquet (rewritten)</text>
+                    <text x="200" y="189" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#9ca3af">49,900 rows · 400 MB</text>
+
+                    <text x="200" y="218" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#ef4444">I/O cost = entire 400 MB file rewritten</text>
+
+                    <!-- RIGHT: With Deletion Vectors -->
+                    <text x="600" y="28" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" font-weight="bold" fill="#e5e7eb">With Deletion Vectors</text>
+
+                    <text x="580" y="48" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#6b7280">before DELETE</text>
+                    <rect x="415" y="54" width="278" height="44" rx="2" fill="#111827" stroke="#1f2937" stroke-width="1"/>
+                    <text x="554" y="76" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#e5e7eb">part-0001.parquet</text>
+                    <text x="554" y="91" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#9ca3af">50,000 rows · 400 MB</text>
+                    <rect x="703" y="54" width="72" height="44" rx="2" fill="#111827" stroke="#4b5563" stroke-width="0.5" stroke-dasharray="3,2"/>
+                    <text x="739" y="74" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#6b7280">.dv</text>
+                    <text x="739" y="88" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#6b7280">empty</text>
+
+                    <line x1="580" y1="98" x2="580" y2="126" stroke="#10b981" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
+                    <text x="595" y="116" font-family="JetBrains Mono, monospace" font-size="10" fill="#10b981">DELETE 100 rows</text>
+
+                    <text x="580" y="146" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#6b7280">after DELETE</text>
+                    <rect x="415" y="152" width="278" height="44" rx="2" fill="#111827" stroke="#1f2937" stroke-width="1"/>
+                    <text x="554" y="174" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#e5e7eb">part-0001.parquet</text>
+                    <text x="554" y="189" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#9ca3af">unchanged · 400 MB</text>
+                    <rect x="703" y="152" width="72" height="44" rx="2" fill="#052e16" stroke="#10b981" stroke-width="1"/>
+                    <text x="739" y="172" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#10b981">.dv</text>
+                    <text x="739" y="186" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#10b981">100 refs</text>
+
+                    <text x="600" y="218" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#10b981">I/O cost = sidecar only (KB, not MB)</text>
+
+                    <!-- Direct Lake warning -->
+                    <rect x="415" y="232" width="370" height="62" rx="2" fill="#1a1000" stroke="#d97706" stroke-width="0.5"/>
+                    <text x="600" y="252" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#d97706">Direct Lake cold-start must load ALL deletion vectors</text>
+                    <text x="600" y="268" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#d97706">Accumulation slows cold-cache query performance</text>
+                    <text x="600" y="284" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#d97706">Run OPTIMIZE before Power BI refresh to resolve</text>
+                </svg>
+                <figcaption>Without deletion vectors, every DELETE rewrites the entire Parquet file. Deletion vectors defer that cost to compaction — but they accumulate, and Direct Lake must load them all at cold-start. OPTIMIZE resolves them.</figcaption>
+            </figure>
 
             <p><strong>When to enable, by layer:</strong></p>
             <ul>
@@ -789,7 +929,7 @@ SET TBLPROPERTIES (<span class="string">'delta.enableDeletionVectors'</span> = <
 
             <hr>
 
-            <p><em>Brad Coles is a Senior Consultant and Data Engineering Capability Lead at <a href="https://www.synechron.com" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Synechron Australia</a>, specialising in Microsoft Fabric and modern data platform engineering. Connect on <a href="https://www.linkedin.com/in/brad-coles/" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">LinkedIn</a>.</em></p>
+            <p><em>Brad Coles is a Senior Consultant and Data Engineering Capability Lead at <a href="https://www.synechron.com/en-au" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Synechron Australia</a>, specialising in Microsoft Fabric and modern data platform engineering. Connect on <a href="https://www.linkedin.com/in/brad-coles/" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">LinkedIn</a>.</em></p>
         </article>
 
         <footer>
