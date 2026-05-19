@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The definitive guide to Delta table maintenance in Microsoft Fabric — what the documentation says, where to find it, and what your notebooks should actually look like in 2026.">
+    <meta name="keywords" content="Microsoft Fabric, Delta Lake, Spark, V-Order, Liquid Clustering, Auto-Compaction, Data Engineering, Performance Optimisation, Delta Table Maintenance">
+    <meta name="author" content="Brad Coles">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://bradcoles-dev.github.io/blog/fabric-delta-table-maintenance.html">
+    <meta property="og:title" content="Don't Double Your Microsoft Fabric Spend. Just Set These Configs.">
+    <meta property="og:description" content="The definitive guide to Delta table maintenance in Microsoft Fabric — what the documentation says, where to find it, and what your notebooks should actually look like in 2026.">
+    <meta property="og:image" content="https://bradcoles-dev.github.io/preview.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://bradcoles-dev.github.io/blog/fabric-delta-table-maintenance.html">
+    <meta property="twitter:title" content="Don't Double Your Microsoft Fabric Spend. Just Set These Configs.">
+    <meta property="twitter:description" content="The definitive guide to Delta table maintenance in Microsoft Fabric — what the documentation says, where to find it, and what your notebooks should actually look like in 2026.">
+    <meta property="twitter:image" content="https://bradcoles-dev.github.io/preview.png">
+
+    <title>Don't Double Your Microsoft Fabric Spend | Brad Coles</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Press+Start+2P&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0e1a;
+            --bg-card: #111827;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent: #3b82f6;
+            --accent-bright: #60a5fa;
+            --accent-dim: #1e40af;
+            --success: #10b981;
+            --border: #1f2937;
+            --code-bg: #0d1117;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+                linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            padding: 3rem 0 2rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .back-link {
+            display: inline-block;
+            color: var(--accent-bright);
+            text-decoration: none;
+            margin-bottom: 2rem;
+            font-size: 0.875rem;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: var(--text-primary);
+        }
+
+        .back-link::before {
+            content: '← ';
+        }
+
+        .blog-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .blog-date,
+        .blog-category {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .blog-category {
+            color: var(--accent-bright);
+            border-color: var(--accent-dim);
+        }
+
+        h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .blog-subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        .blog-byline {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0;
+        }
+
+        h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-top: 3rem;
+            margin-bottom: 1rem;
+            color: var(--accent-bright);
+        }
+
+        h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent-bright);
+        }
+
+        article {
+            margin-top: 2rem;
+            line-height: 1.8;
+        }
+
+        article p {
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        article ul, article ol {
+            margin: 1.5rem 0 1.5rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        article li {
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+
+        article strong {
+            color: var(--accent-bright);
+            font-weight: 700;
+        }
+
+        article em {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        article p > code,
+        article li > code {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            padding: 0.1rem 0.4rem;
+            font-size: 0.85em;
+            color: var(--accent-bright);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            padding: 1.5rem;
+            overflow-x: auto;
+            margin: 1rem 0 1.5rem;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        pre code {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-primary);
+        }
+
+        .comment { color: #6b7280; }
+        .keyword { color: #a78bfa; }
+        .string { color: #34d399; }
+
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+
+        th {
+            background: var(--code-bg);
+            color: var(--accent-bright);
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border: 1px solid var(--border);
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            vertical-align: top;
+        }
+
+        tr:nth-child(even) td {
+            background: rgba(17, 24, 39, 0.6);
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 3rem 0;
+        }
+
+        .callout {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        footer {
+            padding: 3rem 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-secondary);
+            margin-top: 4rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            th, td {
+                padding: 0.5rem 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="../index.html" class="back-link">Back to Portfolio</a>
+            <div class="blog-meta">
+                <span class="blog-date">May 2026</span>
+                <span class="blog-category">Data Engineering</span>
+                <span class="blog-category">Microsoft Fabric</span>
+            </div>
+            <h1>Don't Double Your Microsoft Fabric Spend. Just Set These Configs.</h1>
+            <p class="blog-subtitle">The definitive guide to Delta table maintenance in Microsoft Fabric — what the documentation says, where to find it, and what your notebooks should actually look like in 2026.</p>
+            <p class="blog-byline">By Brad Coles | Senior Consultant &amp; Data Engineering Capability Lead, Synechron Australia</p>
+        </header>
+
+        <article>
+            <p>
+                Fabric capacity SKUs double in cost at every tier. F64 to F128 is a 100% price increase. There is no fine-grained middle ground — if your current SKU cannot keep up, your only option is to pay twice as much.
+            </p>
+
+            <p>
+                What many teams do not realise is that poor Delta table maintenance silently inflates capacity consumption over time. As tables accumulate small files, fragmentation builds. Queries that should scan 10 files scan 100. Compaction jobs that should take minutes take hours. Power BI reports that should load from warm cache fall back to cold-state transcoding because deletion vectors have built up and were never cleared. The Spark pool is working harder than it needs to — not because you have added more data or more users, but because the platform is carrying the weight of months of deferred maintenance.
+            </p>
+
+            <p>
+                The insidious part is that this degradation is gradual. Creeping capacity usage is easy to attribute to organic growth. By the time you notice, you are staring at a SKU upgrade — when the real fix might have been four lines of Spark configuration and a weekly OPTIMIZE job.
+            </p>
+
+            <p>
+                There is a second problem layered on top of this: until recently, there was almost no official Microsoft documentation on Fabric table maintenance. Practitioners were piecing together guidance from community blogs, Databricks documentation, and occasional posts from Microsoft employees on LinkedIn. That has changed — but the documentation is now spread across Microsoft Learn pages, official Fabric team blog posts, personal blogs from Microsoft engineers, and release note archives. Most practitioners have not read all of it.
+            </p>
+
+            <p>
+                This guide brings it together. It covers what the documentation now tells us, where to find it, and what your Fabric Spark notebooks should actually look like in 2026.
+            </p>
+
+            <hr>
+
+            <h2>The Defaults That Catch Practitioners Out</h2>
+
+            <p>
+                Fabric's Apache Spark runtime ships with defaults that are not widely known — and if you are not aware of them, you may be doing redundant work, paying unnecessary overhead, or missing out on optimisations that are already running. Two in particular catch people out.
+            </p>
+
+            <p>
+                <strong>V-Order is off by default in Fabric.</strong><br>
+                <code>spark.sql.parquet.vorder.default = false</code>
+            </p>
+
+            <p>
+                This wasn't always the case — historically, V-Order was enabled by default and many existing workspaces may still have this. For all new workspaces, V-Order defaults to false. V-Order applies VertiPaq-compatible encoding to Parquet files at write time, delivering 40–60% cold-cache query improvements for Power BI Direct Lake and approximately 10% improvement for the SQL Analytics Endpoint. The trade-off is 15–33% additional write time. It is off by default for new Fabric workspaces on Runtime 1.3 — you need to explicitly enable it at the layers where you actually have Direct Lake or SQL Endpoint consumers.
+            </p>
+
+            <p>
+                One important caveat: Microsoft's own documentation is inconsistent on this point. The <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/lakehouse-and-delta-tables" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Lakehouse and Delta Tables</a> defaults reference page still lists V-Order as <code>true</code>, while the dedicated <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/delta-optimization-and-v-order" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Delta Optimization and V-Order</a> page explicitly states it is off by default for newly created workspaces and notes that earlier documentation saying otherwise is no longer accurate. I verified this directly on Runtime 1.3 — <code>spark.conf.get("spark.sql.parquet.vorder.default")</code> returns <code>false</code>. Trust the dedicated page and your own environment, not the comparison table.
+            </p>
+
+            <p>
+                <strong>Optimize Write is on by default in Fabric.</strong><br>
+                <code>spark.databricks.delta.optimizeWrite.enabled = true</code>
+            </p>
+
+            <p>
+                Optimize Write reshuffles in-memory data before writing Parquet files to produce fewer, larger, better-sized output files. For MERGE, UPDATE, and DELETE operations — which touch many files and create fragmentation — this is genuinely useful. For large append-only batch loads that already produce right-sized files, it adds shuffle overhead with no meaningful benefit.
+            </p>
+
+            <p>
+                Both of these are documented in Microsoft's <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/lakehouse-and-delta-tables" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Lakehouse and Delta Tables</a> reference. They are easy to miss.
+            </p>
+
+            <hr>
+
+            <h2>Your Utility Notebook in 2026</h2>
+
+            <p>
+                Many Fabric practitioners use a shared utility notebook called at the start of each pipeline notebook to standardise Spark session behaviour. Here is what that notebook should look like today, and why.
+            </p>
+
+<pre><code><span class="comment"># Preserve exact table/column name casing — e.g. 'Bronze_TGB_GDT' not 'bronze_tgb_gdt'</span>
+spark.conf.set(<span class="string">"spark.sql.caseSensitive"</span>, <span class="string">"true"</span>)
+
+<span class="comment"># Enable Auto-compaction — compacts small files automatically after each write</span>
+spark.conf.set(<span class="string">"spark.databricks.delta.autoCompact.enabled"</span>, <span class="string">"true"</span>)
+
+<span class="comment"># Enable Adaptive Target File Size — adjusts compaction target based on table size and query patterns</span>
+spark.conf.set(<span class="string">"spark.microsoft.delta.targetFileSize.adaptive.enabled"</span>, <span class="string">"true"</span>)
+
+<span class="comment"># Enable File Level Compaction Target — prevents recompaction of already-optimised files when target sizes change</span>
+spark.conf.set(<span class="string">"spark.microsoft.delta.optimize.fileLevelTarget.enabled"</span>, <span class="string">"true"</span>)
+
+<span class="comment"># Enable Fast Optimize — skips OPTIMIZE on file groups that won't meaningfully benefit; reduces write amplification</span>
+spark.conf.set(<span class="string">"spark.microsoft.delta.optimize.fast.enabled"</span>, <span class="string">"true"</span>)
+
+<span class="comment"># Optimize Write: set explicitly — workspace default varies with age and history; this establishes a known baseline</span>
+<span class="comment"># Override to false in append-only batch notebooks where shuffle overhead is not justified</span>
+spark.conf.set(<span class="string">"spark.databricks.delta.optimizeWrite.enabled"</span>, <span class="string">"true"</span>)
+
+<span class="comment"># V-Order: set explicitly to off — workspace default varies with age and history; this establishes a known baseline</span>
+<span class="comment"># Override to true at session level in Gold notebooks, or per-table via TBLPROPERTIES at Silver</span>
+spark.conf.set(<span class="string">"spark.sql.parquet.vorder.default"</span>, <span class="string">"false"</span>)</code></pre>
+
+            <p>
+                Optimize Write and V-Order are both set explicitly here rather than left to workspace defaults. Fabric's documented defaults are <code>optimizeWrite = true</code> and <code>vorder = false</code> for new workspaces — but older workspaces may have different values, and relying on defaults means your notebooks behave differently depending on where they run. Setting them explicitly makes the utility notebook workspace-agnostic and self-documenting. Per-notebook overrides then apply on top of this known baseline.
+            </p>
+
+            <h3>Per-notebook additions</h3>
+
+            <h4>Bronze ingestion notebooks — disable Optimize Write; V-Order already off from utility</h4>
+
+<pre><code><span class="comment"># Optimize Write: append-only batch loads produce right-sized files; shuffle overhead not needed</span>
+spark.conf.set(<span class="string">"spark.databricks.delta.optimizeWrite.enabled"</span>, <span class="string">"false"</span>)
+<span class="comment"># V-Order: set to false in utility notebook — no further action needed at Bronze</span></code></pre>
+
+            <h4>Gold notebooks — enable V-Order at session level</h4>
+
+<pre><code><span class="comment"># V-Order: set to false in utility notebook; override here for consumer-facing layer</span>
+spark.conf.set(<span class="string">"spark.sql.parquet.vorder.default"</span>, <span class="string">"true"</span>)</code></pre>
+
+            <h4>Append-only batch notebooks at Silver and Gold — disable Optimize Write</h4>
+
+<pre><code>spark.conf.set(<span class="string">"spark.databricks.delta.optimizeWrite.enabled"</span>, <span class="string">"false"</span>)</code></pre>
+
+            <h4>Silver tables feeding Direct Lake or SQL Endpoint — enable V-Order via table property</h4>
+
+<pre><code><span class="comment">-- Persists across sessions</span>
+ALTER TABLE my_catalog.silver.my_table
+SET TBLPROPERTIES (<span class="string">'delta.parquet.vorder.enabled'</span> = <span class="string">'true'</span>);</code></pre>
+
+            <h4>MERGE, UPDATE, or DELETE notebooks at any layer — no overrides needed</h4>
+
+            <p>Both Fabric defaults are correct for these operations.</p>
+
+            <hr>
+
+            <h2>Auto-Compaction, Adaptive Target File Size, and Fast Optimize</h2>
+
+            <p>
+                These three settings, used together, form the foundation of a low-maintenance compaction strategy.
+            </p>
+
+            <p>
+                <strong>Auto-compaction</strong> (<code>spark.databricks.delta.autoCompact.enabled</code>) triggers automatically after each write commit when it detects that a partition has accumulated too many small files. It runs synchronously — in the same Spark session, immediately after the write — eliminating the need for a separate scheduled compaction job for most workloads. It is not on by default in Fabric, which is why it belongs in the utility notebook.
+            </p>
+
+            <p>
+                <strong>Adaptive Target File Size</strong> (<code>spark.microsoft.delta.targetFileSize.adaptive.enabled</code>) replaces static file size configuration. Rather than targeting a fixed 128 MB, it evaluates table size and adjusts the target accordingly: 128 MB for tables under 10 GB, scaling linearly up to 1 GB for tables exceeding 10 TB. Microsoft explicitly recommends enabling this, describing it as eliminating "the complexity related to manually tuning the target file size."
+            </p>
+
+            <p>
+                When both are enabled, auto-compaction uses the ATFS-calculated target, meaning inline compaction and any manual OPTIMIZE runs converge on the same optimal file size automatically.
+            </p>
+
+            <p>
+                <strong>Fast Optimize</strong> (<code>spark.microsoft.delta.optimize.fast.enabled</code>) is the third part of this strategy, and the one that makes running OPTIMIZE frequently practical. Before rewriting a bin of files, it evaluates whether doing so would meaningfully improve the current state — checking minimum size thresholds and whether fragmentation is sufficient to justify the operation. If a bin does not meet the bar, it is skipped entirely. The result is that a no-op OPTIMIZE run costs almost nothing: Fast Optimize short-circuits it before any rewriting occurs. Microsoft recommends enabling it, but it is off by default on Runtime 1.3. In a simulated real-world scenario, it reduced compaction time by 80% across 200 ELT cycles with no performance regression.
+            </p>
+
+            <p>
+                Two constraints worth noting: Fast Optimize does not apply to Liquid Clustering or Z-Order operations. And Auto-Compaction runs its own independent calculations — Fast Optimize's skip logic does not affect inline compaction triggered after a write.
+            </p>
+
+            <p>
+                <strong>File Level Compaction Target</strong> (<code>spark.microsoft.delta.optimize.fileLevelTarget.enabled</code>) is a newer addition, now officially recommended by Microsoft. It tags each compacted file with the target size at the time of compaction. When target sizes change over time — as they will with ATFS — previously compacted files are not needlessly rewritten if they already meet at least half the new target. This directly reduces write amplification. It is not on by default.
+            </p>
+
+            <hr>
+
+            <h2>Do You Still Need a Scheduled OPTIMIZE Job?</h2>
+
+            <p>
+                A reasonable question at this point: if Optimize Write prevents small files being created, and Auto-Compaction cleans up any that slip through, is a scheduled OPTIMIZE job still necessary?
+            </p>
+
+            <p>
+                For <strong>Bronze-layer, append-only ingestion</strong> — mostly no. That combination handles ongoing file management continuously and a separate OPTIMIZE schedule adds little value.
+            </p>
+
+            <p>
+                For <strong>Silver and Gold layers</strong> — yes, and the reasons go beyond file fragmentation. Microsoft's official cross-workload guidance is to run scheduled OPTIMIZE <strong>aggressively</strong> at these layers. There are three reasons that Auto-Compaction and Optimize Write cannot address:
+            </p>
+
+            <ol>
+                <li><strong>File size targets differ by consumer.</strong> Auto-compaction defaults to 128 MB. The SQL Analytics Endpoint performs best with files around 400 MB. Power BI Direct Lake prefers 400 MB to 1 GB with row groups of 8 million or more rows. Auto-compaction alone will not get you there without additional configuration.</li>
+                <li><strong>Liquid Clustering requires OPTIMIZE to take effect.</strong> Regular write operations do not physically cluster data. Clustering is only applied when OPTIMIZE runs. If you have enabled liquid clustering on your Gold tables and are not running OPTIMIZE, your data is not clustered — you are getting none of the file-skipping benefits.</li>
+                <li><strong>Deletion vectors accumulate.</strong> Deletion vectors (covered below) record soft-deletes without rewriting Parquet files. Direct Lake must load these deletion vectors during cold-state bootstrapping, adding overhead that grows with accumulation. Regular OPTIMIZE physically resolves them.</li>
+            </ol>
+
+            <p>
+                <strong>What does "aggressively" actually mean in practice?</strong> The Microsoft documentation uses the word without defining a cadence, which is not particularly helpful. The most practical approach is to not put OPTIMIZE on a separate schedule at all — instead, run it as the last step of your pipeline, after each load completes. That ties it to the natural cadence of your data changes: daily for overnight batch loads, and after each intraday run for more frequent pipelines.
+            </p>
+
+            <p>
+                This approach also means you do not need to worry about running it "too often." With Fast Optimize enabled, if OPTIMIZE runs but the files do not genuinely need compaction, it evaluates each candidate bin and skips the ones that would not benefit — so the overhead of a no-op OPTIMIZE run is low.
+            </p>
+
+            <p>
+                For Gold tables serving Power BI Direct Lake, align the OPTIMIZE run to complete <strong>before</strong> your Power BI refresh window. This ensures deletion vectors are cleared and liquid clustering is applied before Direct Lake frames the latest commit version.
+            </p>
+
+            <p>
+                Not every table needs OPTIMIZE every run, though. Dimension tables, master data, and lookup tables may rarely change — running OPTIMIZE on them daily is wasted capacity.
+            </p>
+
+            <p>
+                The right gate is <strong>average file size versus your layer target</strong>. Before running OPTIMIZE, read the table's metadata via <code>DESCRIBE DETAIL</code> — it returns the total size in bytes and the current file count, from which you can calculate the average file size in seconds without scanning any data. If the average is already within tolerance of your target, skip it. If it is meaningfully below, run it.
+            </p>
+
+            <p>
+                At Silver, target 256 MB. At Gold, target 400 MB. With Fast Optimize enabled, once OPTIMIZE does run it handles bin-level evaluation internally — skipping individual file groups that do not genuinely need compaction. The file size check gates whether to start the command at all; Fast Optimize handles the nuance within the run.
+            </p>
+
+            <p>
+                The result is a maintenance pipeline step that runs on every execution, costs almost nothing when tables are healthy, and kicks in automatically when they are not — without any manual scheduling or intervention.
+            </p>
+
+            <p class="callout">
+                If you would like the reusable PySpark implementation of this pattern, feel free to connect with me on <a href="https://www.linkedin.com/in/brad-coles/" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">LinkedIn</a> or reach out via <a href="https://www.synechron.com" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Synechron</a>.
+            </p>
+
+            <hr>
+
+            <h2>V-Order by Layer</h2>
+
+            <p>
+                Since V-Order is off by default in new Fabric workspaces, the question is not where to disable it — it is where to explicitly enable it.
+            </p>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Layer</th>
+                            <th>Recommendation</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Bronze</td>
+                            <td>No action needed</td>
+                            <td>Off by default — raw ingestion; no Direct Lake or SQL Endpoint consumers</td>
+                        </tr>
+                        <tr>
+                            <td>Silver</td>
+                            <td>Selective</td>
+                            <td>Enable via table property for tables feeding Direct Lake or SQL Endpoint; leave off for Spark-only intermediate tables</td>
+                        </tr>
+                        <tr>
+                            <td>Gold</td>
+                            <td>Enable at session level</td>
+                            <td>Consumer-facing layer — V-Order's read performance gains are fully realised here</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p>For Gold notebooks, enable at session level:</p>
+
+<pre><code>spark.conf.set(<span class="string">"spark.sql.parquet.vorder.default"</span>, <span class="string">"true"</span>)</code></pre>
+
+            <p>For individual Silver tables feeding Direct Lake or SQL Endpoint:</p>
+
+<pre><code><span class="comment">-- Table properties persist across sessions — use for per-table decisions at Silver</span>
+ALTER TABLE my_catalog.silver.my_table
+SET TBLPROPERTIES (<span class="string">'delta.parquet.vorder.enabled'</span> = <span class="string">'true'</span>);</code></pre>
+
+            <hr>
+
+            <h2>Liquid Clustering Over Partitioning</h2>
+
+            <p>
+                I want to address something directly: most data engineers I know still default to partitioning Delta tables. It is what many of us learned on Databricks or Hadoop, and it feels intuitive — divide your data by date or region, and queries that filter on those columns only scan the relevant folder. In the right circumstances, it works well.
+            </p>
+
+            <p>
+                Microsoft Fabric's current documentation makes no mention of partitioning as a recommended data organisation strategy. That is not an oversight. There are real reasons why the guidance has moved on, and they are particularly relevant in Fabric.
+            </p>
+
+            <p>
+                <strong>The problems with partitioning in Fabric:</strong>
+            </p>
+
+            <p>
+                Partitioning creates a fixed physical directory structure. Choose a partition column with too many distinct values (say, a date column on a table loaded daily for five years) and you end up with thousands of small partition directories — each containing a handful of Parquet files. That is the small files problem recreated at a structural level, baked permanently into your table layout.
+            </p>
+
+            <p>
+                For <strong>Power BI Direct Lake</strong>, this is especially damaging. Direct Lake performance depends on large row groups and a small total file count. The Direct Lake documentation explicitly warns that "extensive partitioning could result in a substantially increased number of Parquet files and row groups, thereby causing an excessive increase in column segments within the Direct Lake semantic model, negatively affecting query performance." Partitioning on a high-cardinality column — even one that feels natural, like a date — can degrade the exact workload you are optimising for.
+            </p>
+
+            <p>
+                And if you later realise your partition column was the wrong choice, you cannot easily change it. Repartitioning a large table means rewriting all the data.
+            </p>
+
+            <p>
+                <strong>Liquid Clustering solves these problems:</strong>
+            </p>
+
+            <p>
+                Liquid clustering co-locates rows with similar values in the same files, enabling Delta's file-skipping to eliminate large portions of a scan when queries filter on the cluster key — the same benefit partitioning aims for, without the structural drawbacks. Critically:
+            </p>
+
+            <ul>
+                <li>The clustering policy can be changed with <code>ALTER TABLE</code> without rewriting all existing data</li>
+                <li>It is not tied to a fixed directory structure</li>
+                <li>It works with Adaptive Target File Size to produce well-sized files regardless of data volume</li>
+                <li>It supports multiple cluster columns without the ordering sensitivity of Z-Order</li>
+            </ul>
+
+<pre><code><span class="comment">-- New table</span>
+CREATE TABLE my_catalog.gold.my_table (...)
+CLUSTER BY (customer_id, event_date);
+
+<span class="comment">-- Existing table — change clustering policy without a full rewrite</span>
+ALTER TABLE my_catalog.gold.my_table
+CLUSTER BY (customer_id, event_date);</code></pre>
+
+            <p>
+                For teams with existing partitioned tables: there is no need to immediately rewrite everything. Liquid clustering is the right default for new tables, and migration can happen incrementally.
+            </p>
+
+            <p>
+                A practical note on when to apply it: liquid clustering adds value when a table is large enough to span multiple Parquet files. For small static reference tables — country codes, currency codes, status types — all data fits in one or two files and there is nothing to skip. Applying clustering there is harmless but pointless. The Databricks documentation on automatic clustering states it will not select keys when "the table is too small to benefit." Note that Databricks documentation references Unity Catalog — Databricks' catalogue model — which is not the same as Microsoft Fabric Lakehouses. No equivalent Fabric-specific threshold is published, but the underlying principle is the same.
+            </p>
+
+            <p>
+                The critical operational point bears repeating: <strong>data is only physically clustered when OPTIMIZE runs</strong>. Writes alone do not cluster. This is another reason why scheduled OPTIMIZE matters for Silver and Gold — if you enable liquid clustering and never run OPTIMIZE, your data is not clustered, and you are getting none of the file-skipping benefit.
+            </p>
+
+            <hr>
+
+            <h2>Deletion Vectors</h2>
+
+            <p>
+                Deletion vectors have been referenced across multiple Microsoft Fabric documentation pages, release notes, and Lakehouse connector documentation — but never in a single dedicated Fabric page. Here is what you need to know.
+            </p>
+
+            <p>
+                By default, any DELETE, UPDATE, or MERGE that modifies a row requires rewriting the entire Parquet file containing that row. Deletion vectors avoid this by recording affected rows as soft-deletes in a small sidecar file. The Parquet file is left unchanged; reads resolve the current state by applying the deletion vector. Physical rewriting is deferred until compaction.
+            </p>
+
+            <p><strong>When to enable, by layer:</strong></p>
+            <ul>
+                <li><strong>Bronze:</strong> Enable for tables with MERGE patterns</li>
+                <li><strong>Silver:</strong> Enable for tables with frequent updates</li>
+                <li><strong>Gold:</strong> Enable; manage accumulation through regular compaction</li>
+            </ul>
+
+<pre><code>ALTER TABLE my_catalog.silver.my_table
+SET TBLPROPERTIES (<span class="string">'delta.enableDeletionVectors'</span> = <span class="string">true</span>);</code></pre>
+
+            <p>
+                <strong>The Direct Lake impact</strong> is the most important operational consideration. During cold-state bootstrapping, Power BI Direct Lake must load all deletion vectors for each table to correctly exclude soft-deleted rows. The more deletion vectors accumulated, the greater this overhead — resulting in slower cold-cache query performance. For Gold tables serving Direct Lake, regular OPTIMIZE to physically resolve deletion vectors is not just housekeeping; it directly affects the query experience your end users see.
+            </p>
+
+            <p>
+                <strong>Warning:</strong> Enabling deletion vectors upgrades the Delta table protocol. The table will not be readable by clients that do not support deletion vectors. Verify client compatibility before enabling on a table.
+            </p>
+
+            <hr>
+
+            <h2>The Cheat Sheet</h2>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Layer</th>
+                            <th>Auto-Compaction</th>
+                            <th>Optimize Write</th>
+                            <th>V-Order</th>
+                            <th>Liquid Clustering</th>
+                            <th>Deletion Vectors</th>
+                            <th>Scheduled OPTIMIZE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Bronze</strong></td>
+                            <td>Enable</td>
+                            <td>Disable (append) / Default (MERGE)</td>
+                            <td>No action (off by default)</td>
+                            <td>No</td>
+                            <td>Enable (MERGE tables)</td>
+                            <td>After MERGE-heavy loads</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Silver</strong></td>
+                            <td>Enable</td>
+                            <td>Disable (append) / Default (MERGE)</td>
+                            <td>Enable per-table for Direct Lake / SQL Endpoint tables</td>
+                            <td>Recommended</td>
+                            <td>Enable (frequent updates)</td>
+                            <td>Run aggressively</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Gold</strong></td>
+                            <td>Enable</td>
+                            <td>Disable (append) / Default (MERGE)</td>
+                            <td>Enable at session level</td>
+                            <td>Required</td>
+                            <td>Enable; minimise via OPTIMIZE</td>
+                            <td>Run aggressively</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <hr>
+
+            <h2>Where the Documentation Lives</h2>
+
+            <p>For those who want to go deeper, here is where the official guidance is now spread across:</p>
+
+            <ul>
+                <li><strong>Fabric default configurations:</strong> <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/lakehouse-and-delta-tables" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Lakehouse and Delta Tables</a></li>
+                <li><strong>V-Order defaults and controls:</strong> <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/delta-optimization-and-v-order" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Delta Optimization and V-Order</a></li>
+                <li><strong>Auto-compaction, Fast Optimize, File Level Compaction Target:</strong> <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/table-compaction" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Table Compaction</a></li>
+                <li><strong>ATFS, Optimize Write, File Level Compaction Target:</strong> <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/tune-file-size" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Tune File Size</a></li>
+                <li><strong>Cross-workload strategy, medallion recommendations:</strong> <a href="https://learn.microsoft.com/en-us/fabric/fundamentals/table-maintenance-optimization" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Cross-Workload Table Maintenance and Optimization</a></li>
+                <li><strong>Direct Lake and deletion vectors:</strong> <a href="https://learn.microsoft.com/en-us/fabric/fundamentals/direct-lake-understand-storage" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Understand Direct Lake Query Performance</a></li>
+                <li><strong>Fast Optimize deep-dive:</strong> <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Introducing-Optimized-Compaction-in-Fabric-Spark/ba-p/5172547" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Introducing Optimised Compaction in Fabric Spark</a> — Miles Cole, Microsoft (Oct 2025)</li>
+                <li><strong>Cross-workload context:</strong> <a href="https://christopherfinlan.com/2026/02/15/microsoft-fabric-table-maintenance-optimization-a-cross-workload-survival-guide/" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Microsoft Fabric Table Maintenance Optimization: A Cross-Workload Survival Guide</a> — Christopher Finlan, Microsoft (Feb 2026)</li>
+                <li><strong>Deletion vector support in connectors:</strong> <a href="https://learn.microsoft.com/en-us/fabric/data-factory/connector-lakehouse-copy-activity" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Lakehouse Copy Activity</a></li>
+                <li><strong>Liquid clustering concepts:</strong> <a href="https://delta.io/blog/liquid-clustering/" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Delta Lake Liquid Clustering</a> — Delta Lake open source (note: Databricks-specific features such as Unity Catalog thresholds do not apply to Fabric)</li>
+            </ul>
+
+            <hr>
+
+            <h2>What to Watch: March 2026 Preview Features</h2>
+
+            <p>
+                The March 2026 Fabric release introduced three features directly relevant to the topics in this guide. I have not tested any of them yet — all are in Preview — but they are worth flagging.
+            </p>
+
+            <p>
+                <strong>Lakehouse Maintenance Activity in Pipelines (Preview)</strong>
+            </p>
+
+            <p>
+                There is now a native Lakehouse Maintenance activity in Data Factory Pipelines. If it holds up to scrutiny, this could simplify — or eventually replace — the Notebook activity + parameterised maintenance notebook pattern described earlier. The key questions I would want to answer before adopting it: does it support file-size gating so healthy tables are skipped? Does it respect Fast Optimize? How does it handle VACUUM retention and the Direct Lake framing requirement? Worth evaluating when it reaches GA.
+            </p>
+
+            <p>
+                <strong>SQL Endpoint Refresh Activity in Pipelines (Preview)</strong>
+            </p>
+
+            <p>
+                A dedicated pipeline activity to trigger a SQL Analytics Endpoint refresh. The current gap in most maintenance pipelines is that the Direct Lake framing step — ensuring the semantic model re-frames to the current Delta commit before VACUUM runs — relies on timing and coordination. A dedicated activity for this could make that step explicit and reliable. Again, untested.
+            </p>
+
+            <p>
+                <strong>Fabric Runtime 2.0 (Preview) — Spark 4.0, Delta Lake 4.0</strong>
+            </p>
+
+            <p>
+                Runtime 2.0 brings Apache Spark 4.0, Python 3.12, and Delta Lake 4.0. Everything in this guide — default configurations, V-Order behaviour, compaction settings — was verified against Runtime 1.3. Delta Lake 4.0 in particular may change defaults or introduce new behaviours. Verify your utility notebook config against your own environment before adopting Runtime 2.0 in production.
+            </p>
+
+            <hr>
+
+            <h2>Final Thoughts</h2>
+
+            <p>
+                Microsoft Fabric's Delta table maintenance story has matured significantly in a short time. The platform has sensible defaults, powerful automatic features, and — now — a growing body of official documentation to back it up. The work is in knowing which defaults to trust, which to override, and where the gaps between the documentation and your specific workload lie.
+            </p>
+
+            <p>
+                The three things I would leave you with:
+            </p>
+
+            <p>
+                First, <strong>check your utility notebook against Fabric's actual defaults</strong> before assuming you need to set everything explicitly. You may be doing redundant work — or worse, overriding defaults that are now correct.
+            </p>
+
+            <p>
+                Second, <strong>do not skip scheduled OPTIMIZE on your Silver and Gold tables</strong> just because auto-compaction is running. Auto-compaction and scheduled OPTIMIZE solve different problems. Auto-compaction prevents fragmentation building up. Scheduled OPTIMIZE hits the file size targets your SQL and Power BI consumers actually need, physically applies liquid clustering, and clears deletion vectors before they accumulate.
+            </p>
+
+            <p>
+                Third, and most importantly: <strong>treat maintenance as a cost control measure, not just a performance one</strong>. Fabric capacity SKUs double with each tier. The difference between a well-maintained platform and a neglected one may well be the difference between your current SKU and the next one up — a 100% cost increase that no amount of additional workload justifies if the root cause is simply deferred maintenance.
+            </p>
+
+            <hr>
+
+            <p><em>Brad Coles is a Senior Consultant and Data Engineering Capability Lead at <a href="https://www.synechron.com" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Synechron Australia</a>, specialising in Microsoft Fabric and modern data platform engineering. Connect on <a href="https://www.linkedin.com/in/brad-coles/" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">LinkedIn</a>.</em></p>
+        </article>
+
+        <footer>
+            <p>&copy; 2025 Brad Coles. <a href="../index.html" style="color: var(--accent-bright); text-decoration: none;">Back to Portfolio</a></p>
+        </footer>
+    </div>
+</body>
+</html>
