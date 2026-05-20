@@ -60,3 +60,6 @@ _site/
 # Cache
 .cache/
 *.cache
+
+# Claude Code
+.claude/
