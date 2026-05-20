@@ -419,11 +419,11 @@
             </p>
 
             <p>
-                Enable tenant-level Private Links and block public internet access, and your OPDGs stop working. The OPDG reaches outbound to public Fabric endpoints; with Block Public Internet Access enabled, those calls fail. Microsoft documents this explicitly: OPDG is officially unsupported with tenant-level Private Links when public internet is blocked.
+                Enable tenant-level Private Links, and your OPDGs become officially unsupported. The current documentation is explicit: on-premises data gateways "aren't supported and fail to register when Private Link is enabled" — you cannot set up a new gateway while Private Link is on. An already-registered OPDG may continue to function for data ingestion if Block Public Internet Access is not enabled (the VM can still reach public Fabric endpoints outbound), but Microsoft provides no support for this configuration and it will fail entirely once internet is blocked.
             </p>
 
             <p>
-                There is a partial workaround — if you only enable the Azure Private Link setting without enabling Block Public Internet Access, OPDGs may continue to function. But at that point you haven't actually blocked the public internet, which is usually the point of enabling Private Links in the first place. The guidance from Microsoft is to use VNet Data Gateways instead, which do work — but this is a meaningful infrastructure change, not a configuration tweak.
+                In practice, most organisations enable Private Links precisely to block the public internet — which makes OPDG ingestion a hard blocker. The guidance from Microsoft is to replace OPDGs with VNet Data Gateways, which do work with Private Links — but this is a meaningful infrastructure change, not a configuration tweak.
             </p>
 
             <div class="verdict">
@@ -582,7 +582,7 @@
                         </tr>
                         <tr>
                             <td>On-premises data gateway</td>
-                            <td>Fails when Block Public Internet Access enabled; may work without blocking (officially unsupported)</td>
+                            <td>Officially unsupported; cannot register a new gateway when PL is enabled. Existing gateways may function if internet is not blocked, but fail entirely with Block Public Internet Access enabled</td>
                             <td>Not affected — recommended model for OPDG + PL coexistence</td>
                         </tr>
                         <tr>
@@ -691,7 +691,7 @@
                         </tr>
                         <tr>
                             <td>Publish to Web</td>
-                            <td>Not supported</td>
+                            <td>Not supported when Azure Private Link enabled</td>
                             <td>Not documented</td>
                         </tr>
                         <tr>
@@ -701,7 +701,7 @@
                         </tr>
                         <tr>
                             <td>Export report to PDF / PowerPoint</td>
-                            <td>Not supported</td>
+                            <td>Not supported when Azure Private Link enabled</td>
                             <td>Not documented</td>
                         </tr>
                         <tr>
@@ -734,6 +734,11 @@
                         </tr>
                         <tr>
                             <td class="section-header" colspan="3">Copy Activity</td>
+                        </tr>
+                        <tr>
+                            <td>Pipeline copy to/from Data Warehouse</td>
+                            <td>Not supported when Private Link enabled</td>
+                            <td>Not documented</td>
                         </tr>
                         <tr>
                             <td>Workspace staging (Warehouse, Snowflake, Teradata)</td>
@@ -839,7 +844,7 @@
 
             <hr>
 
-            <p><em>Sources: Microsoft Learn — <a href="https://learn.microsoft.com/en-us/fabric/security/security-inbound-overview" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Inbound access overview</a>, <a href="https://learn.microsoft.com/en-us/fabric/security/security-private-links-overview" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Tenant-level Private Link</a>, <a href="https://learn.microsoft.com/en-us/fabric/security/security-workspace-level-private-links-overview" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Workspace-level Private Link overview</a>, <a href="https://learn.microsoft.com/en-us/fabric/security/security-workspace-level-private-links-support" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Workspace-level Private Link supported scenarios</a> (last updated May 16, 2026), <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/custom-live-pools-overview" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Custom live pools overview</a>. Last verified May 2026.</em></p>
+            <p><em>Sources: Microsoft Learn — <a href="https://learn.microsoft.com/en-us/fabric/security/security-inbound-overview" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Inbound access overview</a>, <a href="https://learn.microsoft.com/en-us/fabric/security/security-private-links-overview" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Tenant-level Private Link</a> (last updated May 4, 2026), <a href="https://learn.microsoft.com/en-us/fabric/security/security-workspace-level-private-links-overview" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Workspace-level Private Link overview</a>, <a href="https://learn.microsoft.com/en-us/fabric/security/security-workspace-level-private-links-support" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Workspace-level Private Link supported scenarios</a> (last updated May 16, 2026), <a href="https://learn.microsoft.com/en-us/fabric/security/security-conditional-access" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Conditional Access in Fabric</a>, <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/custom-live-pools-overview" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Custom live pools overview</a>. Last verified May 2026.</em></p>
 
             <hr>
 
