@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="An honest assessment of Microsoft Fabric Private Links for enterprise deployments — what the limitations actually are, why most organisations land on Conditional Access instead, and when Private Links do make sense.">
+    <meta name="keywords" content="Microsoft Fabric, Private Links, Network Security, Conditional Access, Enterprise Data Platform, Azure, Data Engineering, VNet, OPDG">
+    <meta name="author" content="Brad Coles">
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E8BDECYXD8"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-E8BDECYXD8');
+    </script>
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://bradcoles-dev.github.io/blog/fabric-private-links.html">
+    <meta property="og:title" content="Can You Actually Build a Production Fabric Platform with Private Links?">
+    <meta property="og:description" content="An honest assessment of Microsoft Fabric Private Links for enterprise deployments — what the limitations actually are, why most organisations land on Conditional Access instead, and when Private Links do make sense.">
+    <meta property="og:image" content="https://bradcoles-dev.github.io/preview.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://bradcoles-dev.github.io/blog/fabric-private-links.html">
+    <meta property="twitter:title" content="Can You Actually Build a Production Fabric Platform with Private Links?">
+    <meta property="twitter:description" content="An honest assessment of Microsoft Fabric Private Links for enterprise deployments — what the limitations actually are, why most organisations land on Conditional Access instead, and when Private Links do make sense.">
+    <meta property="twitter:image" content="https://bradcoles-dev.github.io/preview.png">
+
+    <title>Can You Actually Build a Production Fabric Platform with Private Links? | Brad Coles</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Press+Start+2P&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0e1a;
+            --bg-card: #111827;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent: #3b82f6;
+            --accent-bright: #60a5fa;
+            --accent-dim: #1e40af;
+            --success: #10b981;
+            --warning: #d97706;
+            --border: #1f2937;
+            --code-bg: #0d1117;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+                linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            padding: 3rem 0 2rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .back-link {
+            display: inline-block;
+            color: var(--accent-bright);
+            text-decoration: none;
+            margin-bottom: 2rem;
+            font-size: 0.875rem;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: var(--text-primary);
+        }
+
+        .back-link::before {
+            content: '← ';
+        }
+
+        .blog-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .blog-date,
+        .blog-category {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .blog-category {
+            color: var(--accent-bright);
+            border-color: var(--accent-dim);
+        }
+
+        h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .blog-subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        .blog-byline {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0;
+        }
+
+        h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-top: 3rem;
+            margin-bottom: 1rem;
+            color: var(--accent-bright);
+        }
+
+        h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent-bright);
+        }
+
+        article {
+            margin-top: 2rem;
+            line-height: 1.8;
+        }
+
+        article p {
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        article ul, article ol {
+            margin: 1.5rem 0 1.5rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        article li {
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+
+        article strong {
+            color: var(--accent-bright);
+            font-weight: 700;
+        }
+
+        article em {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        article p > code,
+        article li > code,
+        article td > code,
+        article th > code {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            padding: 0.1rem 0.4rem;
+            font-size: 0.85em;
+            color: var(--accent-bright);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 3rem 0;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+
+        th {
+            background: var(--code-bg);
+            color: var(--accent-bright);
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border: 1px solid var(--border);
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            vertical-align: top;
+        }
+
+        tr:nth-child(even) td {
+            background: rgba(17, 24, 39, 0.6);
+        }
+
+        td.section-header {
+            background: var(--code-bg);
+            color: var(--text-secondary);
+            font-weight: 700;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-top: 2px solid var(--border);
+        }
+
+        .verdict {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .verdict strong {
+            color: var(--accent-bright);
+        }
+
+        .callout {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        footer {
+            padding: 3rem 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-secondary);
+            margin-top: 4rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            th, td {
+                padding: 0.5rem 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="../index.html" class="back-link">Back to Portfolio</a>
+            <div class="blog-meta">
+                <span class="blog-date">May 2026</span>
+                <span class="blog-category">Data Engineering</span>
+                <span class="blog-category">Microsoft Fabric</span>
+                <span class="blog-category">Security</span>
+            </div>
+            <h1>Can You Actually Build a Production Fabric Platform with Private Links?</h1>
+            <p class="blog-subtitle">An honest assessment of what Fabric Private Links promise, what they currently deliver, and why most enterprise organisations land on Conditional Access instead.</p>
+            <p class="blog-byline">By Brad Coles | Senior Consultant &amp; Data Engineering Capability Lead, Synechron Australia</p>
+        </header>
+
+        <article>
+            <p>
+                Microsoft Fabric Private Links look great on paper. Route all Fabric traffic over Microsoft's backbone, block the public internet, and check the "network isolated" box for your compliance team. In practice, almost no enterprise deployments I've come across have actually gone down this path — and the ones that evaluated it have generally landed on Conditional Access instead.
+            </p>
+
+            <p>
+                This post is an honest look at why. Not to dismiss Private Links — they have real use cases — but because the gap between what Private Links promise and what they currently deliver for a real enterprise workload is significant, and it's not obvious from the documentation until you've spent time mapping it out.
+            </p>
+
+            <div class="callout">
+                <strong>Note:</strong> Microsoft Fabric is a rapidly evolving platform. The information in this article reflects the state of the product as of 20 May 2026. Specific limitations — particularly around workspace-level Private Links — are actively being addressed. Verify against the latest Microsoft documentation before making architectural decisions.
+            </div>
+
+            <hr>
+
+            <h2>First: There Are Two Different Things Called "Private Links" in Fabric</h2>
+
+            <p>
+                Fabric has two distinct Private Link implementations:
+            </p>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Tenant-Level Private Link</th>
+                            <th>Workspace-Level Private Link</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Scope</strong></td>
+                            <td>Entire Fabric tenant</td>
+                            <td>Individual workspaces</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Who configures it</strong></td>
+                            <td>Fabric admin + Azure</td>
+                            <td>Workspace admin (tenant must enable)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SKU requirement</strong></td>
+                            <td>Any paid Fabric SKU</td>
+                            <td><strong>F SKU only</strong> — not P SKU, not Trial</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Fabric portal when public blocked</strong></td>
+                            <td>Accessible via tenant PL network</td>
+                            <td>Shows "Access Restricted" — workspace PL covers API access only; the Fabric portal itself requires a tenant-level PL</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Mixed public/private model</strong></td>
+                            <td>No — all or nothing</td>
+                            <td>Yes — isolate specific workspaces</td>
+                        </tr>
+                        <tr>
+                            <td><strong>GA date</strong></td>
+                            <td>May 2024</td>
+                            <td>October 2025</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p>
+                Tenant-level locks down everything. Workspace-level gives you surgical, per-workspace control. The limitations are different for each — and some of them are significant enough to be outright dealbreakers depending on your architecture.
+            </p>
+
+            <hr>
+
+            <h2>The Core Question: Can You Build a Solid Enterprise Platform on Fabric With Private Links?</h2>
+
+            <p>Let me work through both scenarios honestly.</p>
+
+            <h3>Tenant-Level Private Link: The On-Premises Data Problem</h3>
+
+            <p>
+                For most enterprise data platforms, data doesn't live entirely in Azure. There are on-premises source systems — ERPs, CRMs, operational databases — that need to feed into Fabric through On-Premises Data Gateways (OPDGs).
+            </p>
+
+            <p>
+                Enable tenant-level Private Links and block public internet access, and your OPDGs stop working. The OPDG reaches outbound to public Fabric endpoints; with Block Public Internet Access enabled, those calls fail. Microsoft documents this explicitly: OPDG is officially unsupported with tenant-level Private Links when public internet is blocked.
+            </p>
+
+            <p>
+                There is a partial workaround — if you only enable the Azure Private Link setting without enabling Block Public Internet Access, OPDGs may continue to function. But at that point you haven't actually blocked the public internet, which is usually the point of enabling Private Links in the first place. The guidance from Microsoft is to use VNet Data Gateways instead, which do work — but this is a meaningful infrastructure change, not a configuration tweak.
+            </p>
+
+            <div class="verdict">
+                <strong>The verdict on tenant-level PL for enterprise:</strong> If you have any on-premises data sources and aren't already running VNet Data Gateways, tenant-level Private Links with internet blocking is effectively off the table without significant re-architecture.
+            </div>
+
+            <h3>Workspace-Level Private Link: Closer, But Still Missing Key Pieces</h3>
+
+            <p>
+                Workspace-level Private Links (GA October 2025) are more surgical and don't inherit the OPDG problem — they're documented as the co-existence model for organisations that need private connectivity without breaking gateway-based ingestion. But the feature gaps matter:
+            </p>
+
+            <p>
+                <strong>Fabric SQL Database is not supported.</strong> As of May 2026, workspace-level Private Links do not support Fabric SQL Database. This is a significant gap for metadata-driven ELT patterns where a SQL database acts as a control table or orchestration store — a common pattern in production Fabric platforms. Tenant-level Private Links do support SQL Database, but that brings you back to the OPDG problem above. A Q1 2026 roadmap item was listed for SQL DB support in workspace PL; it has not shipped as of the time of writing.
+            </p>
+
+            <p>
+                <strong>Deployment Pipelines are not supported.</strong> If your workspace is assigned to a Deployment Pipeline — the standard mechanism for promoting content through DEV, UAT, and PROD environments — you cannot restrict inbound public access on that workspace. Restricting access is also blocked for any workspace that contains a workspace assigned to a pipeline. For teams that rely on Deployment Pipelines for their CI/CD workflow, this is a direct conflict.
+            </p>
+
+            <p>
+                <strong>The Fabric portal is blocked for restricted workspaces.</strong> When a workspace blocks public inbound access, the Fabric portal shows "Access Restricted" for requests that don't originate from the workspace's associated private endpoint. Users who aren't on the private network (VPN, ExpressRoute) cannot access the workspace through the portal at all. Note: admin APIs remain publicly accessible — it's the portal itself that's restricted, not the administrative plane.
+            </p>
+
+            <p>
+                <strong>Capacity Metrics App support is undocumented.</strong> For tenant-level Private Links, the Capacity Metrics App is explicitly noted as not supporting Private Links. For workspace-level, the documentation is silent — no confirmation either way. In practice, this is a meaningful blind spot: without the Capacity Metrics App, capacity monitoring requires alternative tooling.
+            </p>
+
+            <p>
+                <strong>The Fabric portal still requires tenant-level Private Links for full access.</strong> This compounds the above — workspace-level PL covers API access to the workspace, but the Fabric portal (<code>app.fabric.microsoft.com</code>) itself requires a tenant-level Private Link to be accessible from a private-only network. If you're using workspace-level PL without tenant-level PL, your users still need public internet access to reach the portal.
+            </p>
+
+            <div class="verdict">
+                <strong>The verdict on workspace-level PL for enterprise:</strong> Viable for specific, constrained scenarios — particularly cloud-to-cloud workloads on F SKU capacities that don't need Deployment Pipelines, Fabric SQL Database, or cross-workspace tooling. For a typical enterprise Fabric platform with metadata-driven ELT, structured environment promotion, and mixed-SKU capacity estates, the limitations stack up quickly.
+            </div>
+
+            <hr>
+
+            <h2>What Most Organisations Actually Do: Conditional Access</h2>
+
+            <p>
+                In practice, the organisations I've seen evaluate this problem carefully tend to land on Conditional Access as their primary inbound control — not Private Links.
+            </p>
+
+            <p>Conditional Access through Microsoft Entra ID provides:</p>
+
+            <ul>
+                <li><strong>MFA enforcement</strong> for all Fabric access</li>
+                <li><strong>Device compliance requirements</strong> (Intune-enrolled, compliant OS, security patches)</li>
+                <li><strong>Network location restrictions</strong> — limit access to corporate IP ranges or named locations</li>
+                <li><strong>Risk-based access</strong> — block sign-ins flagged as high-risk</li>
+            </ul>
+
+            <p>
+                It doesn't provide network-level isolation — authenticated users still access Fabric over the public internet — but for the majority of enterprise security requirements, it covers the controls that actually matter. And critically, it doesn't break anything.
+            </p>
+
+            <p>
+                The key trade-off to understand with Conditional Access is scope: you cannot target Fabric alone. Policies must cover all five services Fabric depends on (Power BI Service, Azure Data Explorer, Azure SQL Database, Azure Storage, Azure Cosmos DB), which can introduce complexity if your policies are already finely tuned per service.
+            </p>
+
+            <p>
+                Paired with workspace-level IP Firewall rules for additional network control, Conditional Access gives most organisations a workable and maintainable security posture without the architectural constraints that come with Private Links.
+            </p>
+
+            <hr>
+
+            <h2>When Private Links Do Make Sense</h2>
+
+            <p>Private Links aren't the wrong answer — they're the right answer for a narrower set of scenarios than the documentation might suggest:</p>
+
+            <ul>
+                <li><strong>Pure cloud-to-cloud architectures</strong> with no on-premises dependencies and no OPDG reliance</li>
+                <li><strong>F SKU workspaces</strong> with straightforward workloads that don't need Deployment Pipelines or Fabric SQL Database</li>
+                <li><strong>Specific regulatory mandates</strong> that explicitly require network-level isolation rather than just identity-based controls</li>
+                <li><strong>Reporting/read-heavy workspaces</strong> where Power BI limitations (no PDF export, no email subscriptions, no Copilot) are acceptable</li>
+            </ul>
+
+            <p>
+                If any of your enterprise patterns include on-premises ingestion via OPDG, metadata-driven ELT with a control database, Deployment Pipeline-based promotion, or multi-SKU capacity estates — evaluate the full limitations picture before committing.
+            </p>
+
+            <hr>
+
+            <h2>The Full Limitations Comparison</h2>
+
+            <p>
+                For reference, the table below maps documented limitations across both Private Link types. <strong>"Not documented"</strong> means no official confirmation either way — do not assume support.
+            </p>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Feature / Area</th>
+                            <th>Tenant-Level PL</th>
+                            <th>Workspace-Level PL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="section-header" colspan="3">Setup</td>
+                        </tr>
+                        <tr>
+                            <td>SKU requirement</td>
+                            <td>Any paid Fabric SKU</td>
+                            <td>F SKU only — not P SKU, not Trial</td>
+                        </tr>
+                        <tr>
+                            <td>Fabric portal access when public blocked</td>
+                            <td>Accessible via tenant PL network</td>
+                            <td>Shows "Access Restricted" — portal requires tenant-level PL</td>
+                        </tr>
+                        <tr>
+                            <td>Admin APIs</td>
+                            <td>Governed by tenant settings</td>
+                            <td>Remain publicly accessible even with workspace restriction</td>
+                        </tr>
+                        <tr>
+                            <td>Configure inbound + outbound via portal</td>
+                            <td>Not supported — use REST API</td>
+                            <td>Not supported — use REST API</td>
+                        </tr>
+                        <tr>
+                            <td>Capacity limit</td>
+                            <td>450 capacities per tenant</td>
+                            <td>500 workspace private link services; 100 private endpoints per workspace</td>
+                        </tr>
+                        <tr>
+                            <td>New capacities</td>
+                            <td>Up to 24 hours to reflect in private DNS zone</td>
+                            <td>N/A</td>
+                        </tr>
+                        <tr>
+                            <td>Trial capacity</td>
+                            <td>Not supported</td>
+                            <td>Not supported</td>
+                        </tr>
+                        <tr>
+                            <td>Tenant migration</td>
+                            <td>Blocked while enabled</td>
+                            <td>N/A</td>
+                        </tr>
+                        <tr>
+                            <td>Workspace deletion</td>
+                            <td>N/A</td>
+                            <td>Workspaces with active private link services cannot be deleted</td>
+                        </tr>
+                        <tr>
+                            <td>SQL Database</td>
+                            <td>Supported</td>
+                            <td><strong>Not supported</strong> — roadmap item not shipped as of May 2026</td>
+                        </tr>
+                        <tr>
+                            <td class="section-header" colspan="3">Data Gateway</td>
+                        </tr>
+                        <tr>
+                            <td>On-premises data gateway</td>
+                            <td>Fails when Block Public Internet Access enabled; may work without blocking (officially unsupported)</td>
+                            <td>Not affected — recommended model for OPDG + PL coexistence</td>
+                        </tr>
+                        <tr>
+                            <td>VNet Data Gateway download diagnostics</td>
+                            <td>Does not work</td>
+                            <td>Not documented</td>
+                        </tr>
+                        <tr>
+                            <td class="section-header" colspan="3">Deployment</td>
+                        </tr>
+                        <tr>
+                            <td>Deployment Pipelines</td>
+                            <td>Not documented</td>
+                            <td><strong>Cannot be used with restricted workspaces</strong></td>
+                        </tr>
+                        <tr>
+                            <td class="section-header" colspan="3">Capacity Metrics App</td>
+                        </tr>
+                        <tr>
+                            <td>Capacity Metrics App</td>
+                            <td>Does not support Private Link</td>
+                            <td>Not documented</td>
+                        </tr>
+                        <tr>
+                            <td class="section-header" colspan="3">Microsoft Purview / MIP</td>
+                        </tr>
+                        <tr>
+                            <td>Sensitivity labels (MIP)</td>
+                            <td>Not supported — Sensitivity button greyed out in Power BI Desktop</td>
+                            <td>Not documented</td>
+                        </tr>
+                        <tr>
+                            <td>OneLake Catalog — Govern tab</td>
+                            <td>Not available</td>
+                            <td>Not available</td>
+                        </tr>
+                        <tr>
+                            <td class="section-header" colspan="3">OneLake</td>
+                        </tr>
+                        <tr>
+                            <td>OneLake regional endpoints (direct calls)</td>
+                            <td>Do not work via private link</td>
+                            <td>Not documented</td>
+                        </tr>
+                        <tr>
+                            <td>OneLake Security</td>
+                            <td>Not documented</td>
+                            <td>Not currently supported</td>
+                        </tr>
+                        <tr>
+                            <td>Shortcut transforms</td>
+                            <td>Not documented</td>
+                            <td>Not supported in restricted workspaces</td>
+                        </tr>
+                        <tr>
+                            <td class="section-header" colspan="3">Spark / Data Engineering</td>
+                        </tr>
+                        <tr>
+                            <td>Spark starter pools</td>
+                            <td>Disabled once managed VNet is provisioned</td>
+                            <td>Not documented</td>
+                        </tr>
+                        <tr>
+                            <td>Spark cold start</td>
+                            <td>Increases to 3–5 min after managed VNet provisioned. Partial mitigation: Custom Live Pools (GA Mar 2026) for notebook workloads on a schedule — SJDs and overflow still hit full cold start; managed VNet compatibility not explicitly documented</td>
+                            <td>Not documented</td>
+                        </tr>
+                        <tr>
+                            <td>Workspace migration across regions</td>
+                            <td>Not supported after managed VNet allocated</td>
+                            <td>Not documented</td>
+                        </tr>
+                        <tr>
+                            <td>Spark friendly names</td>
+                            <td>Not documented</td>
+                            <td>Do not work with workspace-level PL</td>
+                        </tr>
+                        <tr>
+                            <td class="section-header" colspan="3">Bandwidth / Latency</td>
+                        </tr>
+                        <tr>
+                            <td>Static asset routing</td>
+                            <td>Static assets (CSS, JS) route through private endpoint — increased latency for geographically distant users</td>
+                            <td>Not documented</td>
+                        </tr>
+                        <tr>
+                            <td class="section-header" colspan="3">Monitoring</td>
+                        </tr>
+                        <tr>
+                            <td>Workspace monitoring</td>
+                            <td>Not documented</td>
+                            <td>Not currently supported</td>
+                        </tr>
+                        <tr>
+                            <td>Monitoring hub Level 2 deeplinks</td>
+                            <td>Not documented</td>
+                            <td>May not work — navigate from Level 1 page instead</td>
+                        </tr>
+                        <tr>
+                            <td>Power BI modern usage metrics</td>
+                            <td>Partial only — Report Open events; no Page Views or performance data</td>
+                            <td>Not documented</td>
+                        </tr>
+                        <tr>
+                            <td class="section-header" colspan="3">Power BI</td>
+                        </tr>
+                        <tr>
+                            <td>Publish to Web</td>
+                            <td>Not supported</td>
+                            <td>Not documented</td>
+                        </tr>
+                        <tr>
+                            <td>Email subscriptions</td>
+                            <td>Not supported when Block Public Internet Access enabled</td>
+                            <td>Not documented</td>
+                        </tr>
+                        <tr>
+                            <td>Export report to PDF / PowerPoint</td>
+                            <td>Not supported</td>
+                            <td>Not documented</td>
+                        </tr>
+                        <tr>
+                            <td>Copilot</td>
+                            <td>Not supported</td>
+                            <td>Not documented</td>
+                        </tr>
+                        <tr>
+                            <td>Visual query in Warehouse</td>
+                            <td>Does not work when Block Public Internet Access enabled</td>
+                            <td>Not documented</td>
+                        </tr>
+                        <tr>
+                            <td>Direct Lake (datamart/dataflow source, internet-blocked)</td>
+                            <td>Connection fails</td>
+                            <td>Not documented</td>
+                        </tr>
+                        <tr>
+                            <td class="section-header" colspan="3">Item Sharing</td>
+                        </tr>
+                        <tr>
+                            <td>Shared item links</td>
+                            <td>Not documented</td>
+                            <td>Stop working for restricted workspaces</td>
+                        </tr>
+                        <tr>
+                            <td>Power Platform Dataflow Connector between workspace dataflows</td>
+                            <td>Not documented</td>
+                            <td>Cannot connect when public access is denied</td>
+                        </tr>
+                        <tr>
+                            <td class="section-header" colspan="3">Copy Activity</td>
+                        </tr>
+                        <tr>
+                            <td>Workspace staging (Warehouse, Snowflake, Teradata)</td>
+                            <td>Not documented</td>
+                            <td>Not supported — use external staging</td>
+                        </tr>
+                        <tr>
+                            <td>Copy to Eventhouse</td>
+                            <td>Not documented</td>
+                            <td>Not supported</td>
+                        </tr>
+                        <tr>
+                            <td class="section-header" colspan="3">Eventstream</td>
+                        </tr>
+                        <tr>
+                            <td>Custom Endpoint source/destination</td>
+                            <td>Not supported</td>
+                            <td>Not supported</td>
+                        </tr>
+                        <tr>
+                            <td>Eventhouse as destination (direct ingestion)</td>
+                            <td>Not supported</td>
+                            <td>Not supported</td>
+                        </tr>
+                        <tr>
+                            <td>Activator as destination</td>
+                            <td>Not supported</td>
+                            <td>Not supported</td>
+                        </tr>
+                        <tr>
+                            <td class="section-header" colspan="3">Eventhouse</td>
+                        </tr>
+                        <tr>
+                            <td>OneLake ingestion</td>
+                            <td>Not supported</td>
+                            <td>Not documented</td>
+                        </tr>
+                        <tr>
+                            <td>Eventstream consumption</td>
+                            <td>Not documented</td>
+                            <td>Not supported</td>
+                        </tr>
+                        <tr>
+                            <td>Shortcut creation</td>
+                            <td>Not supported</td>
+                            <td>Not documented</td>
+                        </tr>
+                        <tr>
+                            <td>Pipeline connection</td>
+                            <td>Not supported</td>
+                            <td>Not documented</td>
+                        </tr>
+                        <tr>
+                            <td>Queued ingestion</td>
+                            <td>Not supported</td>
+                            <td>Not documented</td>
+                        </tr>
+                        <tr>
+                            <td>T-SQL queries / SQL Server TDS endpoints</td>
+                            <td>Not supported</td>
+                            <td>Not supported</td>
+                        </tr>
+                        <tr>
+                            <td class="section-header" colspan="3">Mirroring</td>
+                        </tr>
+                        <tr>
+                            <td>Most mirrored database types</td>
+                            <td>Paused when Block Public Internet Access enabled — only open mirroring, Cosmos DB, Azure SQL MI, SQL Server 2025 supported</td>
+                            <td>Paused when public access restricted — same supported types</td>
+                        </tr>
+                        <tr>
+                            <td class="section-header" colspan="3">Azure Events</td>
+                        </tr>
+                        <tr>
+                            <td>Azure Events (Block Public Internet Access)</td>
+                            <td>New event delivery blocked; existing configs stop delivering</td>
+                            <td>Not documented</td>
+                        </tr>
+                        <tr>
+                            <td class="section-header" colspan="3">Other</td>
+                        </tr>
+                        <tr>
+                            <td>Private link REST APIs</td>
+                            <td>Do not support tags</td>
+                            <td>Not documented</td>
+                        </tr>
+                        <tr>
+                            <td>Dataflow Gen2 VNet gateway</td>
+                            <td>Not documented</td>
+                            <td>Must reside in same VNet as workspace-level PL endpoint</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p>
+                The limitations list above will get shorter over time — workspace-level Private Links only went GA in October 2025 and the feature is actively evolving. But right now, for most enterprise Fabric implementations, Conditional Access is doing the heavy lifting, and Private Links are being deferred until the feature gaps close.
+            </p>
+
+            <p>
+                If you've implemented Private Links successfully in a production enterprise environment — particularly with on-premises data sources or Deployment Pipelines — I'd genuinely like to hear how you approached it.
+            </p>
+
+            <hr>
+
+            <p><em>Sources: Microsoft Learn — <a href="https://learn.microsoft.com/en-us/fabric/security/security-inbound-overview" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Inbound access overview</a>, <a href="https://learn.microsoft.com/en-us/fabric/security/security-private-links-overview" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Tenant-level Private Link</a>, <a href="https://learn.microsoft.com/en-us/fabric/security/security-workspace-level-private-links-overview" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Workspace-level Private Link overview</a>, <a href="https://learn.microsoft.com/en-us/fabric/security/security-workspace-level-private-links-support" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Workspace-level Private Link supported scenarios</a> (last updated May 16, 2026), <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/custom-live-pools-overview" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Custom live pools overview</a>. Last verified May 2026.</em></p>
+
+            <hr>
+
+            <p><em>Brad Coles is a Senior Consultant and Data Engineering Capability Lead at <a href="https://www.synechron.com/en-au" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Synechron Australia</a>, specialising in Microsoft Fabric and modern data platform engineering. Connect on <a href="https://www.linkedin.com/in/brad-coles/" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">LinkedIn</a>.</em></p>
+        </article>
+
+        <footer>
+            <p>&copy; 2026 Brad Coles. <a href="../index.html" style="color: var(--accent-bright); text-decoration: none;">Back to Portfolio</a></p>
+        </footer>
+    </div>
+</body>
+</html>
