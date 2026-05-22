@@ -307,6 +307,25 @@
             margin-top: 4rem;
         }
 
+        figure.diagram-wrapper {
+            margin: 2rem 0;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #0d1117;
+        }
+
+        figure.diagram-wrapper figcaption {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 0.75rem 1.5rem;
+            border-top: 1px solid var(--border);
+            background: var(--code-bg);
+            font-style: italic;
+            line-height: 1.5;
+        }
+
         @media (max-width: 768px) {
             h1 {
                 font-size: 2rem;
@@ -339,16 +358,16 @@
 
         <article>
             <p>
-                Microsoft Fabric Private Links look great on paper. Route all Fabric traffic over Microsoft's backbone, block the public internet, and check the "network isolated" box for your compliance team. In practice, almost no enterprise deployments I've come across have actually gone down this path — and the ones that evaluated it have generally landed on Conditional Access instead.
+                Microsoft Fabric Private Links route traffic to Fabric through a private connection rather than the public internet, with the option to block public access entirely at the tenant or workspace level. For organisations with explicit regulatory requirements for network isolation, they are the right architectural control.
             </p>
 
             <p>
-                This post is an honest look at why. Not to dismiss Private Links — they have real use cases — but because the gap between what Private Links promise and what they currently deliver for a real enterprise workload is significant, and it's not obvious from the documentation until you've spent time mapping it out.
+                The challenge is that the feature set, as of mid-2026, carries constraints that interact in non-obvious ways with the patterns common to enterprise Fabric platforms: on-premises data ingestion, multi-environment CI/CD promotion, metadata-driven ELT, and mixed-SKU capacity estates. Understanding those constraints before design commitments are made is the purpose of this post.
             </p>
 
-            <div class="callout">
-                <strong>Note:</strong> Microsoft Fabric is a rapidly evolving platform. The information in this article reflects the state of the product as of 20 May 2026. Specific limitations — particularly around workspace-level Private Links — are actively being addressed. Verify against the latest Microsoft documentation before making architectural decisions.
-            </div>
+            <p>
+                This is not an argument against Private Links. It is a map of the gap between what the feature can do today and what a full enterprise implementation typically needs — so that you can make an informed choice between accepting the current constraints, deferring Private Links until the feature matures, or adopting layered controls that work for your environment.
+            </p>
 
             <hr>
 
@@ -386,7 +405,7 @@
                         <tr>
                             <td><strong>Fabric portal when public blocked</strong></td>
                             <td>Accessible via tenant PL network</td>
-                            <td>Shows "Access Restricted" — workspace PL covers API access only; the Fabric portal itself requires a tenant-level PL</td>
+                            <td>Shows "Access Restricted" for requests not originating from the workspace's private endpoint. Users on the private network (VPN, ExpressRoute) can access the workspace via portal. The portal application itself requires tenant-level PL for private routing.</td>
                         </tr>
                         <tr>
                             <td><strong>Mixed public/private model</strong></td>
@@ -419,16 +438,89 @@
             </p>
 
             <p>
-                Enable tenant-level Private Links, and your OPDGs become officially unsupported. The current documentation is explicit: on-premises data gateways "aren't supported and fail to register when Private Link is enabled" — you cannot set up a new gateway while Private Link is on. An already-registered OPDG may continue to function for data ingestion if Block Public Internet Access is not enabled (the VM can still reach public Fabric endpoints outbound), but Microsoft provides no support for this configuration and it will fail entirely once internet is blocked.
+                Enable tenant-level Private Links, and your OPDGs become officially unsupported. The current documentation is explicit: on-premises data gateways "aren't supported and fail to register when Private Link is enabled" — you cannot set up a new gateway while Private Link is on. An already-registered OPDG may continue to function for data ingestion if Block Public Internet Access is not enabled at the Fabric tenant level AND the gateway VM has outbound internet access permitted by the customer's own network controls — a separate dependency from Microsoft's platform setting. Microsoft provides no support for this configuration, and it fails entirely once internet is blocked.
             </p>
 
             <p>
-                In practice, most organisations enable Private Links precisely to block the public internet — which makes OPDG ingestion a hard blocker. The guidance from Microsoft is to replace OPDGs with VNet Data Gateways, which do work with Private Links — but this is a meaningful infrastructure change, not a configuration tweak.
+                Organisations that enable Private Links with the intent of blocking the public internet — the most common deployment goal — make OPDG ingestion a hard blocker. Deployments of Private Links without internet blocking (for data residency or attack surface reduction without full isolation) may preserve OPDG function, but that configuration is unsupported and should be treated as transitional. The guidance from Microsoft is to replace OPDGs with VNet Data Gateways, which do work with Private Links — but this is a meaningful infrastructure change, not a configuration tweak. An OPDG runs on-premises and makes an outbound internet connection to Fabric — all it needs is a VM and outbound internet access. A VNet Data Gateway runs inside an Azure VNet, which means on-premises systems must be reachable from Azure via ExpressRoute or Site-to-Site VPN. For organisations that chose OPDGs precisely because they had no Azure networking footprint, that connectivity doesn't exist yet. Establishing it involves Azure VNet design, network team engagement, and — in the case of ExpressRoute — commercial circuit provisioning that can take weeks or months. The gateway migration itself is the easy part; getting to a point where it's possible is the actual project.
             </p>
 
             <div class="verdict">
                 <strong>The verdict on tenant-level PL for enterprise:</strong> If you have any on-premises data sources and aren't already running VNet Data Gateways, tenant-level Private Links with internet blocking is effectively off the table without significant re-architecture.
             </div>
+
+            <figure class="diagram-wrapper">
+                <svg viewBox="0 0 720 378" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;" aria-label="Diagram comparing OPDG and VNet Data Gateway paths with tenant-level Private Links">
+                    <rect width="720" height="378" fill="#0d1117"/>
+                    <line x1="360" y1="10" x2="360" y2="368" stroke="#1f2937" stroke-width="1" stroke-dasharray="4,4"/>
+
+                    <!-- LEFT: OPDG BLOCKED -->
+                    <text x="180" y="24" text-anchor="middle" fill="#ef4444" font-size="9" font-weight="bold" font-family="'JetBrains Mono', monospace" letter-spacing="0.5">OPDG + BLOCK PUBLIC INTERNET ACCESS</text>
+                    <rect x="60" y="36" width="240" height="42" rx="5" fill="#111827" stroke="#374151" stroke-width="1"/>
+                    <text x="180" y="54" text-anchor="middle" fill="#e5e7eb" font-size="11" font-family="'JetBrains Mono', monospace">On-Premises Systems</text>
+                    <text x="180" y="70" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="'JetBrains Mono', monospace">ERP · CRM · Databases</text>
+
+                    <line x1="180" y1="78" x2="180" y2="112" stroke="#9ca3af" stroke-width="1.5"/>
+                    <polygon points="180,120 175,112 185,112" fill="#9ca3af"/>
+
+                    <rect x="60" y="124" width="240" height="42" rx="5" fill="#111827" stroke="#374151" stroke-width="1"/>
+                    <text x="180" y="142" text-anchor="middle" fill="#e5e7eb" font-size="11" font-family="'JetBrains Mono', monospace">On-Premises Data</text>
+                    <text x="180" y="158" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="'JetBrains Mono', monospace">Gateway (OPDG)</text>
+
+                    <line x1="180" y1="166" x2="180" y2="202" stroke="#9ca3af" stroke-width="1.5"/>
+                    <polygon points="180,210 175,202 185,202" fill="#9ca3af"/>
+                    <rect x="192" y="178" width="90" height="14" rx="3" fill="#0d1117"/>
+                    <text x="237" y="189" text-anchor="middle" fill="#9ca3af" font-size="8" font-family="'JetBrains Mono', monospace">Public Internet</text>
+
+                    <rect x="50" y="214" width="260" height="50" rx="5" fill="#1a0808" stroke="#ef4444" stroke-width="2"/>
+                    <circle cx="81" cy="239" r="11" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+                    <line x1="75" y1="233" x2="87" y2="245" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="87" y1="233" x2="75" y2="245" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+                    <text x="106" y="233" fill="#ef4444" font-size="10" font-weight="bold" font-family="'JetBrains Mono', monospace">Block Public</text>
+                    <text x="106" y="249" fill="#ef4444" font-size="10" font-weight="bold" font-family="'JetBrains Mono', monospace">Internet Access</text>
+
+                    <line x1="180" y1="264" x2="180" y2="312" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.3"/>
+                    <polygon points="180,320 175,312 185,312" fill="#ef4444" opacity="0.3"/>
+                    <rect x="60" y="324" width="240" height="42" rx="5" fill="#111827" stroke="#374151" stroke-width="1" opacity="0.25"/>
+                    <text x="180" y="342" text-anchor="middle" fill="#9ca3af" font-size="11" font-family="'JetBrains Mono', monospace" opacity="0.35">Microsoft Fabric</text>
+                    <text x="180" y="358" text-anchor="middle" fill="#ef4444" font-size="9" font-family="'JetBrains Mono', monospace" opacity="0.5">Unreachable</text>
+
+                    <!-- RIGHT: VNET GATEWAY -->
+                    <text x="540" y="24" text-anchor="middle" fill="#10b981" font-size="9" font-weight="bold" font-family="'JetBrains Mono', monospace" letter-spacing="0.5">VNET DATA GATEWAY + TENANT-LEVEL PL</text>
+                    <rect x="420" y="36" width="240" height="42" rx="5" fill="#111827" stroke="#374151" stroke-width="1"/>
+                    <text x="540" y="54" text-anchor="middle" fill="#e5e7eb" font-size="11" font-family="'JetBrains Mono', monospace">On-Premises Systems</text>
+                    <text x="540" y="70" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="'JetBrains Mono', monospace">ERP · CRM · Databases</text>
+
+                    <line x1="540" y1="78" x2="540" y2="112" stroke="#9ca3af" stroke-width="1.5"/>
+                    <polygon points="540,120 535,112 545,112" fill="#9ca3af"/>
+                    <rect x="554" y="86" width="106" height="26" rx="3" fill="#0d1117"/>
+                    <text x="607" y="98" text-anchor="middle" fill="#9ca3af" font-size="8" font-family="'JetBrains Mono', monospace">ExpressRoute /</text>
+                    <text x="607" y="110" text-anchor="middle" fill="#9ca3af" font-size="8" font-family="'JetBrains Mono', monospace">Site-to-Site VPN</text>
+
+                    <rect x="410" y="124" width="260" height="148" rx="8" fill="#050d1a" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="5,3"/>
+                    <text x="424" y="139" fill="#3b82f6" font-size="9" font-family="'JetBrains Mono', monospace" letter-spacing="0.5">Azure VNet</text>
+
+                    <rect x="430" y="146" width="220" height="38" rx="5" fill="#111827" stroke="#3b82f6" stroke-width="1"/>
+                    <text x="540" y="162" text-anchor="middle" fill="#e5e7eb" font-size="11" font-family="'JetBrains Mono', monospace">VNet Data Gateway</text>
+                    <text x="540" y="177" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="'JetBrains Mono', monospace">Runs inside Azure VNet</text>
+
+                    <line x1="540" y1="184" x2="540" y2="214" stroke="#3b82f6" stroke-width="1.5"/>
+                    <polygon points="540,222 535,214 545,214" fill="#3b82f6"/>
+
+                    <rect x="430" y="224" width="220" height="28" rx="4" fill="#0a1628" stroke="#3b82f6" stroke-width="1"/>
+                    <text x="540" y="242" text-anchor="middle" fill="#60a5fa" font-size="9" font-family="'JetBrains Mono', monospace" letter-spacing="0.5">Private Endpoint</text>
+
+                    <line x1="540" y1="252" x2="540" y2="312" stroke="#10b981" stroke-width="1.5"/>
+                    <polygon points="540,320 535,312 545,312" fill="#10b981"/>
+                    <rect x="554" y="273" width="50" height="14" rx="3" fill="#0d1117"/>
+                    <text x="579" y="284" text-anchor="middle" fill="#10b981" font-size="8" font-family="'JetBrains Mono', monospace">Private</text>
+
+                    <rect x="420" y="324" width="240" height="42" rx="5" fill="#111827" stroke="#10b981" stroke-width="1.5"/>
+                    <text x="540" y="342" text-anchor="middle" fill="#e5e7eb" font-size="11" font-family="'JetBrains Mono', monospace">Microsoft Fabric</text>
+                    <text x="540" y="358" text-anchor="middle" fill="#10b981" font-size="9" font-family="'JetBrains Mono', monospace">Connected via Private Link</text>
+                </svg>
+                <figcaption class="diagram-caption">Left: registering a new OPDG fails when tenant-level Private Links are enabled; existing gateways fail entirely once public internet access is blocked. Right: a VNet Data Gateway runs inside an Azure VNet and reaches Fabric via private endpoint — on-premises systems must first be reachable from Azure via ExpressRoute or Site-to-Site VPN.</figcaption>
+            </figure>
 
             <h3>Workspace-Level Private Link: Closer, But Still Missing Key Pieces</h3>
 
@@ -437,23 +529,104 @@
             </p>
 
             <p>
-                <strong>Fabric SQL Database is not supported.</strong> As of May 2026, workspace-level Private Links do not support Fabric SQL Database. This is a significant gap for metadata-driven ELT patterns where a SQL database acts as a control table or orchestration store — a common pattern in production Fabric platforms. Tenant-level Private Links do support SQL Database, but that brings you back to the OPDG problem above. A Q1 2026 roadmap item was listed for SQL DB support in workspace PL; it has not shipped as of the time of writing.
+                <strong>Fabric SQL Database is not supported.</strong> As of May 2026, workspace-level Private Links do not support Fabric SQL Database. This is a significant gap for metadata-driven ELT patterns where a SQL database acts as a control table or orchestration store — a common pattern in production Fabric platforms. Tenant-level Private Links do support SQL Database, but that brings you back to the OPDG problem above. (A roadmap item for SQL DB support in workspace PL was listed for early 2026 and has not shipped as of May 2026. Verify current status before treating future support as a given.)
             </p>
 
             <p>
-                <strong>Deployment Pipelines are not supported.</strong> If your workspace is assigned to a Deployment Pipeline — the standard mechanism for promoting content through DEV, UAT, and PROD environments — you cannot restrict inbound public access on that workspace. Restricting access is also blocked for any workspace that contains a workspace assigned to a pipeline. For teams that rely on Deployment Pipelines for their CI/CD workflow, this is a direct conflict.
+                <strong>Deployment Pipelines are not supported.</strong> If your workspace is assigned to a Deployment Pipeline — one of two primary promotion mechanisms in Fabric alongside Git integration — you cannot restrict inbound public access on that workspace. Restricting access is also blocked for any workspace that contains a workspace assigned to a pipeline. The status of Git integration-based workflows under workspace-level PL restriction is not confirmed in current documentation and should be verified before assuming it as an alternative path.
             </p>
 
             <p>
-                <strong>The Fabric portal is blocked for restricted workspaces.</strong> When a workspace blocks public inbound access, the Fabric portal shows "Access Restricted" for requests that don't originate from the workspace's associated private endpoint. Users who aren't on the private network (VPN, ExpressRoute) cannot access the workspace through the portal at all. Note: admin APIs remain publicly accessible — it's the portal itself that's restricted, not the administrative plane.
+                <strong>The Fabric portal is blocked for restricted workspaces.</strong> When a workspace blocks public inbound access, the Fabric portal shows "Access Restricted" for requests that don't originate from the workspace's associated private endpoint. Users who aren't on the private network (VPN, ExpressRoute) cannot access the workspace through the portal at all.
             </p>
+
+            <p>
+                Important architectural constraint: workspace-level Private Links are a data plane inbound control. The Fabric administrative plane — Admin REST APIs, tenant settings, capacity management — remains accessible over the public internet and is governed separately by Fabric tenant settings and Entra ID permissions. Organisations that treat Private Links as a full administrative isolation boundary should document compensating controls for administrative access, as the feature does not provide it.
+            </p>
+
+            <figure class="diagram-wrapper">
+                <svg viewBox="0 0 720 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;" aria-label="Diagram: Workspace-level Private Links portal access model — external user vs corporate user">
+                    <rect width="720" height="380" fill="#0d1117"/>
+                    <line x1="360" y1="10" x2="360" y2="370" stroke="#1f2937" stroke-width="1" stroke-dasharray="4,4"/>
+
+                    <!-- LEFT: EXTERNAL USER BLOCKED -->
+                    <text x="180" y="24" text-anchor="middle" fill="#ef4444" font-size="9" font-weight="bold" font-family="'JetBrains Mono', monospace" letter-spacing="0.5">PUBLIC INTERNET — ACCESS RESTRICTED</text>
+
+                    <rect x="60" y="36" width="240" height="42" rx="5" fill="#111827" stroke="#374151" stroke-width="1"/>
+                    <text x="180" y="54" text-anchor="middle" fill="#e5e7eb" font-size="11" font-family="'JetBrains Mono', monospace">External User</text>
+                    <text x="180" y="70" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="'JetBrains Mono', monospace">Outside corporate network</text>
+
+                    <line x1="180" y1="78" x2="180" y2="112" stroke="#9ca3af" stroke-width="1.5"/>
+                    <polygon points="180,120 175,112 185,112" fill="#9ca3af"/>
+                    <rect x="192" y="86" width="90" height="14" rx="3" fill="#0d1117"/>
+                    <text x="237" y="97" text-anchor="middle" fill="#9ca3af" font-size="8" font-family="'JetBrains Mono', monospace">Public Internet</text>
+
+                    <rect x="60" y="124" width="240" height="50" rx="5" fill="#111827" stroke="#374151" stroke-width="1"/>
+                    <rect x="68" y="126" width="64" height="16" rx="3" fill="#10b981" opacity="0.15"/>
+                    <text x="100" y="138" text-anchor="middle" fill="#10b981" font-size="8" font-family="'JetBrains Mono', monospace">Accessible</text>
+                    <text x="180" y="148" text-anchor="middle" fill="#e5e7eb" font-size="11" font-family="'JetBrains Mono', monospace">Fabric Portal</text>
+                    <text x="180" y="164" text-anchor="middle" fill="#9ca3af" font-size="8" font-family="'JetBrains Mono', monospace">app.fabric.microsoft.com</text>
+
+                    <line x1="180" y1="174" x2="180" y2="210" stroke="#9ca3af" stroke-width="1.5"/>
+                    <polygon points="180,218 175,210 185,210" fill="#9ca3af"/>
+                    <rect x="192" y="184" width="110" height="14" rx="3" fill="#0d1117"/>
+                    <text x="247" y="195" text-anchor="middle" fill="#9ca3af" font-size="8" font-family="'JetBrains Mono', monospace">Requests workspace</text>
+
+                    <rect x="50" y="222" width="260" height="56" rx="5" fill="#1a0808" stroke="#ef4444" stroke-width="2"/>
+                    <circle cx="80" cy="250" r="11" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+                    <line x1="74" y1="244" x2="86" y2="256" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="86" y1="244" x2="74" y2="256" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+                    <text x="104" y="243" fill="#ef4444" font-size="10" font-weight="bold" font-family="'JetBrains Mono', monospace">Access Restricted</text>
+                    <text x="104" y="261" fill="#9ca3af" font-size="8" font-family="'JetBrains Mono', monospace">Request not from private endpoint</text>
+
+                    <line x1="180" y1="278" x2="180" y2="316" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.3"/>
+                    <polygon points="180,324 175,316 185,316" fill="#ef4444" opacity="0.3"/>
+                    <rect x="60" y="328" width="240" height="42" rx="5" fill="#111827" stroke="#374151" stroke-width="1" opacity="0.25"/>
+                    <text x="180" y="346" text-anchor="middle" fill="#9ca3af" font-size="11" font-family="'JetBrains Mono', monospace" opacity="0.35">Restricted Workspace</text>
+                    <text x="180" y="362" text-anchor="middle" fill="#ef4444" font-size="9" font-family="'JetBrains Mono', monospace" opacity="0.5">Not reachable</text>
+
+                    <!-- RIGHT: CORPORATE USER ALLOWED -->
+                    <text x="540" y="24" text-anchor="middle" fill="#10b981" font-size="9" font-weight="bold" font-family="'JetBrains Mono', monospace" letter-spacing="0.5">PRIVATE NETWORK — WORKSPACE ACCESSIBLE</text>
+
+                    <rect x="420" y="36" width="240" height="42" rx="5" fill="#111827" stroke="#374151" stroke-width="1"/>
+                    <text x="540" y="54" text-anchor="middle" fill="#e5e7eb" font-size="11" font-family="'JetBrains Mono', monospace">Corporate User</text>
+                    <text x="540" y="70" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="'JetBrains Mono', monospace">On VPN or ExpressRoute</text>
+
+                    <line x1="540" y1="78" x2="540" y2="112" stroke="#9ca3af" stroke-width="1.5"/>
+                    <polygon points="540,120 535,112 545,112" fill="#9ca3af"/>
+                    <rect x="554" y="86" width="104" height="14" rx="3" fill="#0d1117"/>
+                    <text x="606" y="97" text-anchor="middle" fill="#9ca3af" font-size="8" font-family="'JetBrains Mono', monospace">VPN / ExpressRoute</text>
+
+                    <rect x="420" y="124" width="240" height="50" rx="5" fill="#111827" stroke="#374151" stroke-width="1"/>
+                    <rect x="428" y="126" width="64" height="16" rx="3" fill="#10b981" opacity="0.15"/>
+                    <text x="460" y="138" text-anchor="middle" fill="#10b981" font-size="8" font-family="'JetBrains Mono', monospace">Accessible</text>
+                    <text x="540" y="148" text-anchor="middle" fill="#e5e7eb" font-size="11" font-family="'JetBrains Mono', monospace">Fabric Portal</text>
+                    <text x="540" y="164" text-anchor="middle" fill="#9ca3af" font-size="8" font-family="'JetBrains Mono', monospace">app.fabric.microsoft.com</text>
+
+                    <line x1="540" y1="174" x2="540" y2="210" stroke="#3b82f6" stroke-width="1.5"/>
+                    <polygon points="540,218 535,210 545,210" fill="#3b82f6"/>
+                    <rect x="554" y="184" width="104" height="14" rx="3" fill="#0d1117"/>
+                    <text x="606" y="195" text-anchor="middle" fill="#9ca3af" font-size="8" font-family="'JetBrains Mono', monospace">via private endpoint</text>
+
+                    <rect x="420" y="222" width="240" height="40" rx="5" fill="#0a1628" stroke="#3b82f6" stroke-width="1.5"/>
+                    <text x="540" y="246" text-anchor="middle" fill="#60a5fa" font-size="10" font-family="'JetBrains Mono', monospace" letter-spacing="0.5">Private Endpoint</text>
+
+                    <line x1="540" y1="262" x2="540" y2="316" stroke="#10b981" stroke-width="1.5"/>
+                    <polygon points="540,324 535,316 545,316" fill="#10b981"/>
+
+                    <rect x="420" y="328" width="240" height="42" rx="5" fill="#111827" stroke="#10b981" stroke-width="1.5"/>
+                    <text x="540" y="346" text-anchor="middle" fill="#e5e7eb" font-size="11" font-family="'JetBrains Mono', monospace">Restricted Workspace</text>
+                    <text x="540" y="362" text-anchor="middle" fill="#10b981" font-size="9" font-family="'JetBrains Mono', monospace">Accessible via private network</text>
+                </svg>
+                <figcaption class="diagram-caption">Both users can reach the Fabric portal. When a workspace blocks public inbound access, the external user's request hits "Access Restricted" — it doesn't originate from the workspace's private endpoint. The corporate user on VPN routes through the private endpoint and reaches the workspace. The Fabric portal itself requires a tenant-level Private Link to be routed privately; without it, both users reach the portal over the public internet.</figcaption>
+            </figure>
 
             <p>
                 <strong>Capacity Metrics App support is undocumented.</strong> For tenant-level Private Links, the Capacity Metrics App is explicitly noted as not supporting Private Links. For workspace-level, the documentation is silent — no confirmation either way. In practice, this is a meaningful blind spot: without the Capacity Metrics App, capacity monitoring requires alternative tooling.
             </p>
 
             <p>
-                <strong>The Fabric portal still requires tenant-level Private Links for full access.</strong> This compounds the above — workspace-level PL covers API access to the workspace, but the Fabric portal (<code>app.fabric.microsoft.com</code>) itself requires a tenant-level Private Link to be accessible from a private-only network. If you're using workspace-level PL without tenant-level PL, your users still need public internet access to reach the portal.
+                <strong>The Fabric portal requires tenant-level Private Links for private routing.</strong> Workspace-level PL covers API and data plane access to the workspace, but the Fabric portal application (<code>app.fabric.microsoft.com</code>) itself requires a tenant-level Private Link to be routed privately. Users on workspace-level PL without tenant-level PL can still reach the portal over the public internet — but cannot reach restricted workspace content from outside the private network.
             </p>
 
             <div class="verdict">
@@ -478,16 +651,60 @@
             </ul>
 
             <p>
-                It doesn't provide network-level isolation — authenticated users still access Fabric over the public internet — but for the majority of enterprise security requirements, it covers the controls that actually matter. And critically, it doesn't break anything.
+                It doesn't provide network-level isolation — authenticated users still access Fabric over the public internet — but for many enterprise security frameworks it addresses the primary risk surface: identity, device compliance, and network location. And critically, it doesn't break anything.
             </p>
 
             <p>
-                The key trade-off to understand with Conditional Access is scope: you cannot target Fabric alone. Policies must cover all five services Fabric depends on (Power BI Service, Azure Data Explorer, Azure SQL Database, Azure Storage, Azure Cosmos DB), which can introduce complexity if your policies are already finely tuned per service.
+                One caveat worth flagging: Conditional Access is an identity and location control — it doesn't provide network isolation. If your organisation has a specific requirement for network-level isolation from a compliance or security standpoint, check with your security team before treating Conditional Access as sufficient. For most Fabric data platform workloads it's the right starting point, but it's worth having that conversation explicitly rather than assuming.
             </p>
 
             <p>
-                Paired with workspace-level IP Firewall rules for additional network control, Conditional Access gives most organisations a workable and maintainable security posture without the architectural constraints that come with Private Links.
+                The key trade-off to understand with Conditional Access is scope: you cannot target Fabric alone. Policies must target all services in Microsoft's documented dependency list for Fabric (Power BI Service, Azure Data Explorer, Azure SQL Database, Azure Storage, Azure Cosmos DB), which can introduce complexity if your policies are already finely tuned per service. For non-interactive workloads consuming Fabric via Power Automate, Logic Apps, or custom application identities, validate that CA Named Location restrictions apply uniformly across those authentication paths — service principal flows can behave differently from user-interactive flows.
             </p>
+
+            <p>
+                Paired with workspace-level IP Firewall rules, Conditional Access provides layered identity and network location controls that satisfy a broad range of enterprise security requirements. Verify coverage across direct OneLake storage access, XMLA endpoints, and SQL analytics endpoints — IP Firewall applicability varies by access path.
+            </p>
+
+            <figure class="diagram-wrapper">
+                <svg viewBox="0 0 620 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;" aria-label="Diagram: Layered security controls — Conditional Access wrapping IP Firewall wrapping Fabric Workspace">
+                    <rect width="620" height="340" fill="#0d1117"/>
+
+                    <!-- Outer: Conditional Access -->
+                    <rect x="10" y="10" width="600" height="320" rx="10" fill="#0a0e1a" stroke="#3b82f6" stroke-width="1.5"/>
+                    <text x="26" y="32" fill="#60a5fa" font-size="11" font-weight="bold" font-family="'JetBrains Mono', monospace">Entra ID Conditional Access</text>
+                    <text x="310" y="318" text-anchor="middle" fill="#3b82f6" font-size="8" font-family="'JetBrains Mono', monospace">MFA Required  ·  Device Compliance  ·  Named Locations  ·  Risk-Based Access  ·  All Fabric-dependent services</text>
+
+                    <!-- Middle: IP Firewall -->
+                    <rect x="55" y="52" width="510" height="226" rx="8" fill="#080d14" stroke="#d97706" stroke-width="1.5"/>
+                    <text x="70" y="72" fill="#f59e0b" font-size="10" font-weight="bold" font-family="'JetBrains Mono', monospace">Workspace IP Firewall</text>
+                    <text x="310" y="264" text-anchor="middle" fill="#d97706" font-size="8" font-family="'JetBrains Mono', monospace">Named Locations  ·  IP Range Allowlist  ·  Applicability varies: verify OneLake direct, XMLA, SQL analytics endpoints</text>
+
+                    <!-- Inner: Fabric Workspace -->
+                    <rect x="110" y="86" width="400" height="160" rx="6" fill="#111827" stroke="#10b981" stroke-width="1.5"/>
+                    <text x="310" y="106" text-anchor="middle" fill="#10b981" font-size="10" font-weight="bold" font-family="'JetBrains Mono', monospace">Fabric Workspace</text>
+
+                    <!-- 2x2 grid of workspace items -->
+                    <rect x="130" y="114" width="172" height="38" rx="4" fill="#0d1117" stroke="#1f2937" stroke-width="1"/>
+                    <text x="216" y="130" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="'JetBrains Mono', monospace">Lakehouse / Delta</text>
+                    <text x="216" y="144" text-anchor="middle" fill="#6b7280" font-size="8" font-family="'JetBrains Mono', monospace">OneLake Storage</text>
+
+                    <rect x="318" y="114" width="172" height="38" rx="4" fill="#0d1117" stroke="#1f2937" stroke-width="1"/>
+                    <text x="404" y="130" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="'JetBrains Mono', monospace">Data Pipelines</text>
+                    <text x="404" y="144" text-anchor="middle" fill="#6b7280" font-size="8" font-family="'JetBrains Mono', monospace">ELT / Orchestration</text>
+
+                    <rect x="130" y="162" width="172" height="38" rx="4" fill="#0d1117" stroke="#1f2937" stroke-width="1"/>
+                    <text x="216" y="178" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="'JetBrains Mono', monospace">Fabric SQL Database</text>
+                    <text x="216" y="192" text-anchor="middle" fill="#6b7280" font-size="8" font-family="'JetBrains Mono', monospace">Control Tables</text>
+
+                    <rect x="318" y="162" width="172" height="38" rx="4" fill="#0d1117" stroke="#1f2937" stroke-width="1"/>
+                    <text x="404" y="178" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="'JetBrains Mono', monospace">Power BI Reports</text>
+                    <text x="404" y="192" text-anchor="middle" fill="#6b7280" font-size="8" font-family="'JetBrains Mono', monospace">Semantic Models</text>
+
+                    <text x="310" y="225" text-anchor="middle" fill="#4b5563" font-size="8" font-family="'JetBrains Mono', monospace">Spark Notebooks  ·  Eventstreams  ·  Eventhouse  ·  Mirroring</text>
+                </svg>
+                <figcaption class="diagram-caption">Every request must satisfy Conditional Access (identity, device, location, risk) before it can be filtered by IP Firewall (network location). Private Links are not required for either layer — and unlike Private Links, neither breaks OPDGs, Deployment Pipelines, or Fabric SQL Database.</figcaption>
+            </figure>
 
             <hr>
 
@@ -499,7 +716,7 @@
                 <li><strong>Pure cloud-to-cloud architectures</strong> with no on-premises dependencies and no OPDG reliance</li>
                 <li><strong>F SKU workspaces</strong> with straightforward workloads that don't need Deployment Pipelines or Fabric SQL Database</li>
                 <li><strong>Specific regulatory mandates</strong> that explicitly require network-level isolation rather than just identity-based controls</li>
-                <li><strong>Reporting/read-heavy workspaces</strong> where Power BI limitations (no PDF export, no email subscriptions, no Copilot) are acceptable</li>
+                <li><strong>Reporting/read-heavy workspaces</strong> where Power BI limitations are acceptable — for tenant-level PL these include no PDF export, no email subscriptions, and no Copilot. For workspace-level PL, Copilot support is not currently documented; verify before assuming availability.</li>
             </ul>
 
             <p>
@@ -611,7 +828,7 @@
                         </tr>
                         <tr>
                             <td>Sensitivity labels (MIP)</td>
-                            <td>Not supported — Sensitivity button greyed out in Power BI Desktop</td>
+                            <td>Power BI Desktop client only: Sensitivity button greyed out — labels cannot be applied from Desktop. Label application via Fabric portal and programmatic methods should be verified separately.</td>
                             <td>Not documented</td>
                         </tr>
                         <tr>
@@ -835,7 +1052,15 @@
             </div>
 
             <p>
-                The limitations list above will get shorter over time — workspace-level Private Links only went GA in October 2025 and the feature is actively evolving. But right now, for most enterprise Fabric implementations, Conditional Access is doing the heavy lifting, and Private Links are being deferred until the feature gaps close.
+                The limitations list above will get shorter over time — workspace-level Private Links only went GA in October 2025 and the feature is actively evolving. Several items on this list have roadmap entries; readers should verify current status before making architecture decisions based on assumed future support.
+            </p>
+
+            <p>
+                The limitations that are structural rather than temporary — the OPDG/tenant-PL incompatibility, the Deployment Pipeline restriction, the portal routing dependency on tenant-level PL — aren't going to disappear with a minor update. If your platform doesn't have a hard network isolation requirement, Conditional Access paired with workspace-level IP Firewall gives you strong controls without the current constraints. If network isolation is a firm requirement, the path forward is to design around the limitations: VNet Data Gateways in place of OPDGs, Git-based CI/CD in place of Deployment Pipelines, and a phased rollout starting from workspaces with no PL-incompatible dependencies.
+            </p>
+
+            <p>
+                The limitations list will change. Design principles should not.
             </p>
 
             <p>
