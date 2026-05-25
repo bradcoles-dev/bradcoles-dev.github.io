@@ -301,6 +301,25 @@
             margin-top: 4rem;
         }
 
+        figure.diagram-wrapper {
+            margin: 2rem 0;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #0d1117;
+        }
+
+        figure.diagram-wrapper figcaption {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 0.75rem 1.5rem;
+            border-top: 1px solid var(--border);
+            background: var(--code-bg);
+            font-style: italic;
+            line-height: 1.5;
+        }
+
         @media (max-width: 768px) {
             h1 {
                 font-size: 2rem;
@@ -356,6 +375,76 @@
             <p>
                 The word "mirroring" covers three architecturally distinct mechanisms. Choosing the wrong one for your use case is the first and most common mistake.
             </p>
+
+            <figure class="diagram-wrapper">
+                <svg viewBox="0 0 720 315" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;" aria-label="Three types of Fabric mirroring: database mirroring replicates data to OneLake, metadata mirroring creates shortcuts with data staying in source, open mirroring accepts Parquet files to a landing zone">
+                    <rect width="720" height="315" fill="#0d1117"/>
+                    <defs>
+                        <marker id="t1-ab" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#60a5fa"/></marker>
+                        <marker id="t1-ag" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#10b981"/></marker>
+                        <marker id="t1-ad" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#4b5563"/></marker>
+                        <marker id="t1-ap" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#a78bfa"/></marker>
+                    </defs>
+                    <line x1="240" y1="5" x2="240" y2="310" stroke="#1f2937" stroke-width="1" stroke-dasharray="4,4"/>
+                    <line x1="480" y1="5" x2="480" y2="310" stroke="#1f2937" stroke-width="1" stroke-dasharray="4,4"/>
+
+                    <!-- COL 1: DATABASE MIRRORING -->
+                    <rect x="10" y="8" width="220" height="28" rx="3" fill="#172554"/>
+                    <text x="120" y="26" text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="700" font-family="'JetBrains Mono', monospace">Database Mirroring</text>
+                    <rect x="15" y="46" width="210" height="50" rx="4" fill="#111827" stroke="#3b82f6" stroke-width="1.5"/>
+                    <text x="120" y="65" text-anchor="middle" fill="#e5e7eb" font-size="11" font-family="'JetBrains Mono', monospace">Source Database</text>
+                    <text x="120" y="83" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="'JetBrains Mono', monospace">Azure SQL · SQL Server · PG · MySQL</text>
+                    <line x1="120" y1="96" x2="120" y2="120" stroke="#60a5fa" stroke-width="1.5" marker-end="url(#t1-ab)"/>
+                    <rect x="30" y="122" width="180" height="36" rx="3" fill="#0d1117" stroke="#1f2937" stroke-width="1"/>
+                    <text x="120" y="138" text-anchor="middle" fill="#9ca3af" font-size="9.5" font-family="'JetBrains Mono', monospace">Change Feed · CDC · Streams</text>
+                    <text x="120" y="152" text-anchor="middle" fill="#9ca3af" font-size="9.5" font-family="'JetBrains Mono', monospace">LogMiner · binary logs</text>
+                    <line x1="120" y1="158" x2="120" y2="200" stroke="#60a5fa" stroke-width="1.5" marker-end="url(#t1-ab)"/>
+                    <text x="134" y="184" fill="#60a5fa" font-size="9" font-family="'JetBrains Mono', monospace">data moves</text>
+                    <rect x="15" y="202" width="210" height="50" rx="4" fill="#111827" stroke="#3b82f6" stroke-width="1.5"/>
+                    <text x="120" y="221" text-anchor="middle" fill="#e5e7eb" font-size="11" font-family="'JetBrains Mono', monospace">OneLake</text>
+                    <text x="120" y="240" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="'JetBrains Mono', monospace">Delta / Parquet — queries hit Fabric</text>
+                    <text x="120" y="272" text-anchor="middle" fill="#10b981" font-size="9.5" font-family="'JetBrains Mono', monospace">Source not queried at report time</text>
+                    <text x="120" y="287" text-anchor="middle" fill="#4b5563" font-size="8.5" font-family="'JetBrains Mono', monospace">10 native connectors</text>
+
+                    <!-- COL 2: METADATA MIRRORING -->
+                    <rect x="250" y="8" width="220" height="28" rx="3" fill="#14291a"/>
+                    <text x="360" y="26" text-anchor="middle" fill="#10b981" font-size="11" font-weight="700" font-family="'JetBrains Mono', monospace">Metadata Mirroring</text>
+                    <rect x="255" y="46" width="210" height="50" rx="4" fill="#111827" stroke="#10b981" stroke-width="1.5"/>
+                    <text x="360" y="65" text-anchor="middle" fill="#e5e7eb" font-size="11" font-family="'JetBrains Mono', monospace">Source Catalog</text>
+                    <text x="360" y="83" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="'JetBrains Mono', monospace">Azure Databricks · Dremio</text>
+                    <line x1="348" y1="96" x2="348" y2="200" stroke="#10b981" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#t1-ag)"/>
+                    <line x1="372" y1="200" x2="372" y2="96" stroke="#4b5563" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#t1-ad)"/>
+                    <text x="278" y="150" fill="#10b981" font-size="9" font-family="'JetBrains Mono', monospace">shortcuts</text>
+                    <text x="278" y="163" fill="#10b981" font-size="9" font-family="'JetBrains Mono', monospace">created ↓</text>
+                    <text x="383" y="145" fill="#4b5563" font-size="9" font-family="'JetBrains Mono', monospace">queries ↑</text>
+                    <text x="383" y="158" fill="#4b5563" font-size="9" font-family="'JetBrains Mono', monospace">return to</text>
+                    <text x="383" y="171" fill="#4b5563" font-size="9" font-family="'JetBrains Mono', monospace">source</text>
+                    <rect x="255" y="202" width="210" height="50" rx="4" fill="#111827" stroke="#10b981" stroke-width="1.5"/>
+                    <text x="360" y="221" text-anchor="middle" fill="#e5e7eb" font-size="11" font-family="'JetBrains Mono', monospace">OneLake</text>
+                    <text x="360" y="240" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="'JetBrains Mono', monospace">Shortcuts — no data copied</text>
+                    <text x="360" y="272" text-anchor="middle" fill="#10b981" font-size="9.5" font-family="'JetBrains Mono', monospace">Query perf = source speed</text>
+                    <text x="360" y="287" text-anchor="middle" fill="#4b5563" font-size="8.5" font-family="'JetBrains Mono', monospace">Databricks &amp; Dremio only</text>
+
+                    <!-- COL 3: OPEN MIRRORING -->
+                    <rect x="490" y="8" width="220" height="28" rx="3" fill="#2d1f3d"/>
+                    <text x="600" y="26" text-anchor="middle" fill="#a78bfa" font-size="11" font-weight="700" font-family="'JetBrains Mono', monospace">Open Mirroring</text>
+                    <rect x="495" y="46" width="210" height="50" rx="4" fill="#111827" stroke="#7c3aed" stroke-width="1.5"/>
+                    <text x="600" y="65" text-anchor="middle" fill="#e5e7eb" font-size="11" font-family="'JetBrains Mono', monospace">Any Source</text>
+                    <text x="600" y="83" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="'JetBrains Mono', monospace">no native connector required</text>
+                    <line x1="600" y1="96" x2="600" y2="120" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#t1-ap)"/>
+                    <rect x="510" y="122" width="180" height="36" rx="3" fill="#0d1117" stroke="#1f2937" stroke-width="1"/>
+                    <text x="600" y="138" text-anchor="middle" fill="#9ca3af" font-size="9.5" font-family="'JetBrains Mono', monospace">Custom Writer</text>
+                    <text x="600" y="152" text-anchor="middle" fill="#9ca3af" font-size="9.5" font-family="'JetBrains Mono', monospace">Parquet → Landing Zone</text>
+                    <line x1="600" y1="158" x2="600" y2="200" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#t1-ap)"/>
+                    <text x="614" y="184" fill="#a78bfa" font-size="9" font-family="'JetBrains Mono', monospace">Fabric merges</text>
+                    <rect x="495" y="202" width="210" height="50" rx="4" fill="#111827" stroke="#7c3aed" stroke-width="1.5"/>
+                    <text x="600" y="221" text-anchor="middle" fill="#e5e7eb" font-size="11" font-family="'JetBrains Mono', monospace">OneLake</text>
+                    <text x="600" y="240" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="'JetBrains Mono', monospace">Delta tables</text>
+                    <text x="600" y="272" text-anchor="middle" fill="#10b981" font-size="9.5" font-family="'JetBrains Mono', monospace">You control change detection</text>
+                    <text x="600" y="287" text-anchor="middle" fill="#4b5563" font-size="8.5" font-family="'JetBrains Mono', monospace">Any source can feed the pipeline</text>
+                </svg>
+                <figcaption><strong>Database mirroring</strong> continuously replicates data to OneLake via a native connector — queries hit Fabric, not the source. <strong>Metadata mirroring</strong> creates OneLake shortcuts that point to the source catalog; no data is copied, and queries return to the source at runtime. <strong>Open mirroring</strong> accepts Parquet files written to a landing zone by any custom writer — no native connector required.</figcaption>
+            </figure>
 
             <div class="table-wrapper">
                 <table>
@@ -586,6 +675,59 @@
             <p>
                 The mirroring overview describes replication as <a href="https://learn.microsoft.com/en-us/fabric/mirroring/overview#near-real-time-replication" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">"near real-time"</a>. No specific latency SLA is published.
             </p>
+
+            <figure class="diagram-wrapper">
+                <svg viewBox="0 0 720 215" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;" aria-label="Latency timeline showing two layers: replication lag from source commit to Delta table update, and endpoint lag from Delta table update to SQL analytics endpoint availability">
+                    <rect width="720" height="215" fill="#0d1117"/>
+
+                    <!-- Labels above timeline -->
+                    <text x="80" y="34" text-anchor="middle" fill="#e5e7eb" font-size="11" font-family="'JetBrains Mono', monospace">Source</text>
+                    <text x="80" y="50" text-anchor="middle" fill="#e5e7eb" font-size="11" font-family="'JetBrains Mono', monospace">commit</text>
+                    <text x="360" y="34" text-anchor="middle" fill="#e5e7eb" font-size="11" font-family="'JetBrains Mono', monospace">Delta table</text>
+                    <text x="360" y="50" text-anchor="middle" fill="#e5e7eb" font-size="11" font-family="'JetBrains Mono', monospace">updated</text>
+                    <text x="640" y="34" text-anchor="middle" fill="#e5e7eb" font-size="11" font-family="'JetBrains Mono', monospace">SQL endpoint</text>
+                    <text x="640" y="50" text-anchor="middle" fill="#e5e7eb" font-size="11" font-family="'JetBrains Mono', monospace">ready</text>
+
+                    <!-- Connector lines from labels to circles -->
+                    <line x1="80" y1="56" x2="80" y2="72" stroke="#4b5563" stroke-width="1"/>
+                    <line x1="360" y1="56" x2="360" y2="72" stroke="#4b5563" stroke-width="1"/>
+                    <line x1="640" y1="56" x2="640" y2="72" stroke="#4b5563" stroke-width="1"/>
+
+                    <!-- Timeline segments -->
+                    <line x1="80" y1="80" x2="360" y2="80" stroke="#3b82f6" stroke-width="3"/>
+                    <line x1="360" y1="80" x2="640" y2="80" stroke="#d97706" stroke-width="3"/>
+
+                    <!-- Circles -->
+                    <circle cx="80" cy="80" r="8" fill="#111827" stroke="#3b82f6" stroke-width="2.5"/>
+                    <circle cx="360" cy="80" r="8" fill="#111827" stroke="#60a5fa" stroke-width="2.5"/>
+                    <circle cx="640" cy="80" r="8" fill="#111827" stroke="#d97706" stroke-width="2.5"/>
+
+                    <!-- Measurement brackets below timeline -->
+                    <line x1="80" y1="100" x2="360" y2="100" stroke="#3b82f6" stroke-width="1"/>
+                    <line x1="80" y1="96" x2="80" y2="104" stroke="#3b82f6" stroke-width="1"/>
+                    <line x1="360" y1="96" x2="360" y2="104" stroke="#3b82f6" stroke-width="1"/>
+                    <text x="220" y="118" text-anchor="middle" fill="#60a5fa" font-size="10" font-family="'JetBrains Mono', monospace">60–90s typical (CDC-based)</text>
+                    <text x="220" y="132" text-anchor="middle" fill="#4b5563" font-size="9" font-family="'JetBrains Mono', monospace">Replication layer</text>
+
+                    <line x1="360" y1="100" x2="640" y2="100" stroke="#d97706" stroke-width="1"/>
+                    <line x1="640" y1="96" x2="640" y2="104" stroke="#d97706" stroke-width="1"/>
+                    <text x="500" y="118" text-anchor="middle" fill="#d97706" font-size="10" font-family="'JetBrains Mono', monospace">+20–60s</text>
+                    <text x="500" y="132" text-anchor="middle" fill="#4b5563" font-size="9" font-family="'JetBrains Mono', monospace">Endpoint layer</text>
+
+                    <!-- Point descriptions -->
+                    <text x="80" y="153" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="'JetBrains Mono', monospace">Row committed</text>
+                    <text x="80" y="166" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="'JetBrains Mono', monospace">at source</text>
+                    <text x="360" y="153" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="'JetBrains Mono', monospace">Parquet files written</text>
+                    <text x="360" y="166" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="'JetBrains Mono', monospace">to OneLake</text>
+                    <text x="640" y="153" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="'JetBrains Mono', monospace">SQL analytics</text>
+                    <text x="640" y="166" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="'JetBrains Mono', monospace">endpoint syncs</text>
+
+                    <!-- Separator and bottom note -->
+                    <line x1="20" y1="181" x2="700" y2="181" stroke="#1f2937" stroke-width="1"/>
+                    <text x="360" y="197" text-anchor="middle" fill="#4b5563" font-size="8.5" font-family="'JetBrains Mono', monospace">Best-case benchmark (append-only, optimal conditions): Delta 11.3s · SQL endpoint +30–60s</text>
+                </svg>
+                <figcaption>Two latency layers separate a source commit from a queryable result. The <strong>replication layer</strong> (blue) is the time for the mirroring engine to write changes as Parquet files to OneLake. The <strong>endpoint layer</strong> (amber) is the additional sync time before the SQL analytics endpoint reflects those changes. For minimum latency, read directly from the Delta layer via Spark rather than via the SQL endpoint.</figcaption>
+            </figure>
 
             <p>
                 Microsoft describes replication latency as 15–60 seconds. For CDC-based native database mirroring (Azure SQL, SQL Server, PostgreSQL, MySQL, Cosmos DB), practitioners report typical latency in the 60–90 second range under normal load — the lower end of Microsoft's stated range appears to reflect optimal conditions rather than typical deployment. Latency can fall further behind under heavy source write pressure. These are community observations rather than confirmed measurements. BigQuery uses a different change capture mechanism (Storage Write API) and may have different latency characteristics — I have not seen reliable published figures for it.
