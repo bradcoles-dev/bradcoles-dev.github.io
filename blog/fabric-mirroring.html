@@ -345,13 +345,6 @@
                 This article is built on close study of mirroring across successive releases: the documentation as it shipped, community-reported production behaviour, and the connector limitations scattered across ten separate pages. Data type limitations that previously blocked whole categories of source tables have been addressed or narrowed as the feature has evolved. Meaningful limitations remain — what mirroring replicates, what it silently drops, and what it cannot preserve — and this article works through them.
             </p>
 
-            <div class="verdict">
-                <p><strong>At a glance</strong></p>
-                <p><strong>Strongest use cases:</strong> near-real-time operational reporting on current source state; replacing DirectQuery with Direct Lake on large datasets; sources without a native connector via Open Mirroring.</p>
-                <p><strong>Biggest limitations:</strong> no historical replay — stop/restart reseeds from current state; private link incompatibility blocks most connectors in locked-down enterprise networks; data type gaps can silently exclude columns or block entire tables; source security policies (RLS, OLS, masking) are not propagated.</p>
-                <p><em>Both are covered in detail below.</em></p>
-            </div>
-
             <p>
                 This post is for data engineers, architects, and analysts evaluating mirroring for production use. It is not a getting-started tutorial — the <a href="https://learn.microsoft.com/en-us/fabric/mirroring/overview" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">official documentation</a> covers that ground well enough. It is a depth guide for practitioners who have moved past the overview: connector-specific behaviour, architectural trade-offs, operational limits, and the edge cases that only surface in production. The appendix consolidates capability support across all ten connectors into a single reference matrix — including the gaps where Microsoft has not published documentation — so you can assess your specific source without cross-referencing ten separate limitations pages.
             </p>
