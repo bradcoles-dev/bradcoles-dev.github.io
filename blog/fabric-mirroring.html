@@ -768,27 +768,27 @@
                     <tbody>
                         <tr>
                             <td>Replication compute</td>
-                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#10b981 !important">No</strong></td>
                             <td>Off-capacity; free for all mirroring types</td>
                         </tr>
                         <tr>
                             <td>OneLake storage for mirrored data</td>
-                            <td><strong>No</strong> (up to limit)</td>
+                            <td><strong style="color:#10b981 !important">No</strong> (up to limit)</td>
                             <td><a href="https://learn.microsoft.com/en-us/fabric/mirroring/overview#cost-of-mirroring" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">1 TB free per capacity unit</a> (e.g. 64 TB free on F64); excess charged at standard OneLake rates</td>
                         </tr>
                         <tr>
                             <td>OneLake write transactions (landing zone writes)</td>
-                            <td><strong style="color:#10b981 !important">Yes</strong></td>
+                            <td><strong style="color:#f59e0b !important">Yes</strong></td>
                             <td>Applies to Open Mirroring; files &lt; 4 MB cost one transaction each — see below</td>
                         </tr>
                         <tr>
                             <td>Query compute (SQL endpoint, Spark, Power BI)</td>
-                            <td><strong style="color:#10b981 !important">Yes</strong></td>
+                            <td><strong style="color:#f59e0b !important">Yes</strong></td>
                             <td>Charged at standard Fabric capacity rates</td>
                         </tr>
                         <tr>
                             <td>Source-side costs (BigQuery, SAP, Snowflake)</td>
-                            <td><strong>Yes</strong> (varies)</td>
+                            <td><strong style="color:#f59e0b !important">Yes</strong> (varies)</td>
                             <td>Charged by the source provider, not Microsoft</td>
                         </tr>
                     </tbody>
