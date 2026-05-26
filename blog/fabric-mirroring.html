@@ -2249,13 +2249,17 @@
         document.querySelectorAll('td').forEach(function(cell) {
             var text = cell.textContent.trim();
             var color = null;
-            if (text === 'Blocked' || text === 'No') { color = '#ef4444'; }
-            else if (text === 'Stop/restart') { color = '#f59e0b'; }
-            else if (text === 'Disrupts replication') { color = '#f97316'; }
+            if (text === 'Blocked' || text === 'No' || /^No \[[a-z]+\]$/.test(text) || text === 'No (TABLE)') {
+                color = '#ef4444';
+            } else if (text === 'Stop/restart') {
+                color = '#f59e0b';
+            } else if (text === 'Disrupts replication') {
+                color = '#f97316';
+            }
             if (color) {
-                cell.style.color = color;
+                cell.style.setProperty('color', color, 'important');
                 cell.querySelectorAll('strong, em, code').forEach(function(el) {
-                    el.style.color = color;
+                    el.style.setProperty('color', color, 'important');
                 });
             }
         });
