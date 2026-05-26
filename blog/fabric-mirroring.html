@@ -969,6 +969,61 @@
                 These are not mutually exclusive scenarios. Using mirroring for current-state operational reporting does not prevent a separate, lightweight append-only capture layer from handling historical fidelity in parallel. A pipeline that appends extracted records to a separate OneLake path - without transformation, without schema enforcement, just faithful extraction - provides the raw archive that mirroring cannot. The two run independently: mirroring handles the real-time replica; the capture layer handles the immutable record. For many organisations, building this alongside mirroring is less work than it sounds, because a raw capture layer has no transformation requirements.
             </p>
 
+            <figure class="diagram-wrapper">
+                <svg viewBox="0 0 720 310" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;" aria-label="Flow diagram showing a source database feeding both a Fabric mirroring path and an append-only pipeline path in parallel, both landing in OneLake as a mirror table and raw archive respectively">
+                    <rect width="720" height="310" fill="#0d1117"/>
+                    <defs>
+                        <marker id="rl-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#3b82f6"/></marker>
+                        <marker id="rl-amber" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#d97706"/></marker>
+                    </defs>
+
+                    <!-- Source box (top centre) -->
+                    <rect x="250" y="15" width="220" height="54" fill="#111827" stroke="#4b5563" stroke-width="1.5" rx="4"/>
+                    <text x="360" y="40" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="700" fill="#e5e7eb">Source Database</text>
+                    <text x="360" y="57" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="9" fill="#6b7280">operational system of record</text>
+
+                    <!-- Stem from source down to fork point -->
+                    <line x1="360" y1="69" x2="360" y2="100" stroke="#6b7280" stroke-width="1.5"/>
+                    <!-- Left branch to mirroring -->
+                    <polyline points="360,100 173,100 173,116" fill="none" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#rl-blue)"/>
+                    <!-- Right branch to pipeline -->
+                    <polyline points="360,100 547,100 547,116" fill="none" stroke="#d97706" stroke-width="1.5" marker-end="url(#rl-amber)"/>
+
+                    <!-- Mirroring box (left) -->
+                    <rect x="58" y="116" width="230" height="74" fill="#172554" stroke="#3b82f6" stroke-width="1.5" rx="4"/>
+                    <text x="173" y="140" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#93c5fd">Mirroring</text>
+                    <text x="173" y="156" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#bfdbfe">Fabric connector</text>
+                    <text x="173" y="171" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#bfdbfe">current-state replica</text>
+
+                    <!-- Independent separator label in gap between boxes -->
+                    <line x1="296" y1="153" x2="424" y2="153" stroke="#374151" stroke-width="1" stroke-dasharray="4,4"/>
+                    <text x="360" y="148" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="8" fill="#4b5563">run independently</text>
+
+                    <!-- Append-only pipeline box (right) -->
+                    <rect x="432" y="116" width="230" height="74" fill="#1a1200" stroke="#d97706" stroke-width="1.5" rx="4"/>
+                    <text x="547" y="140" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#fcd34d">Append-only pipeline</text>
+                    <text x="547" y="156" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#fde68a">lightweight extract</text>
+                    <text x="547" y="171" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#fde68a">raw archive</text>
+
+                    <!-- Convergence lines from both boxes down to OneLake -->
+                    <polyline points="173,190 173,217 340,217 340,232" fill="none" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#rl-blue)"/>
+                    <polyline points="547,190 547,217 380,217 380,232" fill="none" stroke="#d97706" stroke-width="1.5" marker-end="url(#rl-amber)"/>
+
+                    <!-- OneLake box (bottom centre) -->
+                    <rect x="238" y="232" width="244" height="68" fill="#1a1344" stroke="#6366f1" stroke-width="1.5" rx="4"/>
+                    <text x="360" y="253" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="700" fill="#c4b5fd">OneLake</text>
+                    <!-- Internal divider -->
+                    <line x1="360" y1="261" x2="360" y2="294" stroke="#374151" stroke-width="1"/>
+                    <!-- Mirror table sub-label (left half) -->
+                    <text x="299" y="275" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="9" fill="#93c5fd">mirror table</text>
+                    <text x="299" y="288" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="9" fill="#6b7280">upserted · current state</text>
+                    <!-- Raw archive sub-label (right half) -->
+                    <text x="421" y="275" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="9" fill="#86efac">raw archive</text>
+                    <text x="421" y="288" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="9" fill="#6b7280">append-only · full history</text>
+                </svg>
+                <figcaption>Mirroring and a raw capture layer are not mutually exclusive. The source feeds both paths independently - Fabric mirroring continuously replicates current state via the native connector; a lightweight append-only pipeline writes immutable extracted records alongside it. Both land in OneLake as separate tables with different characteristics: mirror table for current-state queries and Direct Lake; raw archive for historical reconstruction and reprocessing.</figcaption>
+            </figure>
+
             <p>
                 The framing to avoid is "mirroring eliminates ingestion infrastructure." What it eliminates is orchestrated incremental pipeline infrastructure for current-state reporting. That is a meaningful and real reduction in complexity. It is not a replacement for a raw archive if your architecture requires one.
             </p>
