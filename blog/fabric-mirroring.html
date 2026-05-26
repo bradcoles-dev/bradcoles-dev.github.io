@@ -2248,9 +2248,16 @@
     <script>
         document.querySelectorAll('td').forEach(function(cell) {
             var text = cell.textContent.trim();
-            if (text === 'Blocked' || text === 'No') { cell.style.color = '#ef4444'; }
-            else if (text === 'Stop/restart') { cell.style.color = '#f59e0b'; }
-            else if (text === 'Disrupts replication') { cell.style.color = '#f97316'; }
+            var color = null;
+            if (text === 'Blocked' || text === 'No') { color = '#ef4444'; }
+            else if (text === 'Stop/restart') { color = '#f59e0b'; }
+            else if (text === 'Disrupts replication') { color = '#f97316'; }
+            if (color) {
+                cell.style.color = color;
+                cell.querySelectorAll('strong, em, code').forEach(function(el) {
+                    el.style.color = color;
+                });
+            }
         });
     </script>
 </body>
