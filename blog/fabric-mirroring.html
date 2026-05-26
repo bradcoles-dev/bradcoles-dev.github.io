@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Connectors, limits, cost model, and the architectural questions that determine whether Fabric mirroring fits your use case. A practitioner's guide.">
+    <meta name="description" content="Connectors, limits, cost model, and the architectural questions that determine whether Fabric mirroring fits your use case.">
     <meta name="keywords" content="Microsoft Fabric, Mirroring, OneLake, Delta Lake, CDC, Azure SQL Database, SQL Server, PostgreSQL, MySQL, Oracle, Snowflake, Cosmos DB, BigQuery, SAP, Data Engineering, Direct Lake, Open Mirroring">
     <meta name="author" content="Brad Coles">
 
@@ -19,18 +19,18 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://bradcoles-dev.github.io/blog/fabric-mirroring.html">
-    <meta property="og:title" content="Microsoft Fabric Mirroring: A Practitioner's Architecture Guide">
+    <meta property="og:title" content="Microsoft Fabric Mirroring: Before You Commit">
     <meta property="og:description" content="Connectors, limits, cost model, and the architectural questions that determine whether Fabric mirroring fits your use case.">
     <meta property="og:image" content="https://bradcoles-dev.github.io/preview.png">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://bradcoles-dev.github.io/blog/fabric-mirroring.html">
-    <meta property="twitter:title" content="Microsoft Fabric Mirroring: A Practitioner's Architecture Guide">
+    <meta property="twitter:title" content="Microsoft Fabric Mirroring: Before You Commit">
     <meta property="twitter:description" content="Connectors, limits, cost model, and the architectural questions that determine whether Fabric mirroring fits your use case.">
     <meta property="twitter:image" content="https://bradcoles-dev.github.io/preview.png">
 
-    <title>Microsoft Fabric Mirroring: A Practitioner's Architecture Guide | Brad Coles</title>
+    <title>Microsoft Fabric Mirroring: Before You Commit | Brad Coles</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Press+Start+2P&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -345,7 +345,7 @@
                 <span class="blog-category">Microsoft Fabric</span>
                 <span class="blog-category">Architecture</span>
             </div>
-            <h1>Microsoft Fabric Mirroring: A Practitioner's Architecture Guide</h1>
+            <h1>Microsoft Fabric Mirroring: Before You Commit</h1>
             <p class="blog-subtitle">Connectors, limits, cost model, and the architectural questions that determine whether it fits.</p>
             <p class="blog-byline">By Brad Coles | Senior Consultant &amp; Data Engineering Capability Lead, Synechron Australia</p>
         </header>
@@ -643,11 +643,11 @@
             </p>
 
             <p>
-                <strong>CI/CD is supported, with one manual step — and likely a full initial load.</strong> Mirrored databases can be <a href="https://learn.microsoft.com/en-us/fabric/mirroring/mirrored-database-cicd" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">committed to Git and deployed through Fabric deployment pipelines</a>. The database definition is stored as a <code>{name}.MirroredDatabase</code> folder containing <code>mirroring.json</code>. The caveat: mirroring does not start automatically after a deployment pipeline runs. You must manually start replication in each target workspace.
+                <strong>CI/CD is supported (GA), with one manual step — and likely a full initial load.</strong> Mirrored databases can be <a href="https://learn.microsoft.com/en-us/fabric/mirroring/mirrored-database-cicd" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">committed to Git and deployed through Fabric deployment pipelines</a>. The database definition is stored as a <code>{name}.MirroredDatabase</code> folder containing <code>mirroring.json</code>. The caveat: mirroring does not start automatically after a deployment pipeline runs. You must manually start replication in each target workspace.
             </p>
 
             <p>
-                Deployment pipelines deploy the item definition — connection settings and table selection — not the underlying Delta data in OneLake. The target workspace receives a configured but empty mirrored database item with no existing replication state. Starting mirroring after deployment almost certainly triggers a full initial load from current source state rather than an incremental pickup from where the source workspace left off. For large databases, this means the target workspace has no data until the seed completes. This behaviour has not been explicitly documented by Microsoft and is worth verifying before relying on deployment pipelines for large-source promotions.
+                Deployment pipelines deploy the item definition — connection settings and table selection — not the underlying Delta data in OneLake. The target workspace receives a configured but empty mirrored database item with no existing replication state. Starting mirroring after deployment triggers a full initial load from current source state — not an incremental pickup from where the source workspace left off. This is confirmed behaviour: Microsoft's documentation states that restarting mirroring "results in all data being replicated from the start" and that "each time you stop and start, the entire table is fetched again" (confirmed in the <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-managed-instance-faq" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Azure SQL MI FAQ</a> and consistent with documented reseed behaviour across other connectors). For large databases, this means the target workspace has no data until the initial seed completes — factor this into promotion planning.
             </p>
 
             <p>
@@ -860,7 +860,7 @@
             </p>
 
             <p>
-                <strong>Definition 2 - Change event stream.</strong> A sequence of all source changes (inserts, updates, deletes) in commit order, preserved indefinitely as a queryable or replayable record. CDC platforms - Debezium, Azure Data Factory CDC, event streaming pipelines - produce this. Mirroring uses CDC-equivalent mechanisms under the hood to keep the replica current, but it exposes only the resulting state, not the raw change events. The Delta change data feed (an extended capability, <a href="https://learn.microsoft.com/en-us/fabric/mirroring/extended-capabilities" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">currently free but eventually billable</a>) moves somewhat closer to this, but it is a derived feature, not the underlying change stream.
+                <strong>Definition 2 - Change event stream.</strong> A sequence of all source changes (inserts, updates, deletes) in commit order, preserved indefinitely as a queryable or replayable record. CDC platforms - Debezium, Azure Data Factory CDC, event streaming pipelines - produce this. Mirroring uses CDC-equivalent mechanisms under the hood to keep the replica current, but it exposes only the resulting state, not the raw change events. The <a href="https://learn.microsoft.com/en-us/fabric/mirroring/extended-capabilities" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Delta change data feed</a> — an opt-in paid extended capability, now billed at standard Fabric capacity rates — moves somewhat closer to this: it captures inserts, updates, and deletes incrementally and is available across all mirroring sources including Oracle, Snowflake, Azure SQL, and Open Mirroring. It is still a derived feature rather than the raw underlying change stream, but it is a meaningful step toward incremental change processing without a separate CDC pipeline.
             </p>
 
             <p>
@@ -1110,6 +1110,14 @@
             </p>
 
             <p>
+                <strong>Columns with spaces or special characters are supported via Delta column mapping.</strong> Previously a replication blocker, these column names are now handled through Delta's column mapping feature and replicate correctly.
+            </p>
+
+            <p>
+                <strong>Source schema hierarchy is preserved.</strong> The source database's schema structure (e.g. <code>dbo</code>, <code>sales</code>, <code>hr</code>) is maintained in the mirrored database and is consistent across the SQL analytics endpoint, Spark, and semantic models.
+            </p>
+
+            <p>
                 <strong>DDL changes behave differently across sources.</strong> Azure SQL picks up <code>ADD COLUMN</code> automatically. PostgreSQL requires a stop-and-restart of replication for any schema change - and stop/restart reseeds from current state (see the raw layer section above). MySQL replication is disrupted by DDL changes. SQL MI does not support <code>ALTER COLUMN</code> or <code>RENAME COLUMN</code> while a table is being mirrored; those operations are blocked outright. Check the limitations page for your specific source before planning any schema migration on a mirrored table.
             </p>
 
@@ -1152,6 +1160,10 @@
 
             <p>
                 On-premises data gateways (required for Oracle, and for SQL Server in many on-premises deployments) fail to register when private link is enabled; VNet data gateways work as a substitute but require separate provisioning. If private link is enabled or planned, verify connector support before building a mirroring architecture around a connector that will not function in that network configuration.
+            </p>
+
+            <p>
+                <strong>Gateway support for sources behind firewalls (distinct from the Block Internet scenario).</strong> Separately from the private link constraint above, Azure SQL Database and Snowflake now support replication through On-Premises Data Gateway and VNet Data Gateway for sources that are behind a firewall but where the tenant-level "Block Public Internet Access" setting is not enabled. This expands gateway support beyond Oracle and SQL Server, which were previously the only connectors that used a gateway path. Azure SQL Managed Instance gateway support has since shipped — VNet data gateway or on-premises data gateway can be used when the instance is not publicly accessible, per the <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-managed-instance-faq" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">SQL MI FAQ</a>.
             </p>
 
             <p>
@@ -1256,7 +1268,7 @@
             <h2>Security and governance</h2>
 
             <p>
-                Row-level security (RLS), column-level security (CLS), and dynamic data masking configured in the source system are <strong>not propagated to the mirrored database</strong>. This is documented for all SQL-family sources and applies universally. A user restricted from seeing certain rows or columns in the source will have no such restrictions applied when querying the mirrored replica via the SQL analytics endpoint or Spark, unless those controls are manually re-implemented at the Fabric layer.
+                Row-level security (RLS), column-level security (OLS), and dynamic data masking configured in the source system are <strong>not propagated to the mirrored database</strong>. This is documented for all SQL-family sources and applies universally. A user restricted from seeing certain rows or columns in the source will have no such restrictions applied when querying the mirrored replica via the SQL analytics endpoint or Spark, unless those controls are manually re-implemented at the Fabric layer.
             </p>
 
             <p>
@@ -1670,7 +1682,7 @@
             </p>
 
             <p>
-                <strong>What to watch.</strong> The extended capabilities (Delta change data feed, view mirroring) are currently free - Microsoft's <a href="https://learn.microsoft.com/en-us/fabric/mirroring/extended-capabilities" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">documentation explicitly states that billing is temporarily disabled</a>, not that these features are free permanently. Budget for the eventual charge if you build on them. SQL Server 2025 and the Change Event Stream architecture (<a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-database" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">available on Azure SQL Database and SQL MI</a>) are meaningfully better than CDC-based mirroring for older SQL Server versions - prefer the newer architecture where there is a choice of source version.
+                <strong>What to watch.</strong> The <a href="https://learn.microsoft.com/en-us/fabric/mirroring/extended-capabilities" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">extended capabilities</a> (Delta change data feed, view mirroring) are now billed at standard Fabric capacity rates — billing was enabled as of March 2026. These are opt-in features; charges apply only when enabled and only for actual processing activity. If you built on these capabilities when they were free, factor the ongoing cost into your capacity budget. SQL Server 2025 and the Change Event Stream architecture (<a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-database" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">available on Azure SQL Database and SQL MI</a>) are meaningfully better than CDC-based mirroring for older SQL Server versions - prefer the newer architecture where there is a choice of source version.
             </p>
 
             <hr>
@@ -2076,7 +2088,7 @@
                             <td>N/A</td>
                         </tr>
                         <tr>
-                            <td><strong>Column / CLS propagated</strong></td>
+                            <td><strong>Column / OLS propagated</strong></td>
                             <td><strong style="color:#ef4444 !important">No</strong></td>
                             <td><strong style="color:#ef4444 !important">No</strong></td>
                             <td><strong style="color:#ef4444 !important">No</strong></td>
