@@ -768,7 +768,7 @@
                     <tbody>
                         <tr>
                             <td>Replication compute</td>
-                            <td><strong>No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
                             <td>Off-capacity; free for all mirroring types</td>
                         </tr>
                         <tr>
@@ -1143,7 +1143,7 @@
                             <td>Open Mirroring, Azure Cosmos DB, Azure SQL Managed Instance, SQL Server 2025</td>
                         </tr>
                         <tr>
-                            <td><strong>Blocked</strong></td>
+                            <td><strong style="color:#ef4444 !important">Blocked</strong></td>
                             <td>Azure SQL Database, PostgreSQL, MySQL, Oracle, Snowflake, BigQuery, SAP</td>
                         </tr>
                     </tbody>
@@ -1563,13 +1563,13 @@
                         <tr>
                             <td><strong>Native connector required</strong></td>
                             <td>Yes</td>
-                            <td>No</td>
-                            <td>No</td>
+                            <td style="color:#ef4444">No</td>
+                            <td style="color:#ef4444">No</td>
                         </tr>
                         <tr>
                             <td><strong>Source-side config required</strong></td>
                             <td>Yes (varies by source)</td>
-                            <td>No</td>
+                            <td style="color:#ef4444">No</td>
                             <td>Depends on approach</td>
                         </tr>
                         <tr>
@@ -1604,8 +1604,8 @@
                         </tr>
                         <tr>
                             <td><strong>Source RLS / column security propagated</strong></td>
-                            <td>No</td>
-                            <td>No</td>
+                            <td style="color:#ef4444">No</td>
+                            <td style="color:#ef4444">No</td>
                             <td>Depends</td>
                         </tr>
                         <tr>
@@ -1616,8 +1616,8 @@
                         </tr>
                         <tr>
                             <td><strong>Guaranteed latency SLA</strong></td>
-                            <td>No</td>
-                            <td>No</td>
+                            <td style="color:#ef4444">No</td>
+                            <td style="color:#ef4444">No</td>
                             <td>Yes (schedulable)</td>
                         </tr>
                         <tr>
@@ -1763,11 +1763,11 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td><strong>No (TABLE)</strong></td>
+                            <td><strong style="color:#ef4444 !important">No (TABLE)</strong></td>
                             <td>Not supported; table is entirely blocked from mirroring</td>
                         </tr>
                         <tr>
-                            <td><strong>No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
                             <td>Not supported; feature does not apply or is explicitly excluded</td>
                         </tr>
                         <tr>
@@ -1808,15 +1808,15 @@
                     <tbody>
                         <tr>
                             <td><strong>Primary key required?</strong></td>
-                            <td>No [a]</td>
-                            <td>No [b]</td>
+                            <td style="color:#ef4444">No [a]</td>
+                            <td style="color:#ef4444">No [b]</td>
                             <td>No (2025) / Yes (2016–22)</td>
-                            <td>No</td>
+                            <td style="color:#ef4444">No</td>
                             <td><strong>Yes</strong></td>
-                            <td>No [c]</td>
-                            <td>No</td>
+                            <td style="color:#ef4444">No [c]</td>
+                            <td style="color:#ef4444">No</td>
                             <td>N/A</td>
-                            <td>No</td>
+                            <td style="color:#ef4444">No</td>
                             <td>-</td>
                         </tr>
                         <tr>
@@ -1834,13 +1834,13 @@
                         </tr>
                         <tr>
                             <td><strong>Views replicated?</strong></td>
-                            <td>No</td>
-                            <td>No</td>
-                            <td>No</td>
-                            <td>No</td>
-                            <td>No</td>
-                            <td>No</td>
-                            <td>No [d]</td>
+                            <td style="color:#ef4444">No</td>
+                            <td style="color:#ef4444">No</td>
+                            <td style="color:#ef4444">No</td>
+                            <td style="color:#ef4444">No</td>
+                            <td style="color:#ef4444">No</td>
+                            <td style="color:#ef4444">No</td>
+                            <td style="color:#ef4444">No [d]</td>
                             <td>N/A</td>
                             <td>-</td>
                             <td>-</td>
@@ -1850,7 +1850,7 @@
                             <td>-</td>
                             <td>-</td>
                             <td>-</td>
-                            <td><strong>No (TABLE)</strong></td>
+                            <td><strong style="color:#ef4444 !important">No (TABLE)</strong></td>
                             <td>-</td>
                             <td><strong>Yes</strong></td>
                             <td>-</td>
@@ -1860,10 +1860,10 @@
                         </tr>
                         <tr>
                             <td><strong>Materialized views</strong></td>
-                            <td>No</td>
-                            <td>No</td>
-                            <td>No</td>
-                            <td>No (TABLE)</td>
+                            <td style="color:#ef4444">No</td>
+                            <td style="color:#ef4444">No</td>
+                            <td style="color:#ef4444">No</td>
+                            <td style="color:#ef4444">No (TABLE)</td>
                             <td>N/A</td>
                             <td>-</td>
                             <td>-</td>
@@ -1873,22 +1873,22 @@
                         </tr>
                         <tr>
                             <td><strong>External tables</strong></td>
-                            <td>No</td>
-                            <td>No</td>
-                            <td>No</td>
-                            <td>No (TABLE)</td>
+                            <td style="color:#ef4444">No</td>
+                            <td style="color:#ef4444">No</td>
+                            <td style="color:#ef4444">No</td>
+                            <td style="color:#ef4444">No (TABLE)</td>
                             <td>N/A</td>
                             <td>N/A</td>
-                            <td>No</td>
+                            <td style="color:#ef4444">No</td>
                             <td>N/A</td>
                             <td>-</td>
                             <td>N/A</td>
                         </tr>
                         <tr>
                             <td><strong>In-memory OLTP tables</strong></td>
-                            <td>No (TABLE)</td>
-                            <td>No (TABLE)</td>
-                            <td>No (TABLE)</td>
+                            <td style="color:#ef4444">No (TABLE)</td>
+                            <td style="color:#ef4444">No (TABLE)</td>
+                            <td style="color:#ef4444">No (TABLE)</td>
                             <td>N/A</td>
                             <td>N/A</td>
                             <td>N/A</td>
@@ -1899,9 +1899,9 @@
                         </tr>
                         <tr>
                             <td><strong>Always Encrypted tables</strong></td>
-                            <td>No (TABLE)</td>
-                            <td>No (TABLE)</td>
-                            <td>No (TABLE)</td>
+                            <td style="color:#ef4444">No (TABLE)</td>
+                            <td style="color:#ef4444">No (TABLE)</td>
+                            <td style="color:#ef4444">No (TABLE)</td>
                             <td>N/A</td>
                             <td>N/A</td>
                             <td>N/A</td>
@@ -1912,9 +1912,9 @@
                         </tr>
                         <tr>
                             <td><strong>Temporal history tables</strong></td>
-                            <td>No (TABLE)</td>
-                            <td>No (TABLE)</td>
-                            <td>No (TABLE)</td>
+                            <td style="color:#ef4444">No (TABLE)</td>
+                            <td style="color:#ef4444">No (TABLE)</td>
+                            <td style="color:#ef4444">No (TABLE)</td>
                             <td>N/A</td>
                             <td>N/A</td>
                             <td>N/A</td>
@@ -1925,9 +1925,9 @@
                         </tr>
                         <tr>
                             <td><strong>Graph tables</strong></td>
-                            <td>No (TABLE)</td>
-                            <td>No (TABLE)</td>
-                            <td>No (TABLE)</td>
+                            <td style="color:#ef4444">No (TABLE)</td>
+                            <td style="color:#ef4444">No (TABLE)</td>
+                            <td style="color:#ef4444">No (TABLE)</td>
                             <td>N/A</td>
                             <td>N/A</td>
                             <td>N/A</td>
@@ -1938,9 +1938,9 @@
                         </tr>
                         <tr>
                             <td><strong>Clustered columnstore index</strong></td>
-                            <td>No (TABLE)</td>
-                            <td>No (TABLE)</td>
-                            <td>No (TABLE)</td>
+                            <td style="color:#ef4444">No (TABLE)</td>
+                            <td style="color:#ef4444">No (TABLE)</td>
+                            <td style="color:#ef4444">No (TABLE)</td>
                             <td>N/A</td>
                             <td>N/A</td>
                             <td>N/A</td>
@@ -1978,8 +1978,8 @@
                             <td>Auto</td>
                             <td>Auto</td>
                             <td>Auto (2025) / <strong>Error</strong> (2016–22)</td>
-                            <td><strong>Stop/restart</strong></td>
-                            <td><strong>Disrupts replication</strong></td>
+                            <td><strong style="color:#f59e0b !important">Stop/restart</strong></td>
+                            <td><strong style="color:#f97316 !important">Disrupts replication</strong></td>
                             <td>✓ (partial)</td>
                             <td>Delayed</td>
                             <td>✓</td>
@@ -1989,10 +1989,10 @@
                         <tr>
                             <td><strong>Rename column</strong></td>
                             <td>-</td>
-                            <td><strong>Blocked</strong></td>
+                            <td><strong style="color:#ef4444 !important">Blocked</strong></td>
                             <td>-</td>
-                            <td><strong>Stop/restart</strong></td>
-                            <td><strong>Disrupts replication</strong></td>
+                            <td><strong style="color:#f59e0b !important">Stop/restart</strong></td>
+                            <td><strong style="color:#f97316 !important">Disrupts replication</strong></td>
                             <td>✓</td>
                             <td>-</td>
                             <td>✓ (old + new col retained)</td>
@@ -2002,11 +2002,11 @@
                         <tr>
                             <td><strong>Change column type</strong></td>
                             <td>-</td>
-                            <td><strong>Blocked</strong></td>
+                            <td><strong style="color:#ef4444 !important">Blocked</strong></td>
                             <td>-</td>
-                            <td><strong>Stop/restart</strong></td>
-                            <td><strong>Disrupts replication</strong></td>
-                            <td><strong>Blocked</strong></td>
+                            <td><strong style="color:#f59e0b !important">Stop/restart</strong></td>
+                            <td><strong style="color:#f97316 !important">Disrupts replication</strong></td>
+                            <td><strong style="color:#ef4444 !important">Blocked</strong></td>
                             <td>-</td>
                             <td>Compatible types only</td>
                             <td>-</td>
@@ -2014,9 +2014,9 @@
                         </tr>
                         <tr>
                             <td><strong>Alter / add primary key</strong></td>
-                            <td><strong>Blocked</strong></td>
-                            <td><strong>Blocked</strong></td>
-                            <td><strong>Blocked</strong></td>
+                            <td><strong style="color:#ef4444 !important">Blocked</strong></td>
+                            <td><strong style="color:#ef4444 !important">Blocked</strong></td>
+                            <td><strong style="color:#ef4444 !important">Blocked</strong></td>
                             <td>-</td>
                             <td>-</td>
                             <td>N/A</td>
@@ -2030,7 +2030,7 @@
                             <td>-</td>
                             <td>-</td>
                             <td>-</td>
-                            <td><strong>No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
                             <td>-</td>
                             <td>-</td>
                             <td>-</td>
@@ -2064,11 +2064,11 @@
                     <tbody>
                         <tr>
                             <td><strong>RLS propagated from source</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
                             <td>N/A</td>
                             <td>N/A</td>
                             <td>N/A</td>
@@ -2077,10 +2077,10 @@
                         </tr>
                         <tr>
                             <td><strong>Column / CLS propagated</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
                             <td>N/A</td>
                             <td>N/A</td>
                             <td>N/A</td>
@@ -2090,9 +2090,9 @@
                         </tr>
                         <tr>
                             <td><strong>Dynamic data masking propagated</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
                             <td>N/A</td>
                             <td>N/A</td>
                             <td>N/A</td>
@@ -2110,20 +2110,20 @@
                             <td>No (optional)</td>
                             <td><strong>Always</strong></td>
                             <td>No (optional)</td>
-                            <td><strong>No</strong> [f]</td>
+                            <td><strong style="color:#ef4444 !important">No</strong> [f]</td>
                             <td><strong>Always</strong></td>
                             <td>N/A [g]</td>
                         </tr>
                         <tr>
                             <td><strong>Source-side costs during mirroring</strong></td>
-                            <td>No</td>
-                            <td>No</td>
-                            <td>No</td>
-                            <td>No</td>
-                            <td>No</td>
-                            <td>No</td>
+                            <td style="color:#ef4444">No</td>
+                            <td style="color:#ef4444">No</td>
+                            <td style="color:#ef4444">No</td>
+                            <td style="color:#ef4444">No</td>
+                            <td style="color:#ef4444">No</td>
+                            <td style="color:#ef4444">No</td>
                             <td><strong>Yes</strong> (compute)</td>
-                            <td>No [h]</td>
+                            <td style="color:#ef4444">No [h]</td>
                             <td><strong>Yes</strong> (CDC compute)</td>
                             <td><strong>Yes</strong> (Datasphere pricing)</td>
                         </tr>
@@ -2132,8 +2132,8 @@
                             <td>✓</td>
                             <td>✓</td>
                             <td>N/A</td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
                             <td>N/A</td>
                             <td>N/A</td>
                             <td>N/A</td>
@@ -2170,7 +2170,7 @@
                             <td>✓</td>
                             <td>✓</td>
                             <td>✓</td>
-                            <td><strong>No</strong> [i]</td>
+                            <td><strong style="color:#ef4444 !important">No</strong> [i]</td>
                             <td>✓</td>
                             <td>✓</td>
                             <td>✓</td>
@@ -2179,10 +2179,10 @@
                         </tr>
                         <tr>
                             <td><strong>Can mirror to multiple workspaces</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
                             <td>N/A</td>
                             <td>-</td>
                             <td>✓</td>
@@ -2192,29 +2192,29 @@
                         </tr>
                         <tr>
                             <td><strong>Ownership change supported</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
                         </tr>
                         <tr>
                             <td><strong>Can change source after setup</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
-                            <td><strong>No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
+                            <td><strong style="color:#ef4444 !important">No</strong></td>
                         </tr>
                     </tbody>
                 </table>
@@ -2245,24 +2245,5 @@
             <p>&copy; 2026 Brad Coles. <a href="../index.html" style="color: var(--accent-bright); text-decoration: none;">Back to Portfolio</a></p>
         </footer>
     </div>
-    <script>
-        document.querySelectorAll('td').forEach(function(cell) {
-            var text = cell.textContent.trim();
-            var color = null;
-            if (text === 'Blocked' || text === 'No' || /^No \[[a-z]+\]$/.test(text) || text === 'No (TABLE)') {
-                color = '#ef4444';
-            } else if (text === 'Stop/restart') {
-                color = '#f59e0b';
-            } else if (text === 'Disrupts replication') {
-                color = '#f97316';
-            }
-            if (color) {
-                cell.style.setProperty('color', color, 'important');
-                cell.querySelectorAll('strong, em, code').forEach(function(el) {
-                    el.style.setProperty('color', color, 'important');
-                });
-            }
-        });
-    </script>
 </body>
 </html>
