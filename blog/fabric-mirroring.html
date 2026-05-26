@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="A practitioner's depth guide to Microsoft Fabric mirroring — connectors, limits, cost, architecture trade-offs, and the edge cases that only surface in production.">
+    <meta name="description" content="Connectors, limits, cost model, and the architectural questions that determine whether Fabric mirroring fits your use case. A practitioner's guide.">
     <meta name="keywords" content="Microsoft Fabric, Mirroring, OneLake, Delta Lake, CDC, Azure SQL Database, SQL Server, PostgreSQL, MySQL, Oracle, Snowflake, Cosmos DB, BigQuery, SAP, Data Engineering, Direct Lake, Open Mirroring">
     <meta name="author" content="Brad Coles">
 
@@ -19,18 +19,18 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://bradcoles-dev.github.io/blog/fabric-mirroring.html">
-    <meta property="og:title" content="Microsoft Fabric Mirroring: Everything You Need Before You Commit">
-    <meta property="og:description" content="A practitioner's depth guide to Microsoft Fabric mirroring — connectors, limits, cost, architecture trade-offs, and the edge cases that only surface in production.">
+    <meta property="og:title" content="Microsoft Fabric Mirroring: A Practitioner's Architecture Guide">
+    <meta property="og:description" content="Connectors, limits, cost model, and the architectural questions that determine whether Fabric mirroring fits your use case.">
     <meta property="og:image" content="https://bradcoles-dev.github.io/preview.png">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://bradcoles-dev.github.io/blog/fabric-mirroring.html">
-    <meta property="twitter:title" content="Microsoft Fabric Mirroring: Everything You Need Before You Commit">
-    <meta property="twitter:description" content="A practitioner's depth guide to Microsoft Fabric mirroring — connectors, limits, cost, architecture trade-offs, and the edge cases that only surface in production.">
+    <meta property="twitter:title" content="Microsoft Fabric Mirroring: A Practitioner's Architecture Guide">
+    <meta property="twitter:description" content="Connectors, limits, cost model, and the architectural questions that determine whether Fabric mirroring fits your use case.">
     <meta property="twitter:image" content="https://bradcoles-dev.github.io/preview.png">
 
-    <title>Microsoft Fabric Mirroring: Everything You Need Before You Commit | Brad Coles</title>
+    <title>Microsoft Fabric Mirroring: A Practitioner's Architecture Guide | Brad Coles</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Press+Start+2P&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -345,27 +345,31 @@
                 <span class="blog-category">Microsoft Fabric</span>
                 <span class="blog-category">Architecture</span>
             </div>
-            <h1>Microsoft Fabric Mirroring: Everything You Need Before You Commit</h1>
-            <p class="blog-subtitle">A practitioner's depth guide — connectors, limits, cost, architecture trade-offs, and the edge cases that only surface in production.</p>
+            <h1>Microsoft Fabric Mirroring: A Practitioner's Architecture Guide</h1>
+            <p class="blog-subtitle">Connectors, limits, cost model, and the architectural questions that determine whether it fits.</p>
             <p class="blog-byline">By Brad Coles | Senior Consultant &amp; Data Engineering Capability Lead, Synechron Australia</p>
         </header>
 
         <article>
 
             <div class="callout">
-                <strong>Accuracy notice:</strong> This post was written in May 2026 and reflects the state of Microsoft Fabric mirroring at that time. Fabric is a rapidly evolving platform — features that are in Preview today may reach GA with changed behaviour, documented limitations may be resolved, and new connectors or capabilities may be added. Before making architectural decisions based on this post, verify current behaviour against the <a href="https://learn.microsoft.com/en-us/fabric/mirroring/overview" target="_blank" rel="noopener noreferrer">official Microsoft documentation</a>. Where this post identifies something as a gap or limitation, check whether it has been addressed in a recent Fabric release.
+                <strong>Accuracy notice:</strong> This post was written in May 2026 and reflects the state of Microsoft Fabric mirroring at that time. Fabric is a rapidly evolving platform - features in Preview today may reach GA with changed behaviour, documented limitations may be resolved, and new connectors or capabilities may be added. Before making architectural decisions based on this post, verify current behaviour against the <a href="https://learn.microsoft.com/en-us/fabric/mirroring/overview" target="_blank" rel="noopener noreferrer">official Microsoft documentation</a>. Where this post identifies gaps or limitations, check whether they have been addressed in a recent Fabric release.
             </div>
 
             <p>
-                Microsoft Fabric mirroring promises a lot: near-real-time analytics on your operational data, zero ETL pipelines, no compute charges for ingestion, and a seamless path from source database to Power BI report. For a large class of use cases, it genuinely delivers. Most practitioners encounter the limits not through the documentation (which is structured for breadth) but through production, which is a more expensive place to discover them.
+                Near-real-time replication at near-zero ingestion cost. No ETL pipelines to orchestrate. No ingestion compute to pay for. The pitch for Microsoft Fabric mirroring is genuinely compelling - and for a well-defined class of use cases, it delivers.
             </p>
 
             <p>
-                This article is built on close study of mirroring across successive releases: the documentation as it shipped, community-reported production behaviour, and the connector limitations scattered across ten separate pages. Data type limitations that previously blocked whole categories of source tables have been addressed or narrowed as the feature has evolved. Meaningful limitations remain — what mirroring replicates, what it silently drops, and what it cannot preserve — and this article works through them.
+                The question worth asking before you commit is not whether mirroring works. It is what kind of data layer mirroring produces, and whether that matches what your architecture actually requires.
             </p>
 
             <p>
-                This post is for data engineers, architects, and analysts evaluating mirroring for production use. It is not a getting-started tutorial — the <a href="https://learn.microsoft.com/en-us/fabric/mirroring/overview" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">official documentation</a> covers that ground well enough. It is a depth guide for practitioners who have moved past the overview: connector-specific behaviour, architectural trade-offs, operational limits, and the edge cases that only surface in production. The appendix consolidates capability support across all ten connectors into a single reference matrix — including the gaps where Microsoft has not published documentation — so you can assess your specific source without cross-referencing ten separate limitations pages.
+                Mirroring produces a <em>current-state replica</em> - a continuously updated copy of the source's present state, in Delta/Parquet format, in OneLake. It is not a historical record, a replayable event stream, or an immutable raw layer. For some architectures, that distinction is irrelevant. For others - particularly those where replayability, historical fidelity, or audit immutability matter - it is critical. This guide works through both sides.
+            </p>
+
+            <p>
+                This is a depth guide for data engineers and architects evaluating mirroring for production use. It is not a getting-started tutorial - the <a href="https://learn.microsoft.com/en-us/fabric/mirroring/overview" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">official documentation</a> covers that ground. It covers connector-specific behaviour, architectural trade-offs, operational limits, and edge cases that surface in production. The appendix consolidates capability support across all ten connectors into a single reference matrix - including the gaps where Microsoft has not published documentation - so you can evaluate your specific source without cross-referencing ten separate limitations pages.
             </p>
 
             <hr>
@@ -373,7 +377,7 @@
             <h2>The three types of mirroring</h2>
 
             <p>
-                The word "mirroring" covers three architecturally distinct mechanisms. Choosing the wrong one for your use case is the first and most common mistake.
+                The word "mirroring" covers three architecturally distinct mechanisms. Choosing the wrong type is the first mistake.
             </p>
 
             <figure class="diagram-wrapper">
@@ -479,67 +483,63 @@
                 </table>
             </div>
 
-            <h3>1. Database mirroring — data moves</h3>
+            <h3>1. Database mirroring - data moves</h3>
 
             <p>
-                The source database's change log (CDC, Change Tracking, or Fabric's own Change Event Stream) is continuously read, and changes are replicated as Delta/Parquet files into OneLake. The data lives in Fabric. Queries hit OneLake, not the source.
+                The source database's change log (CDC, Change Tracking, or Fabric's Change Event Stream) is continuously read, and changes land as Delta/Parquet files in OneLake. The data lives in Fabric. Queries hit OneLake, not the source.
             </p>
 
             <p>
-                <strong>Use this when</strong> you want low-latency analytics without hitting the production database, and your source is one of the supported connectors: <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-database" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Azure SQL Database</a>, <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-managed-instance" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Azure SQL Managed Instance</a>, <a href="https://learn.microsoft.com/en-us/fabric/mirroring/sql-server" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">SQL Server</a>, <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-database-postgresql" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">PostgreSQL</a>, <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-database-mysql" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">MySQL</a>, <a href="https://learn.microsoft.com/en-us/fabric/mirroring/oracle" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Oracle</a>, <a href="https://learn.microsoft.com/en-us/fabric/mirroring/snowflake" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Snowflake</a>, <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-cosmos-db" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Cosmos DB</a>, <a href="https://learn.microsoft.com/en-us/fabric/mirroring/google-bigquery" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Google BigQuery</a>, or <a href="https://learn.microsoft.com/en-us/fabric/mirroring/sap" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">SAP</a>. One important exception: SAP is not a direct connection. It routes through <a href="https://learn.microsoft.com/en-us/fabric/mirroring/sap#mirroring-for-sap-via-sap-datasphere" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">SAP Datasphere as an intermediary</a>, which must be separately licensed and configured.
+                <strong>Use this when</strong> you want low-latency analytics without hitting the production database, and your source is one of the ten supported connectors: <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-database" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Azure SQL Database</a>, <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-managed-instance" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Azure SQL Managed Instance</a>, <a href="https://learn.microsoft.com/en-us/fabric/mirroring/sql-server" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">SQL Server</a>, <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-database-postgresql" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">PostgreSQL</a>, <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-database-mysql" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">MySQL</a>, <a href="https://learn.microsoft.com/en-us/fabric/mirroring/oracle" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Oracle</a>, <a href="https://learn.microsoft.com/en-us/fabric/mirroring/snowflake" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Snowflake</a>, <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-cosmos-db" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Cosmos DB</a>, <a href="https://learn.microsoft.com/en-us/fabric/mirroring/google-bigquery" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Google BigQuery</a>, or <a href="https://learn.microsoft.com/en-us/fabric/mirroring/sap" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">SAP</a>. One important exception: SAP is not a direct connection. It routes through <a href="https://learn.microsoft.com/en-us/fabric/mirroring/sap#mirroring-for-sap-via-sap-datasphere" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">SAP Datasphere as an intermediary</a>, which must be separately licensed and configured.
             </p>
 
             <p>
-                One special case worth noting: <a href="https://learn.microsoft.com/en-us/fabric/database/sql/overview" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Fabric SQL database</a> (Microsoft's own managed SQL database within Fabric) is mirrored to OneLake automatically, with no setup, no connector configuration, and no source-side changes required. If your operational workload is running on Fabric SQL database, the analytics layer comes for free.
+                One special case: <a href="https://learn.microsoft.com/en-us/fabric/database/sql/overview" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Fabric SQL database</a> - Microsoft's own managed SQL database within Fabric - is mirrored to OneLake automatically, with no setup, no connector configuration, and no source-side changes required. If your operational workload runs on Fabric SQL database, the analytics layer comes for free.
             </p>
 
-            <h3>2. Metadata mirroring — data stays put</h3>
+            <h3>2. Metadata mirroring - data stays put</h3>
 
             <p>
-                The source data is not copied. Instead, OneLake shortcuts are created that point to the source. Querying the "mirrored" item queries the source system in real time — query performance depends on the source system's responsiveness, not OneLake.
-            </p>
-
-            <p>
-                <strong>Use this when</strong> you want the Fabric SQL analytics experience over data that already lives in a supported catalog: <a href="https://learn.microsoft.com/en-us/fabric/mirroring/catalog-mirroring/azure-databricks" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Azure Databricks</a> or <a href="https://learn.microsoft.com/en-us/fabric/mirroring/catalog-mirroring/dremio" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Dremio</a>. A caveat applies to both: neither vendor documents the integration from their own side — it is covered only in Microsoft's documentation. Dremio has an additional flag: Microsoft's own page marks it as Preview while the <a href="https://learn.microsoft.com/en-us/fabric/mirroring/overview#supported-sources" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">mirroring overview table</a> does not. Treat both connectors as early-stage and test thoroughly before committing.
-            </p>
-
-            <h3>3. Open mirroring — you write the data</h3>
-
-            <p>
-                You deliver files (Parquet or delimited text) to a OneLake landing zone in a <a href="https://learn.microsoft.com/en-us/fabric/mirroring/open-mirroring-landing-zone-format" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">prescribed format</a>. Fabric's replication engine picks them up and merges them into Delta tables. No Microsoft connector required; any system that can write files can feed the pipeline.
+                The source data is not copied. Instead, OneLake shortcuts are created that point to the source. Querying the mirrored item queries the source system in real time - query performance depends on the source, not OneLake.
             </p>
 
             <p>
-                <strong>Use this when</strong> no native connector exists for your source, or when you need full control over what gets replicated and how changes are tracked. It has the steepest setup curve of the three types but the widest applicability. The <a href="https://learn.microsoft.com/en-us/fabric/mirroring/open-mirroring-partners-ecosystem" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">partners ecosystem</a> lists pre-built integrations for common systems.
+                <strong>Use this when</strong> you want the Fabric SQL analytics experience over data that already lives in a supported catalog: <a href="https://learn.microsoft.com/en-us/fabric/mirroring/catalog-mirroring/azure-databricks" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Azure Databricks</a> or <a href="https://learn.microsoft.com/en-us/fabric/mirroring/catalog-mirroring/dremio" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Dremio</a>. A caveat applies to both: neither vendor documents the integration from their own side - it is covered only in Microsoft's documentation. Dremio carries an additional flag: Microsoft's own page marks it as Preview while the <a href="https://learn.microsoft.com/en-us/fabric/mirroring/overview#supported-sources" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">mirroring overview table</a> does not. Treat both connectors as early-stage and validate thoroughly before committing.
+            </p>
+
+            <h3>3. Open mirroring - you write the data</h3>
+
+            <p>
+                You deliver files (Parquet or delimited text) to a OneLake landing zone in a <a href="https://learn.microsoft.com/en-us/fabric/mirroring/open-mirroring-landing-zone-format" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">prescribed format</a>. Fabric's replication engine picks them up and merges them into Delta tables. No Microsoft connector required - any system that can write files can feed it.
+            </p>
+
+            <p>
+                <strong>Use this when</strong> no native connector exists for your source, or when you need full control over what is replicated and how changes are tracked. It has the steepest setup curve of the three types but the widest applicability. The <a href="https://learn.microsoft.com/en-us/fabric/mirroring/open-mirroring-partners-ecosystem" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">partners ecosystem</a> lists pre-built integrations for common systems.
             </p>
 
             <h3>Each connector is its own evaluation</h3>
 
             <p>
-                The three-type taxonomy above is a useful starting point, but it understates the variation within database mirroring. Each connector uses a different change capture mechanism:
+                The three-type taxonomy understates the variation within database mirroring. Each connector uses a different change capture mechanism:
             </p>
 
             <ul>
-                <li>SQL Change Feed for Azure SQL Database</li>
-                <li>CDC for SQL Server 2016–2022</li>
-                <li>Change Event Stream for SQL Server 2025</li>
-                <li>logical replication for PostgreSQL</li>
-                <li>binary logs for MySQL</li>
-                <li>LogMiner for Oracle</li>
-                <li>Snowflake Streams for Snowflake</li>
-                <li>built-in change feed for Cosmos DB</li>
+                <li>SQL Change Feed - Azure SQL Database</li>
+                <li>Change Event Stream - SQL Server 2025</li>
+                <li>CDC - SQL Server 2016–2022</li>
+                <li>Logical replication - PostgreSQL</li>
+                <li>Binary logs - MySQL</li>
+                <li>LogMiner - Oracle</li>
+                <li>Snowflake Streams - Snowflake</li>
+                <li>Built-in change feed - Cosmos DB</li>
             </ul>
 
             <p>
-                Each has different data type support, different DDL handling, different source-side prerequisites, and different maturity. Each change capture mechanism has its own operational profile and documented constraints.
+                Each has different data type support, different DDL handling, different source-side prerequisites, and different maturity. Nothing generalises cleanly across connectors unless the documentation explicitly says it does. A confirmed behaviour on Azure SQL Database tells you nothing about BigQuery.
             </p>
 
             <p>
-                The practitioner must treat each connector as its own evaluation. Nothing generalises cleanly across connectors unless the documentation explicitly says it does. A limitation on Azure SQL Database may not apply to PostgreSQL, and a behaviour confirmed for Cosmos DB tells you nothing about BigQuery.
-            </p>
-
-            <p>
-                The table below summarises connector maturity and documentation coverage. The gap count is the number of <code>—</code> cells in the appendix — behaviors Microsoft has not published documentation for. It is a proxy for documentation maturity rather than feature completeness: Azure SQL Database and SQL Server score 4 each due to undocumented DDL edge cases rather than fundamental unknowns, while BigQuery's 9 gaps include basic operational questions like whether <code>ADD COLUMN</code> is handled at all.
+                The table below summarises connector maturity and documentation coverage. The gap count reflects the number of <code>-</code> cells in the appendix - behaviours Microsoft has not documented. Azure SQL Database and SQL Server score 4 each due to undocumented DDL edge cases. BigQuery's 9 gaps include basic operational questions like whether <code>ADD COLUMN</code> is handled at all.
             </p>
 
             <div class="table-wrapper">
@@ -608,69 +608,51 @@
 
             <hr>
 
-            <h2>What works well</h2>
+            <h2>What mirroring delivers</h2>
 
             <p>
-                Where mirroring operates within its intended scope, it delivers.
-            </p>
-
-            <h3>The cost model is real</h3>
-
-            <p>
-                The replication compute does not consume Fabric capacity — <a href="https://learn.microsoft.com/en-us/fabric/mirroring/overview#cost-of-mirroring" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">documented</a> and confirmed by independent benchmarking. Storage is free up to 1 TB per capacity unit. The compelling advantage is not raw CU savings over a carefully built pipeline — it is continuous near-real-time replication at near-zero ingestion cost, a cadence that would be unworkable via scheduled pipelines on any reasonable SKU. See the cost model section below for the full breakdown.
-            </p>
-
-            <h3>Open mirroring scales surprisingly well</h3>
-
-            <p>
-                The ingestion engine that processes landing zone files is an off-capacity service run by Microsoft. It does not matter whether you are on an F2 or an F256 — the ingestion throughput is the same. One Microsoft engineer demonstrated 1.2 billion rows per minute ingestion on an F2 in a <a href="https://www.rakirahman.me/fabric-open-mirorring-stress/" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">published benchmark</a>. Two caveats on that figure: the write-side compute — generating and uploading the files — had its own cost not reflected in Fabric capacity usage, and the conditions were artificial. The "free" part is the Fabric ingestion engine; whatever writes files to the landing zone bears its own cost. See the latency section below for the full benchmark context.
-            </p>
-
-            <h3>Mirroring as a reporting replica — source protection without a read replica</h3>
-
-            <p>
-                If your organisation only has access to a production source and wants to protect it from heavy analytical queries, a mirrored database is a clean solution: all reporting traffic hits OneLake, not the source. The SQL analytics endpoint provides a T-SQL-queryable replica; Direct Lake provides a Power BI-queryable one. Neither touches the source at query time.
+                Where mirroring operates within its intended scope, it delivers well.
             </p>
 
             <p>
-                This works best with Azure SQL Database (Change Feed) and SQL Server 2025 (Change Event Stream), where the source-side overhead of the replication mechanism is minimal. SQL Server 2016–2022 with CDC does add some source overhead — capture jobs and log space — which partially offsets the protection benefit, though query traffic is still eliminated. One hard constraint: if your organisation already routes reporting traffic to an Always On availability group secondary, mirroring cannot connect to the secondary — it requires the primary. In that scenario, mirroring does not help.
-            </p>
-
-            <h3>Cross-database queries work out of the box</h3>
-
-            <p>
-                The SQL analytics endpoint created for each mirrored database can <a href="https://learn.microsoft.com/en-us/fabric/data-warehouse/cross-database-query" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">query across multiple mirrored databases</a> in the same workspace using three-part naming. If you are mirroring a source that spans multiple databases, you can join across them in a single SQL query without any additional configuration.
-            </p>
-
-            <h3>CI/CD is supported via Git integration and deployment pipelines — with one manual step</h3>
-
-            <p>
-                Mirrored databases can be <a href="https://learn.microsoft.com/en-us/fabric/mirroring/mirrored-database-cicd" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">committed to a Git repository and deployed through Fabric deployment pipelines</a>. The database definition is stored as a <code>{name}.MirroredDatabase</code> folder containing <code>mirroring.json</code>, which captures the connection and configuration settings.
+                <strong>Ingestion compute is genuinely free.</strong> The replication engine runs off Fabric capacity - <a href="https://learn.microsoft.com/en-us/fabric/mirroring/overview#cost-of-mirroring" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">documented</a> and confirmed by independent benchmarking. On an F64, practitioners report background CU usage around 3–4% for half a billion rows across 50 tables. Storage is free up to 1 TB per capacity unit. The advantage is not raw CU savings over a carefully built pipeline - it is continuous near-real-time replication at near-zero ingestion cost, a cadence that would be unworkable via scheduled pipelines on any reasonable SKU. The cost model section below covers the full breakdown, including caveats.
             </p>
 
             <p>
-                The important caveat: a mirrored database does not start replicating automatically after deployment. After each pipeline deployment, you must manually start or resume mirroring in the target workspace. Configuration promotion is automated; the replication start is not. That is a meaningful improvement over no CI/CD support at all, but it stops short of a fully automated deploy-and-run story.
-            </p>
-
-            <h3>The downstream payoff: Direct Lake integration</h3>
-
-            <p>
-                Because mirrored data lands in OneLake as Delta tables, Power BI Semantic Models can connect via <a href="https://learn.microsoft.com/en-us/fabric/get-started/direct-lake-overview" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Direct Lake mode</a>. Direct Lake reads Parquet files directly from OneLake without importing data into the model and without querying the SQL analytics endpoint at query time. As new changes land from the source, reports reflect them without a scheduled refresh. The Delta files are the model. For large datasets, this is significantly faster than DirectQuery and avoids the storage cost of Import mode.
-            </p>
-
-            <h3>The clearest downstream win: source-to-semantic with no transform layer</h3>
-
-            <p>
-                Not every reporting use case requires transform layers. Operational dashboards, self-service analytics on source tables that are useful as-is, operational metrics that don't require heavy cross-domain joins: these can go directly from mirrored Delta tables to a Direct Lake Semantic Model without any transformation compute at all. Source → mirrored database → Direct Lake Semantic Model is near-real-time, near-zero capacity cost, and requires no Spark jobs or pipeline runs.
+                <strong>The Open Mirroring ingestion engine scales irrespective of capacity SKU.</strong> The ingestion engine that processes Open Mirroring landing zone files is an off-capacity service run by Microsoft. It does not matter whether you are on an F2 or an F256 - ingestion throughput is the same. One Microsoft engineer demonstrated 1.2 billion rows per minute ingestion on an F2 in a <a href="https://www.rakirahman.me/fabric-open-mirorring-stress/" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">published benchmark</a>. Two caveats: the write-side compute - generating and uploading files - is not reflected in Fabric capacity usage, and the conditions were artificial. The "free" part is Fabric's ingestion engine; whatever writes files to the landing zone bears its own cost.
             </p>
 
             <p>
-                For use cases that fit this pattern, mirroring delivers on its promise. If your instinct is to build transform layers on top of mirrored data, ask first whether they are actually serving a reporting requirement or carrying over a pipeline pattern that mirroring has made redundant.
+                <strong>Mirroring eliminates analytical query pressure on the source.</strong> For organisations with access only to a production source, a mirrored database offloads all reporting traffic to OneLake. The SQL analytics endpoint provides a T-SQL-queryable replica; Direct Lake provides a Power BI-queryable one. Neither touches the source at query time.
+            </p>
+
+            <p>
+                This works best with Azure SQL Database (Change Feed) and SQL Server 2025 (Change Event Stream), where source-side replication overhead is minimal. SQL Server 2016–2022 with CDC does add overhead - capture jobs and log space - which partially offsets the protection benefit, though analytical query traffic is still eliminated. One hard constraint: mirroring requires the primary of an Always On availability group. Connecting to a readable secondary is not supported. If your organisation already routes reporting traffic to a secondary, mirroring does not help for that path.
+            </p>
+
+            <p>
+                <strong>Cross-database queries work out of the box.</strong> The SQL analytics endpoint for each mirrored database supports <a href="https://learn.microsoft.com/en-us/fabric/data-warehouse/cross-database-query" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">cross-database queries</a> using three-part naming, across multiple mirrored databases in the same workspace. No additional configuration required.
+            </p>
+
+            <p>
+                <strong>CI/CD is supported, with one manual step.</strong> Mirrored databases can be <a href="https://learn.microsoft.com/en-us/fabric/mirroring/mirrored-database-cicd" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">committed to Git and deployed through Fabric deployment pipelines</a>. The database definition is stored as a <code>{name}.MirroredDatabase</code> folder containing <code>mirroring.json</code>. The caveat: mirroring does not start automatically after a deployment pipeline runs. You must manually start or resume replication in each target workspace. Configuration promotion is automated; the replication start is not.
+            </p>
+
+            <p>
+                <strong>The downstream payoff: Direct Lake integration.</strong> Because mirrored data lands in OneLake as Delta tables, Power BI Semantic Models can connect via <a href="https://learn.microsoft.com/en-us/fabric/get-started/direct-lake-overview" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Direct Lake mode</a> - reading Parquet files directly from OneLake without importing data or querying the SQL analytics endpoint at query time. As new changes land from the source, reports reflect them without a scheduled refresh. For large datasets, this is substantially faster than DirectQuery and avoids Import mode's storage cost.
+            </p>
+
+            <p>
+                <strong>The clearest downstream win: source-to-semantic with no transform layer.</strong> Not every reporting use case requires transforms. Operational dashboards, self-service analytics on source tables that are useful as-is, metrics that don't require heavy cross-domain joins - these can go from mirrored Delta tables directly to a Direct Lake Semantic Model. Source → mirrored database → Direct Lake Semantic Model: near-real-time, near-zero capacity cost, no Spark jobs or pipeline runs.
+            </p>
+
+            <p>
+                For use cases that fit this pattern, mirroring delivers on its promise. If your instinct is to add transform layers on top of mirrored data, ask first whether they serve a genuine reporting requirement or carry over a pipeline pattern that mirroring has made redundant.
             </p>
 
             <hr>
 
-            <h2>Latency — what "near real time" actually means</h2>
+            <h2>Latency - what "near real time" actually means</h2>
 
             <p>
                 The mirroring overview describes replication as <a href="https://learn.microsoft.com/en-us/fabric/mirroring/overview#near-real-time-replication" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">"near real-time"</a>. No specific latency SLA is published.
@@ -730,24 +712,28 @@
             </figure>
 
             <p>
-                Microsoft describes replication latency as 15–60 seconds. For CDC-based native database mirroring (Azure SQL, SQL Server, PostgreSQL, MySQL, Cosmos DB), practitioners report typical latency in the 60–90 second range under normal load — the lower end of Microsoft's stated range appears to reflect optimal conditions rather than typical deployment. Latency can fall further behind under heavy source write pressure. These are community observations rather than confirmed measurements. BigQuery uses a different change capture mechanism (Storage Write API) and may have different latency characteristics — I have not seen reliable published figures for it.
+                Microsoft describes replication latency as 15–60 seconds. For CDC-based connectors (Azure SQL, SQL Server, PostgreSQL, MySQL, Cosmos DB), practitioners report typical latency in the 60–90 second range under normal load - the lower end of Microsoft's stated range appears to reflect optimal conditions rather than typical deployments. Latency can fall further under heavy source write pressure. BigQuery uses a different change capture mechanism (Storage Write API) and may have different latency characteristics; reliable published figures are not available.
             </p>
 
             <p>
-                There is an important distinction between two latency layers that the docs don't make explicitly:
+                There are two distinct latency layers the documentation does not make explicit:
             </p>
 
             <ol>
-                <li><strong>Delta table latency</strong> — how long after a source change before the Delta table in OneLake reflects it. This is what the replication engine controls.</li>
-                <li><strong>SQL analytics endpoint latency</strong> — how long after the Delta table is updated before queries via the SQL endpoint see the new data. The SQL endpoint always lags the Delta layer.</li>
+                <li><strong>Delta table latency</strong> - time from source change to the Delta table in OneLake reflecting it. This is what the replication engine controls.</li>
+                <li><strong>SQL analytics endpoint latency</strong> - time from Delta table update to queries via the SQL endpoint seeing new data. The SQL endpoint always lags the Delta layer.</li>
             </ol>
 
             <p>
-                One question that comes up when evaluating mirroring against watermark-based incremental pipelines is how late-arriving data is handled. For CDC-based mirroring, watermarks are largely irrelevant — and that is mostly an advantage. CDC captures changes in commit order at the source regardless of business timestamps on the rows. If a batch job inserts six-month-old data into the source today, mirroring replicates those rows when they are committed; it does not need a high-water mark to detect them. The one edge case to be aware of is long-running transactions: CDC captures changes at commit time, not at statement time, so a large transaction that runs for two hours before committing will appear in the mirror as a burst at the point of commit rather than spread across the transaction duration.
+                For applications requiring the freshest possible data, read directly from the Delta layer via Spark rather than via the SQL analytics endpoint.
             </p>
 
             <p>
-                A <a href="https://www.rakirahman.me/fabric-open-mirorring-stress/" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">published benchmark by a Microsoft engineer</a> under optimal append-only conditions (5 × 32-core machines writing aggressively to an F2 capacity) measured Delta table lag at 11.3 seconds and SQL endpoint availability at 30–60 seconds after file upload. These are best-case figures under a specific workload configuration, not typical figures — the author explicitly describes the results as "empirical results from hacking around tunables" rather than a reproducible benchmark. Read them as an upper bound on how fast the system can go, not as what you should expect in a typical deployment. The benchmark also did not include any updates or deletes — only appends. For applications that need the freshest possible data, read directly from the Delta layer via Spark rather than via the SQL analytics endpoint.
+                <strong>CDC semantics and late-arriving data.</strong> For CDC-based mirroring, watermarks are largely irrelevant - and that is an advantage. CDC captures changes in commit order at the source, regardless of business timestamps on the rows. A batch job inserting six-month-old records into the source today will be replicated when those rows commit; no high-water mark is needed to detect them. The edge case to watch: CDC captures changes at commit time, not statement time. A transaction running for two hours before committing appears in the mirror as a burst at commit rather than spread across the transaction duration.
+            </p>
+
+            <p>
+                A <a href="https://www.rakirahman.me/fabric-open-mirorring-stress/" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">published benchmark by a Microsoft engineer</a> under optimal append-only conditions (5 × 32-core machines writing aggressively to an F2 capacity) measured Delta table lag at 11.3 seconds and SQL endpoint availability at 30–60 seconds after file upload. These are best-case figures under a specific workload configuration - the author explicitly describes them as "empirical results from hacking around tunables" rather than a reproducible benchmark. Read them as an upper bound on what the system can achieve, not as typical deployment expectations. The benchmark covers appends only - no updates or deletes.
             </p>
 
             <hr>
@@ -798,23 +784,23 @@
             </div>
 
             <p>
-                <strong>What "free ingestion" actually means in practice.</strong> The replication engine runs off-capacity — confirmed by independent benchmarking and a Microsoft PM. On an F64, practitioners have reported background CU usage at around 3–4% for half a billion rows across 50 tables. Storage is free at 1 TB per capacity unit; an F64 gives 64 TB, which most organisations will not exceed. The capacity is only required for the initial setup; once configured, the replication engine continues running even if capacity is paused.
+                <strong>What "free ingestion" means in practice.</strong> The replication engine runs off-capacity - confirmed by independent benchmarking and a Microsoft PM. On an F64, practitioners have reported background CU usage around 3–4% for half a billion rows across 50 tables. Storage is free at 1 TB per capacity unit; an F64 gives 64 TB. Once configured, the replication engine continues running even if capacity is paused.
             </p>
 
             <p>
-                To put the cost in perspective against a pipeline-based alternative: a well-optimised incremental pipeline (parameterised loads from multiple on-premises SQL sources, landing as Parquet and merging into Delta tables) can land at a similar absolute CU figure. But that pipeline runs once a day. Pipeline activities and Spark notebooks are background operations in Fabric's CU model, meaning their consumption is smoothed across a 24-hour window. When a pipeline runs once a day, those background CUs spread comfortably across the full window. Run the same pipeline five times a day and you compress five times the background CU consumption into the same budget — already saturating an F16 at that cadence. At sub-minute frequency it becomes unworkable on any reasonable SKU.
+                To contextualise against a pipeline-based alternative: a well-optimised incremental pipeline (parameterised loads from multiple SQL sources, landing as Parquet and merging into Delta) can reach a similar absolute CU figure. But that pipeline runs once a day. Pipeline activities and Spark notebooks are background operations in Fabric's CU model, smoothed across a 24-hour window. Running the same pipeline five times a day compresses five times the background CU consumption into the same budget - already saturating an F16 at that cadence. At sub-minute frequency it becomes unworkable on any reasonable SKU.
             </p>
 
             <p>
-                Mirroring sidesteps this entirely: it delivers changes continuously at near-zero background CU cost. For teams already running daily incremental pipelines, adopting mirroring is not primarily a cost trade-off — it is a step change in data freshness at no additional ingestion cost.
+                Mirroring sidesteps this entirely: continuous replication at near-zero background CU cost. For teams running daily incremental pipelines, adopting mirroring is not primarily a cost trade-off - it is a step change in data freshness at no additional ingestion cost.
             </p>
 
             <p>
-                The net result for a typical database mirroring setup: if your source is Azure SQL, SQL Server, PostgreSQL, MySQL, or Cosmos DB, and you are querying the replica at modest frequency, your Fabric cost for mirroring is close to zero beyond storage. The cost grows once you start querying at scale: the ingestion compute cost is eliminated, not the cost of reading or transforming data.
+                For a typical database mirroring setup on Azure SQL, SQL Server, PostgreSQL, MySQL, or Cosmos DB queried at modest frequency, Fabric cost is close to zero beyond storage. The cost grows with query scale: ingestion compute is eliminated, not the cost of reading or transforming data.
             </p>
 
             <p>
-                <strong>Open Mirroring write transactions.</strong> The ingestion compute is off-capacity and uncharged, but writing files to the landing zone consumes <a href="https://learn.microsoft.com/en-us/fabric/onelake/onelake-consumption#operation-types" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">OneLake write transactions</a>, which are charged. One transaction is charged per file smaller than 4 MB; one per 4 MB block for larger files. At a typical small-record size of 100–150 KB per file, writing one million files costs one million transactions — four times more than if those records were batched into 4 MB files. A community report documented consuming over 3.7 million CU-seconds on an F64 (more than half the capacity's daily budget) from a single initial load of approximately 1.5 million small Parquet files; a Microsoft engineer confirmed this was expected behaviour, not a bug. If you control the writer, target file sizes of 4 MB or larger and batch aggressively for initial loads. A secondary issue: very large numbers of small files can cause OOM conditions in the mirroring backend, degrading throughput — a Microsoft engineer acknowledged this as a known issue as of late 2024; verify current status before pushing millions of small files.
+                <strong>Open Mirroring write transactions.</strong> The ingestion compute is free, but writing files to the landing zone consumes <a href="https://learn.microsoft.com/en-us/fabric/onelake/onelake-consumption#operation-types" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">OneLake write transactions</a>, which are charged. One transaction per file smaller than 4 MB; one per 4 MB block for larger files. At 100–150 KB per file, writing one million files costs one million transactions - four times more than batching those records into 4 MB files. A community report documented consuming over 3.7 million CU-seconds on an F64 (more than half the capacity's daily budget) from a single initial load of approximately 1.5 million small Parquet files; a Microsoft engineer confirmed this as expected behaviour, not a bug. If you control the writer, target file sizes of 4 MB or larger and batch aggressively for initial loads. Very large numbers of small files can also cause OOM conditions in the mirroring backend - a Microsoft engineer acknowledged this as a known issue as of late 2024; verify current status before pushing millions of small files.
             </p>
 
             <hr>
@@ -822,37 +808,105 @@
             <h2>Mirroring is a current-state replica</h2>
 
             <p>
-                Mirroring is a continuously updated copy of what the source looks like <em>right now</em>. That is a legitimate and valuable thing — but it is not a historical record, and it cannot be used as one. If your architecture requires an append-only, replayable capture of source changes, mirroring does not provide it.
-            </p>
-
-            <p>Here is why:</p>
-
-            <p>
-                <strong>Stop/restart reseeds from current state.</strong> If you stop mirroring and restart it, or delete and recreate the mirrored database item, Fabric reseeds from the source's current state. You do not get a replay of historical changes — you get today's data. This behaviour is <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-database-limitations#mirrored-item-limitations" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">documented across all SQL-family sources</a> and Cosmos DB. Practitioners confirm it: in a community post, one user described stop-and-restart as "generally a bad idea, since the parquet files that make up the table are no longer kept."
+                This is the most important architectural property to understand before committing.
             </p>
 
             <p>
-                <strong>Deletes are applied to the mirror.</strong> When a row is deleted at the source, it is deleted from the Delta table in OneLake. It does not persist as a tombstone or soft-delete record. The data is gone from the replica. Delta time travel provides a short window to query past states (1 day for mirrored databases created after mid-June 2025, 7 days for older ones by default; the retention period is configurable via the portal or API) but this is not a rebuild window for most organisations.
+                Mirroring produces a continuously updated copy of what the source looks like <em>right now</em>. That is a legitimate and valuable thing - operational reporting, query offload, Direct Lake integration all rest on it. But it is not a historical record, and it cannot be used as one.
             </p>
 
             <p>
-                <strong>PostgreSQL <code>TRUNCATE</code> is not replicated.</strong> If the source table is truncated, <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-database-postgresql-limitations#table-level" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">the mirror retains the pre-truncation data</a>. The mirror silently diverges from the source. This means the mirror is not even a faithful current-state replica for PostgreSQL workloads that use <code>TRUNCATE</code>.
+                <strong>Stop/restart reseeds from current state.</strong> If you stop mirroring and restart it - or delete and recreate the mirrored item - Fabric reseeds from the source's current state. You do not get a replay of historical changes; you get today's data. This behaviour is <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-database-limitations#mirrored-item-limitations" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">documented across all SQL-family sources</a> and Cosmos DB. A practitioner on the community forums described stop-and-restart as "generally a bad idea, since the Parquet files that make up the table are no longer kept."
             </p>
 
             <p>
-                <strong>Cosmos DB TTL-deleted rows are not replicated.</strong> Rows deleted via Cosmos DB's time-to-live mechanism <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-cosmos-db-limitations#replication-limitations" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">do not appear as deletes in the mirror</a>. The rows remain in the mirrored table indefinitely, silently diverging from the source.
+                <strong>Deletes are applied to the mirror.</strong> When a row is deleted at the source, it is deleted from the Delta table in OneLake. It does not persist as a tombstone or soft-delete record. Delta time travel provides a short recovery window (1 day for mirrored databases created after mid-June 2025; 7 days for older ones by default; configurable via the portal or API) - but this is not a rebuild window for most organisations.
             </p>
 
             <p>
-                If historical replay matters to your architecture, you need a separate capture layer alongside the mirror.
+                <strong>PostgreSQL <code>TRUNCATE</code> is not replicated.</strong> If the source table is truncated, <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-database-postgresql-limitations#table-level" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">the mirror retains the pre-truncation data</a>. The mirror silently diverges from the source - it is not even a faithful current-state replica for PostgreSQL workloads that use <code>TRUNCATE</code>.
+            </p>
+
+            <p>
+                <strong>Cosmos DB TTL-deleted rows are not replicated.</strong> Rows deleted via Cosmos DB's TTL mechanism <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-cosmos-db-limitations#replication-limitations" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">do not appear as deletes in the mirror</a>. Those rows remain in the mirrored table indefinitely.
             </p>
 
             <hr>
 
-            <h2>What actually replicates — the data type story</h2>
+            <h2>Mirroring and the raw layer question</h2>
 
             <p>
-                Unsupported data types are the most common unexpected blocker when setting up mirroring. The critical distinction the docs don't emphasise up front: <strong>unsupported types do not always block the table.</strong> The impact depends on where the unsupported type appears.
+                Whether mirroring is an appropriate implementation of a raw or bronze ingestion layer is one of the more consequential architectural questions it raises. The answer is not universal - it depends on what your raw layer is actually for.
+            </p>
+
+            <p>
+                The term "raw layer" - also called bronze, landing, or ingestion depending on organisational convention - describes different things in different teams. Three distinct definitions are worth separating before forming an opinion:
+            </p>
+
+            <p>
+                <strong>Definition 1 - Current-state replica.</strong> A continuously updated copy of the source's present state, queryable as a table. This is what mirroring provides. It faithfully reflects current source data and is available immediately via Spark, the SQL analytics endpoint, or Power BI Direct Lake.
+            </p>
+
+            <p>
+                <strong>Definition 2 - Change event stream.</strong> A sequence of all source changes (inserts, updates, deletes) in commit order, preserved indefinitely as a queryable or replayable record. CDC platforms - Debezium, Azure Data Factory CDC, event streaming pipelines - produce this. Mirroring uses CDC-equivalent mechanisms under the hood to keep the replica current, but it exposes only the resulting state, not the raw change events. The Delta change data feed (an extended capability, <a href="https://learn.microsoft.com/en-us/fabric/mirroring/extended-capabilities" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">currently free but eventually billable</a>) moves somewhat closer to this, but it is a derived feature, not the underlying change stream.
+            </p>
+
+            <p>
+                <strong>Definition 3 - Immutable append-only store.</strong> A write-once, never-delete collection of extracted records, typically with extraction timestamps. Source deletes and updates do not remove historical records; they are appended as new versions alongside originals. This is what "bronze" means in recovery-oriented architectures - a layer from which any downstream state can be reconstructed at any point in time. Mirroring explicitly does not provide this: source deletes are applied to the mirror, and stop/restart reseeds from current state.
+            </p>
+
+            <h3>When mirroring is sufficient as an ingestion layer</h3>
+
+            <ul>
+                <li>The use case is operational reporting on current source state</li>
+                <li>Historical reconstruction is not a requirement - downstream models do not need to be reprocessed from raw on schema changes or logic corrections</li>
+                <li>The source system is the authoritative system of record and can serve as a recovery point when needed</li>
+                <li>Delta time travel's short retention window covers the organisation's recovery or audit window</li>
+                <li>Downstream processing is idempotent or designed to tolerate reseed events</li>
+            </ul>
+
+            <h3>When mirroring is insufficient</h3>
+
+            <ul>
+                <li>Downstream processing must be replayable: changes to transform logic, data models, or business rules require re-processing historical source data from scratch</li>
+                <li>Source deletes must be preserved in the analytical layer for audit, compliance, or slowly-changing dimension tracking</li>
+                <li>An immutable historical record is a compliance or contractual requirement</li>
+                <li>The source system cannot be relied upon as a recovery point - operational databases often compact transaction logs, purge historical data, or are themselves subject to failure scenarios</li>
+                <li>The architecture requires point-in-time reconstruction of the source state at an arbitrary past date</li>
+            </ul>
+
+            <h3>The architectural response</h3>
+
+            <p>
+                These are not mutually exclusive scenarios. Using mirroring for current-state operational reporting does not prevent a separate, lightweight append-only capture layer from handling historical fidelity in parallel. A pipeline that appends extracted records to a separate OneLake path - without transformation, without schema enforcement, just faithful extraction - provides the raw archive that mirroring cannot. The two run independently: mirroring handles the real-time replica; the capture layer handles the immutable record. For many organisations, building this alongside mirroring is less work than it sounds, because a raw capture layer has no transformation requirements.
+            </p>
+
+            <p>
+                The framing to avoid is "mirroring eliminates ingestion infrastructure." What it eliminates is orchestrated incremental pipeline infrastructure for current-state reporting. That is a meaningful and real reduction in complexity. It is not a replacement for a raw archive if your architecture requires one.
+            </p>
+
+            <h3>A note on disaster recovery</h3>
+
+            <p>
+                A mirrored database is a derived asset. It can be recreated from the source at any time by deleting and re-mirroring. This makes it a query offload layer, not a backup:
+            </p>
+
+            <ul>
+                <li>A mirrored database is not a recovery target if the source is lost or corrupted</li>
+                <li>Mass deletion or corruption at the source will eventually be reflected in the mirror</li>
+                <li>"We have mirroring enabled" is not equivalent to "we have a copy of the data" for recovery purposes</li>
+            </ul>
+
+            <p>
+                None of this is a flaw in mirroring. It is the correct framing of what the tool is. Architectures that treat the mirror as a backup are making a design error, not an engineering one.
+            </p>
+
+            <hr>
+
+            <h2>What actually replicates - the data type story</h2>
+
+            <p>
+                Unsupported data types are the most common unexpected blocker when setting up mirroring. The critical point the documentation does not emphasise up front: <strong>unsupported types do not always block the table.</strong> Impact depends on where the unsupported type appears.
             </p>
 
             <div class="table-wrapper">
@@ -881,27 +935,27 @@
             </div>
 
             <p>
-                For the SQL-family sources, the full blocklist is documented across the individual limitations pages (<a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-database-limitations" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Azure SQL Database</a>, <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-managed-instance-limitations" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">SQL MI</a>, <a href="https://learn.microsoft.com/en-us/fabric/mirroring/sql-server-limitations" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">SQL Server</a>, <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-database-postgresql-limitations" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">PostgreSQL</a>, <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-database-mysql-limitations" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">MySQL</a>). A few highlights worth calling out:
+                For SQL-family sources, the full blocklist is documented across the individual limitations pages (<a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-database-limitations" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Azure SQL Database</a>, <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-managed-instance-limitations" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">SQL MI</a>, <a href="https://learn.microsoft.com/en-us/fabric/mirroring/sql-server-limitations" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">SQL Server</a>, <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-database-postgresql-limitations" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">PostgreSQL</a>, <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-database-mysql-limitations" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">MySQL</a>). Key highlights:
             </p>
 
             <p>
-                <strong>Tables with <code>json</code> or <code>vector</code> columns are completely blocked</strong> (not just column-skipped) for Azure SQL Database. This is an all-or-nothing table exclusion, not a column exclusion. The table cannot be mirrored at all. <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-database-limitations" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);"><code>hierarchyid</code></a>, <code>datetime2(7)</code> as a primary key, and <code>datetimeoffset(7)</code> as a primary key have the same effect.
+                <strong><code>json</code> and <code>vector</code> columns block entire tables for Azure SQL Database.</strong> This is a table-level exclusion, not a column skip - the table cannot be mirrored at all. <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-database-limitations" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);"><code>hierarchyid</code></a>, <code>datetime2(7)</code> as a primary key, and <code>datetimeoffset(7)</code> as a primary key have the same effect.
             </p>
 
             <p>
-                <strong>PostgreSQL excludes a long list of column types silently</strong>, including all geometric types, all network address types, all range types, <code>json</code>, <code>jsonb</code>, <code>xml</code>, and <code>interval</code>. None of these block the table — they simply disappear from the replica. The <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-database-postgresql-limitations" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">PostgreSQL limitations page</a> documents the full list.
+                <strong>PostgreSQL silently excludes a long list of column types</strong>, including all geometric types, all network address types, all range types, <code>json</code>, <code>jsonb</code>, <code>xml</code>, and <code>interval</code>. None block the table - they disappear from the replica without warning. The <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-database-postgresql-limitations" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">PostgreSQL limitations page</a> documents the full list.
             </p>
 
             <p>
-                <strong>Oracle uses an allowlist, not a blocklist.</strong> Only <a href="https://learn.microsoft.com/en-us/fabric/mirroring/oracle-limitations" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">fifteen specific types</a> are supported. Any Oracle type not on that list — including <code>CLOB</code>, <code>BLOB</code>, <code>XMLTYPE</code>, and <code>SDO_GEOMETRY</code> — is implicitly excluded.
+                <strong>Oracle uses an allowlist, not a blocklist.</strong> Only <a href="https://learn.microsoft.com/en-us/fabric/mirroring/oracle-limitations" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">fifteen specific types</a> are supported. Everything else - including <code>CLOB</code>, <code>BLOB</code>, <code>XMLTYPE</code>, and <code>SDO_GEOMETRY</code> - is implicitly excluded.
             </p>
 
             <p>
-                <strong><code>NUMBER</code> without explicit precision or scale is a hard failure for Oracle.</strong> This is a common Oracle pattern: <code>col NUMBER</code> rather than <code>col NUMBER(10,2)</code>. Multiple practitioners have reported that such columns cause the error <code>Invalid Decimal Precision or Scale. Precision: 38, Scale: 127</code>, blocking the entire table from mirroring. There is no workaround within mirroring — the feature does not support custom SELECT queries that could add an explicit cast. Changing a production Oracle column type is typically not feasible, which means affected tables must be handled outside mirroring via pipelines or copy jobs.
+                <strong>Oracle <code>NUMBER</code> without explicit precision or scale causes hard failures.</strong> The common Oracle pattern <code>col NUMBER</code> rather than <code>col NUMBER(10,2)</code> causes the error <code>Invalid Decimal Precision or Scale. Precision: 38, Scale: 127</code>, blocking the entire table. There is no workaround within mirroring - it does not support custom SELECT queries that could add an explicit cast. Changing a production Oracle column type is typically not feasible, meaning affected tables must be handled outside mirroring via pipelines or copy jobs.
             </p>
 
             <p>
-                <strong>DDL changes behave differently across sources.</strong> Azure SQL picks up <code>ADD COLUMN</code> automatically. PostgreSQL requires a stop-and-restart of replication to pick up any schema change. MySQL's replication is disrupted by DDL changes. SQL MI does not support <code>ALTER COLUMN</code> or <code>RENAME COLUMN</code> while a table is being mirrored; those operations are blocked outright. Check the limitations page for your specific source before planning a schema migration on a mirrored database.
+                <strong>DDL changes behave differently across sources.</strong> Azure SQL picks up <code>ADD COLUMN</code> automatically. PostgreSQL requires a stop-and-restart of replication for any schema change - and stop/restart reseeds from current state (see the raw layer section above). MySQL replication is disrupted by DDL changes. SQL MI does not support <code>ALTER COLUMN</code> or <code>RENAME COLUMN</code> while a table is being mirrored; those operations are blocked outright. Check the limitations page for your specific source before planning any schema migration on a mirrored table.
             </p>
 
             <hr>
@@ -909,15 +963,15 @@
             <h2>Operational limits and gotchas</h2>
 
             <p>
-                Beyond the data type limitations, several operational limits are worth knowing before committing to mirroring in production.
+                <strong>Use a service principal or shared service account - never an individual.</strong> A mirrored database is permanently tied to the user who created it. There is <a href="https://learn.microsoft.com/en-us/fabric/mirroring/troubleshooting#take-ownership-of-a-mirrored-database" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">no ownership transfer mechanism</a>. If the owner leaves the organisation, the item must be deleted and recreated - which means a reseed from current state. The connection is tied to the owner's Entra ID authentication: if their token expires due to MFA re-prompt, device compliance failure, or account deactivation, replication stops. A Microsoft MVP documented (Jul 2024) that workspace and tenant admins cannot access the connection unless the original owner has shared it first. Create all mirrored database items using a service principal or a shared service account, and share the connection with an admin group immediately after creation.
             </p>
 
             <p>
-                <strong>Use a service account, not an individual.</strong> A mirrored database is permanently tied to the user who created it. There is <a href="https://learn.microsoft.com/en-us/fabric/mirroring/troubleshooting#take-ownership-of-a-mirrored-database" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">no ownership transfer mechanism</a>. If the owner leaves the organisation, the item must be deleted and recreated. The connection is also tied to the item owner's Entra ID authentication: if their token expires (due to MFA re-prompt, device compliance failure, or account deactivation) replication stops. A Microsoft MVP documented (Jul 2024) that workspace and tenant admins cannot access the connection unless the original owner has shared it first. Create all mirrored database items using a service principal or a shared service account, and share the connection with an admin group immediately after creation.
+                Note: workspace managed identity cannot create or own mirrored database items per the <a href="https://learn.microsoft.com/en-us/fabric/security/workspace-identity" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">workspace identity documentation</a>.
             </p>
 
             <p>
-                <strong>Private link support is partial — and most connectors are unsupported.</strong> This is a significant blocker for enterprise environments with strict network security requirements. When Fabric's "Block Public Internet Access" tenant setting is enabled, <a href="https://learn.microsoft.com/en-us/fabric/security/security-private-links-overview" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">most database mirroring connectors are not supported</a>: active mirrored databases enter a paused state and mirroring cannot be started.
+                <strong>Private link support is partial - and most connectors are blocked.</strong> When Fabric's "Block Public Internet Access" tenant setting is enabled, <a href="https://learn.microsoft.com/en-us/fabric/security/security-private-links-overview" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">most database mirroring connectors are unsupported</a>: active mirrored databases enter a paused state and mirroring cannot be started.
             </p>
 
             <div class="table-wrapper">
@@ -942,11 +996,11 @@
             </div>
 
             <p>
-                A further constraint: on-premises data gateways (required for Oracle, and for SQL Server in many on-premises deployments) fail to register when private link is enabled; VNet data gateways work as a substitute but require separate provisioning. If your organisation has enabled or is planning to enable Fabric private link, verify connector support before building a mirroring architecture around a connector that will not function in that network configuration.
+                On-premises data gateways (required for Oracle, and for SQL Server in many on-premises deployments) fail to register when private link is enabled; VNet data gateways work as a substitute but require separate provisioning. If private link is enabled or planned, verify connector support before building a mirroring architecture around a connector that will not function in that network configuration.
             </p>
 
             <p>
-                <strong>CDC requirements vary significantly by source.</strong> Whether mirroring requires CDC to be enabled on the source database depends on which source and version you are using:
+                <strong>CDC requirements vary significantly by source.</strong>
             </p>
 
             <div class="table-wrapper">
@@ -1019,27 +1073,27 @@
             </div>
 
             <p>
-                The SQL Server 2016–2022 CDC requirement is the most operationally significant. CDC writes captured changes to dedicated tables in the source database, consumes transaction log space, and requires active management to prevent log fill. On a busy SQL Server, DBAs often resist enabling it. If the transaction log fills and is truncated before mirroring can process it, the mirror reseeds from current state rather than resuming incrementally. Azure SQL Database and SQL Server 2025 use newer architectures (Change Feed and Change Event Stream respectively) that carry meaningfully lower source-side overhead. If you have a choice of source version, the newer architecture is worth preferring. If DBA approval for source-side config is uncertain, Open Mirroring requires none of it — see the decision framework in the "Choosing your path" section.
+                The SQL Server 2016–2022 CDC requirement carries the most operational risk. CDC writes captured changes to dedicated tables in the source database, consumes transaction log space, and requires active management to prevent log fill. On a busy SQL Server, DBAs often resist enabling it. If the transaction log fills and is truncated before mirroring can process it, the mirror reseeds from current state rather than resuming incrementally. Azure SQL Database and SQL Server 2025 use newer architectures (Change Feed and Change Event Stream respectively) that carry meaningfully lower source-side overhead. Where there is a choice of source version, the newer architecture is worth preferring.
             </p>
 
             <p>
-                <strong>Availability group secondaries are not supported for SQL Server.</strong> <a href="https://learn.microsoft.com/en-us/fabric/mirroring/sql-server#availability-group" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Fabric Mirroring for SQL Server requires connection to the primary database</a> of an Always On availability group. Connecting to a secondary — even a readable secondary designated for reporting workloads — is not supported. Organisations that deliberately route external connections away from the primary for load isolation will find this a hard blocker.
+                <strong>Availability group secondaries are not supported for SQL Server.</strong> <a href="https://learn.microsoft.com/en-us/fabric/mirroring/sql-server#availability-group" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Fabric Mirroring for SQL Server requires connection to the primary</a> of an Always On availability group. Connecting to a secondary - even a designated readable secondary - is not supported. Organisations that deliberately route external connections to the secondary for load isolation will find this a hard blocker.
             </p>
 
             <p>
-                <strong>Deletion vectors break some Python Delta readers.</strong> When rows are deleted from a source and replicated to Fabric, the Delta table uses <a href="https://docs.delta.io/latest/delta-deletion-vectors.html" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">deletion vectors</a> — a Delta Lake protocol feature that marks deleted rows without immediately rewriting Parquet files. Spark handles deletion vectors correctly, as does DuckDB version 1.2 and above. Polars (via <code>delta-rs</code>) does not: it raises <code>DeltaProtocolError: The table has set these reader features: {'deletionVectors'} but these are not yet supported</code>. This was confirmed by community reports and acknowledged by Microsoft engineers in May 2025. If your notebooks use Polars to read mirrored Delta tables, the reads will succeed until the first delete is replicated, then fail. Use Spark or DuckDB for Delta reads against mirrored tables.
+                <strong>Deletion vectors break some Python Delta readers.</strong> When rows are deleted from a source and replicated to Fabric, the Delta table uses <a href="https://docs.delta.io/latest/delta-deletion-vectors.html" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">deletion vectors</a> - marking deleted rows without rewriting Parquet files. Spark handles this correctly, as does DuckDB 1.2 and above. Polars (via <code>delta-rs</code>) does not: it raises <code>DeltaProtocolError: The table has set these reader features: {'deletionVectors'} but these are not yet supported</code>. This was confirmed by community reports and acknowledged by Microsoft engineers in May 2025. Reads succeed until the first delete is replicated, then fail. Use Spark or DuckDB for Delta reads against mirrored tables.
             </p>
 
             <p>
-                <strong>Reseed behaviour and automatic recovery.</strong> If Fabric capacity is paused for an extended period, the source database's transaction log may be truncated before mirroring can resume, triggering a <a href="https://learn.microsoft.com/en-us/fabric/mirroring/troubleshooting#changes-to-fabric-capacity" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">reseed from the current source state</a>. For <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-database-automatic-reseed" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Azure SQL Database</a> and <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-managed-instance-automatic-reseed" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Azure SQL Managed Instance</a>, automatic reseed is now enabled by default: rather than staying broken, mirroring reinitialises automatically. Two triggers exist: <em>table-level reseed</em> for DDL changes (add, drop, alter, or rename column; truncate or rename table; add nonclustered primary key) and <em>database-level reseed</em> when the transaction log exceeds a configured threshold. <a href="https://learn.microsoft.com/en-us/fabric/mirroring/sql-server-configure-automatic-reseed" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">SQL Server 2025</a> supports automatic reseed but it is disabled by default. In all cases, reseed reinitialises from current source state — the improvement is operational resilience, not historical fidelity.
+                <strong>Reseed behaviour and automatic recovery.</strong> If Fabric capacity is paused for an extended period and the source database's transaction log is truncated before mirroring can resume, a <a href="https://learn.microsoft.com/en-us/fabric/mirroring/troubleshooting#changes-to-fabric-capacity" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">reseed from current source state</a> is triggered. For <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-database-automatic-reseed" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Azure SQL Database</a> and <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-managed-instance-automatic-reseed" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Azure SQL Managed Instance</a>, automatic reseed is enabled by default - mirroring reinitialises automatically rather than staying broken. <a href="https://learn.microsoft.com/en-us/fabric/mirroring/sql-server-configure-automatic-reseed" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">SQL Server 2025</a> supports it but it is disabled by default. Two reseed triggers exist: <em>table-level</em> (DDL changes, truncate, rename) and <em>database-level</em> (transaction log exceeds a configured threshold). In all cases, reseed reinitialises from current source state - the improvement is operational resilience, not historical fidelity.
             </p>
 
             <p>
-                <strong>Structured replication logs exist via Workspace Monitoring.</strong> Enable <a href="https://learn.microsoft.com/en-us/fabric/mirroring/monitor-logs" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Workspace Monitoring</a> for your workspace and replication events are written to an Eventhouse KQL database automatically. The <code>MirroredDatabaseTableExecution</code> table records ProcessedRows, ProcessedBytes, ReplicatorBatchLatency, OperationStartTime, OperationEndTime, and ErrorMessage per operation, enough to query replication history, measure lag over time, and surface failures. Workspace Monitoring is not enabled by default and is charged at standard Eventhouse rates. The events are emitted automatically once configured; you are building queries on top of the data, not the capture layer itself.
+                <strong>Structured replication logs via Workspace Monitoring.</strong> Enable <a href="https://learn.microsoft.com/en-us/fabric/mirroring/monitor-logs" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Workspace Monitoring</a> and replication events are written to an Eventhouse KQL database automatically. The <code>MirroredDatabaseTableExecution</code> table records ProcessedRows, ProcessedBytes, ReplicatorBatchLatency, OperationStartTime, OperationEndTime, and ErrorMessage per operation - enough to query replication history, measure lag over time, and surface failures. Workspace Monitoring is not enabled by default and is charged at standard Eventhouse rates.
             </p>
 
             <p>
-                <strong>Minor configuration limits.</strong> Several smaller constraints worth knowing: the maximum table count per mirrored database is <a href="https://learn.microsoft.com/en-us/fabric/mirroring/troubleshooting#limits-error-messages" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">1,000</a> — sources above this threshold must be split across multiple items. Every mirrored database automatically creates a paired SQL analytics endpoint that cannot be deleted or disabled independently. For MySQL, only one database per server instance can be mirrored, and tables cannot be added or removed after initial setup.
+                <strong>Minor configuration limits.</strong> Maximum table count per mirrored database is <a href="https://learn.microsoft.com/en-us/fabric/mirroring/troubleshooting#limits-error-messages" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">1,000</a> - sources above this threshold must be split across multiple items. Every mirrored database automatically creates a paired SQL analytics endpoint that cannot be deleted or disabled independently. For MySQL, only one database per server instance can be mirrored, and tables cannot be added or removed after initial setup.
             </p>
 
             <hr>
@@ -1047,15 +1101,15 @@
             <h2>Security and governance</h2>
 
             <p>
-                Row-level security (RLS), column-level security (OLS), and dynamic data masking configured in the source system are <strong>not propagated to the mirrored database</strong>. This is documented for all SQL-family sources and applies universally. A user who is restricted from seeing certain rows or columns in the source database will have no such restrictions applied when querying the mirrored replica via the SQL analytics endpoint or Spark, unless those controls are manually re-configured in Fabric.
+                Row-level security (RLS), column-level security (OLS), and dynamic data masking configured in the source system are <strong>not propagated to the mirrored database</strong>. This is documented for all SQL-family sources and applies universally. A user restricted from seeing certain rows or columns in the source will have no such restrictions applied when querying the mirrored replica via the SQL analytics endpoint or Spark, unless those controls are manually re-implemented at the Fabric layer.
             </p>
 
             <p>
-                This is not a mirroring bug. It is an architectural consequence of the data moving to a different system. But it is a significant governance consideration for organisations with row-level security in their source databases. Any security model that relies on source-database RLS must be rebuilt entirely at the Fabric layer.
+                This is an architectural consequence of the data moving to a different system, not a mirroring bug. It is a significant governance consideration for organisations with row-level security in source databases. Any security model that relies on source-database RLS must be rebuilt entirely in Fabric.
             </p>
 
             <p>
-                I did not run empirical tests on RLS behaviour at the SQL analytics endpoint, cross-tenant sharing scenarios, or the interaction between workspace permissions and item-level permissions. The documentation on these topics is thin. Before deploying mirroring for data with regulatory or contractual access controls, test the security model explicitly — do not infer from the source database's configuration.
+                The documentation on RLS behaviour at the SQL analytics endpoint, cross-tenant sharing scenarios, and the interaction between workspace permissions and item-level permissions is thin. Before deploying mirroring for data with regulatory or contractual access controls, test the security model explicitly - do not infer from the source database's configuration.
             </p>
 
             <hr>
@@ -1063,7 +1117,7 @@
             <h2>Choosing your path</h2>
 
             <p>
-                The evaluation is two-dimensional. Your source constrains what is even possible; your requirements determine whether what is possible is actually suitable. Most practitioners inherit their source — they do not choose it. Start the evaluation there.
+                The evaluation is two-dimensional. Your source constrains what is technically possible; your requirements determine whether what is possible is actually suitable. Most practitioners inherit their source - they do not choose it. Start there.
             </p>
 
             <h3>Phase 1: Source assessment</h3>
@@ -1093,7 +1147,7 @@
                         <tr>
                             <td><strong>Sparse documentation</strong></td>
                             <td>Oracle, BigQuery, SAP, Dremio</td>
-                            <td>Significant gaps in published behaviour; treat <code>—</code> cells in appendix as unknowns requiring direct testing; budget validation time before committing</td>
+                            <td>Significant gaps in published behaviour; treat <code>-</code> cells in appendix as unknowns requiring direct testing; budget validation time before committing</td>
                         </tr>
                         <tr>
                             <td><strong>No native connector</strong></td>
@@ -1111,8 +1165,8 @@
             <ul>
                 <li><strong>Oracle:</strong> <code>NUMBER</code> columns without explicit precision/scale cause table-level failures; On-Premises Data Gateway required in all environments including cloud-hosted Oracle</li>
                 <li><strong>MySQL:</strong> Burstable compute tier unsupported; only one database per server can be mirrored; tables cannot be added or removed after initial setup</li>
-                <li><strong>SQL Server:</strong> Availability group secondaries not supported — connection must be to the primary</li>
-                <li><strong>Any source:</strong> If your Fabric tenant has "Block Public Internet Access" enabled, check the <a href="https://learn.microsoft.com/en-us/fabric/security/security-private-links-overview" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">private link support list</a> — most connectors are not supported and will enter a paused state</li>
+                <li><strong>SQL Server:</strong> Availability group secondaries not supported - connection must be to the primary</li>
+                <li><strong>Any source:</strong> If your Fabric tenant has "Block Public Internet Access" enabled, check the <a href="https://learn.microsoft.com/en-us/fabric/security/security-private-links-overview" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">private link support list</a> - most connectors will enter a paused state</li>
             </ul>
 
             <h4>3. Can you get source-side configuration approved?</h4>
@@ -1185,9 +1239,9 @@
             <h4>4. If no native connector, or source-side config not approvable: can you use Open Mirroring?</h4>
 
             <ul>
-                <li>Can you read changes from the source using existing mechanisms — Change Tracking, RowVersion, date-modified timestamps, triggers?</li>
+                <li>Can you read changes from the source using existing mechanisms - Change Tracking, RowVersion, date-modified timestamps, triggers?</li>
                 <li>Can you run a process that writes Parquet files to OneLake?</li>
-                <li><strong>Yes to both →</strong> Open Mirroring is your path. You own the change detection logic; no source-side CDC configuration is required.</li>
+                <li><strong>Yes to both →</strong> Open Mirroring is your path. No source-side CDC configuration required.</li>
                 <li><strong>No →</strong> Traditional pipeline or CDC stack. Mirroring in any form is not available for this source.</li>
             </ul>
 
@@ -1195,23 +1249,23 @@
 
             <h3>Phase 2: Requirements fit</h3>
 
-            <p>Only reach this phase if Phase 1 confirmed a viable source. These questions determine whether what is available is actually suitable.</p>
+            <p>Only reach this phase if Phase 1 confirmed a viable source. These questions determine whether what is technically available is actually suitable.</p>
 
             <h4>5. What is the reporting use case?</h4>
 
             <ul>
                 <li><strong>Operational reporting on current source state, minimal or no transforms →</strong> source-to-semantic with Direct Lake; this is mirroring's clearest win. Proceed.</li>
-                <li><strong>Reporting that requires transforms (cleaning, joins, aggregations) →</strong> mirroring handles ingestion; plan compute budget for the transform layers separately. Near-real-time end-to-end requires Spark Structured Streaming or high-frequency micro-batches — neither is free. Decide whether that compute cost is justified before committing to the architecture.</li>
+                <li><strong>Reporting that requires transforms (cleaning, joins, aggregations) →</strong> mirroring handles ingestion; plan compute budget for transform layers separately. Near-real-time end-to-end requires Spark Structured Streaming or high-frequency micro-batches - neither is free. Decide whether that compute cost is justified before committing.</li>
             </ul>
 
             <h4>6. Do you need a replayable raw layer?</h4>
 
             <ul>
-                <li><strong>Yes, and unwilling or unable to maintain one alongside the mirror →</strong> mirroring alone is insufficient. Use a traditional pipeline, or use mirroring for current-state reporting while maintaining a separate raw capture.</li>
-                <li><strong>No, or able to maintain one separately →</strong> proceed.</li>
+                <li><strong>Yes, and unwilling or unable to maintain one alongside the mirror →</strong> mirroring alone is insufficient. Use a traditional pipeline, or use mirroring for current-state reporting while maintaining a separate raw capture layer - see the raw layer section above.</li>
+                <li><strong>No, or able to maintain a raw capture layer separately →</strong> proceed.</li>
             </ul>
 
-            <h4>7. Do you need source-level RLS or column security to propagate to Fabric automatically?</h4>
+            <h4>7. Do you need source-level RLS or column security to propagate automatically?</h4>
 
             <ul>
                 <li><strong>Yes →</strong> mirroring is the wrong tool regardless of source. Security policies are not propagated; they must be rebuilt at the Fabric layer.</li>
@@ -1253,18 +1307,6 @@
                             <td>Depends on approach</td>
                         </tr>
                         <tr>
-                            <td><strong>Source is a read-only replica</strong></td>
-                            <td>Not supported</td>
-                            <td>Viable</td>
-                            <td>Viable</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Private link (Block Internet enabled)</strong></td>
-                            <td>Most connectors unsupported</td>
-                            <td>Supported</td>
-                            <td>Supported</td>
-                        </tr>
-                        <tr>
                             <td><strong>Near-real-time freshness</strong></td>
                             <td>Strong fit</td>
                             <td>Strong fit</td>
@@ -1289,16 +1331,22 @@
                             <td>Built-in</td>
                         </tr>
                         <tr>
+                            <td><strong>Immutable append-only history</strong></td>
+                            <td>Not provided</td>
+                            <td>Not provided</td>
+                            <td>Built-in if designed for it</td>
+                        </tr>
+                        <tr>
                             <td><strong>Source RLS / column security propagated</strong></td>
                             <td>No</td>
                             <td>No</td>
                             <td>Depends</td>
                         </tr>
                         <tr>
-                            <td><strong>Audit trail</strong></td>
-                            <td>Via Workspace Monitoring</td>
-                            <td>Via Workspace Monitoring</td>
-                            <td>Built-in per run</td>
+                            <td><strong>Private link (Block Internet enabled)</strong></td>
+                            <td>Most connectors unsupported</td>
+                            <td>Supported</td>
+                            <td>Supported</td>
                         </tr>
                         <tr>
                             <td><strong>Guaranteed latency SLA</strong></td>
@@ -1327,27 +1375,27 @@
             <h2>Verdict</h2>
 
             <p>
-                After following mirroring's development closely without yet committing to it in production, the constraints that have most consistently given me pause are the missing replay semantics — which make it an imperfect fit for architectures that require a replayable raw layer — and, for enterprise environments, private link incompatibility across most connectors.
+                Mirroring is one of the more genuinely compelling things in the Fabric toolkit - continuous ingestion at near-zero cost is a meaningful offer, and for a large class of operational reporting use cases it works exactly as described. The qualification is precision: it solves a specific problem, and the more clearly that problem is defined before committing, the less likely its limits are to surface in production.
             </p>
 
             <p>
-                <strong>Mirroring is well-suited for:</strong> near-real-time operational reporting where the mirror reflects current source state; replacing DirectQuery with Direct Lake on large datasets; reducing ETL pipeline complexity where you don't need historical replay; Open Mirroring as a generic ingestion mechanism for sources without a native connector.
+                <strong>Where it fits well:</strong> near-real-time operational reporting where the mirror reflects current source state; replacing DirectQuery with Direct Lake on large datasets; reducing analytical query pressure on production sources; Open Mirroring as a flexible ingestion mechanism for sources without a native connector.
             </p>
 
             <p>
-                <strong>Mirroring is a poor fit for:</strong> any architecture that requires historical replay or pipeline replayability; ingestion where append-only, idempotent semantics are required; sources with Oracle <code>NUMBER</code> columns, MySQL on Burstable compute, or SQL Server availability group secondaries; workloads that require security policies from the source to be automatically enforced in Fabric.
+                <strong>Where it does not fit:</strong> architectures that require historical replay or reprocessable ingestion; workloads where append-only, idempotent semantics matter; organisations with compliance requirements for immutable historical records; sources with Oracle <code>NUMBER</code> columns, MySQL on Burstable compute, or SQL Server availability group secondaries; any scenario where source security policies must be automatically enforced in Fabric.
             </p>
 
             <p>
-                <strong>A note on documentation maturity as a risk signal.</strong> The gaps in the appendix matrix are not editorial omissions: they are behaviors that Microsoft has not published documentation for. If the vendor of a feature cannot tell you whether <code>TRUNCATE</code> is replicated, or how a DDL change is handled, you will find out the answer in production. The connectors with the most <code>—</code> entries in the appendix — BigQuery, SAP, Oracle, Dremio — are also generally the less mature ones. Factor testing time into your evaluation accordingly, and do not assume that absence of a documented limitation means the limitation does not exist.
+                <strong>On the raw layer question.</strong> Whether mirroring is an appropriate "bronze" or raw layer comes down to what that layer needs to guarantee. If it needs to be a current-state replica - a query target for operational reporting - mirroring is an excellent implementation of it. If it needs to be an immutable historical store, a replayable event stream, or a disaster recovery asset, mirroring is not a substitute. These two roles are not in competition; many production architectures will benefit from both running in parallel, with mirroring handling the real-time operational layer and a separate lightweight capture handling the historical record.
             </p>
 
             <p>
-                <strong>What to watch:</strong> the extended capabilities (Delta change data feed, view mirroring) are currently free but are paid features once billing is enabled; the <a href="https://learn.microsoft.com/en-us/fabric/mirroring/extended-capabilities" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">documentation confirms billing is temporarily disabled</a>. If you build on these capabilities, budget for the eventual charge. SQL Server 2025 and the Change Event Stream architecture (<a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-database" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">available on Azure SQL Database and SQL MI</a>) are meaningfully better than the CDC-based approach used for older SQL Server versions — if you have a choice of source version, prefer the newer architecture.
+                <strong>Documentation maturity as a risk signal.</strong> The <code>-</code> cells in the appendix matrix are not editorial omissions - they are behaviours Microsoft has not published documentation for. If the vendor of a feature cannot tell you whether <code>TRUNCATE</code> is replicated, or how a DDL change is handled, you will find out in production. The connectors with the most <code>-</code> entries - BigQuery, SAP, Oracle, Dremio - are also generally the less mature ones. Factor testing time into your evaluation, and do not assume that absence of a documented limitation means the limitation does not exist.
             </p>
 
             <p>
-                Mirroring is one of the more genuinely compelling things in the Fabric toolkit — real-time ingestion at near-zero cost is a meaningful offer. The qualification is precision: it solves a specific problem well, and the more clearly you can state that problem before you start, the less likely you are to discover its limits in production.
+                <strong>What to watch.</strong> The extended capabilities (Delta change data feed, view mirroring) are currently free - Microsoft's <a href="https://learn.microsoft.com/en-us/fabric/mirroring/extended-capabilities" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">documentation explicitly states that billing is temporarily disabled</a>, not that these features are free permanently. Budget for the eventual charge if you build on them. SQL Server 2025 and the Change Event Stream architecture (<a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-database" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">available on Azure SQL Database and SQL MI</a>) are meaningfully better than CDC-based mirroring for older SQL Server versions - prefer the newer architecture where there is a choice of source version.
             </p>
 
             <hr>
@@ -1355,11 +1403,11 @@
             <h2>Appendix: Capability limitations by source</h2>
 
             <p>
-                The table below covers feature and capability support across all ten mirroring sources. It is compiled from the official Microsoft documentation limitations pages for each source, linked in the column key below.
+                The table below covers feature and capability support across all ten mirroring sources. It is compiled from the official Microsoft documentation limitations pages for each source, linked in the sources column.
             </p>
 
             <p>
-                A significant number of cells are marked <code>—</code>. These are not gaps in my research — in every case I checked the official Microsoft documentation and found no published guidance. For several sources, including BigQuery, SAP, and Oracle, fundamental operational questions go unanswered: does the connector handle DDL changes? Is <code>TRUNCATE</code> replicated? Can you mirror partitioned tables? Microsoft simply has not documented the answers. The volume of <code>—</code> entries is itself a signal: the less a connector is documented, the less mature it should be assumed to be. For any <code>—</code> cell that matters to your use case, treat it as <em>test before you rely on it in production</em> — you will not find the answer in the docs.
+                A significant number of cells are marked <code>-</code>. These are not gaps in my research - in every case I checked the official Microsoft documentation and found no published guidance. For several sources, including BigQuery, SAP, and Oracle, fundamental operational questions go unanswered: does the connector handle DDL changes? Is <code>TRUNCATE</code> replicated? Can you mirror partitioned tables? Microsoft simply has not documented the answers. The volume of <code>-</code> entries is itself a signal: the less a connector is documented, the less mature it should be assumed to be. For any <code>-</code> cell that matters to your use case, treat it as <em>test before you rely on it in production</em> - you will not find the answer in the docs.
             </p>
 
             <h3>Column key</h3>
@@ -1456,7 +1504,7 @@
                             <td>Concept does not exist in this source</td>
                         </tr>
                         <tr>
-                            <td>—</td>
+                            <td>-</td>
                             <td>Microsoft has not published documentation for this combination; behaviour is unknown without direct testing</td>
                         </tr>
                     </tbody>
@@ -1494,7 +1542,7 @@
                             <td>No</td>
                             <td>N/A</td>
                             <td>No</td>
-                            <td>—</td>
+                            <td>-</td>
                         </tr>
                         <tr>
                             <td><strong>Max tables per mirrored DB</strong></td>
@@ -1519,21 +1567,21 @@
                             <td>No</td>
                             <td>No [d]</td>
                             <td>N/A</td>
-                            <td>—</td>
-                            <td>—</td>
+                            <td>-</td>
+                            <td>-</td>
                         </tr>
                         <tr>
                             <td><strong>Partitioned tables</strong></td>
-                            <td>—</td>
-                            <td>—</td>
-                            <td>—</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
                             <td><strong>No (TABLE)</strong></td>
-                            <td>—</td>
+                            <td>-</td>
                             <td><strong>Yes</strong></td>
-                            <td>—</td>
+                            <td>-</td>
                             <td>N/A</td>
-                            <td>—</td>
-                            <td>—</td>
+                            <td>-</td>
+                            <td>-</td>
                         </tr>
                         <tr>
                             <td><strong>Materialized views</strong></td>
@@ -1542,11 +1590,11 @@
                             <td>No</td>
                             <td>No (TABLE)</td>
                             <td>N/A</td>
-                            <td>—</td>
-                            <td>—</td>
+                            <td>-</td>
+                            <td>-</td>
                             <td>N/A</td>
-                            <td>—</td>
-                            <td>—</td>
+                            <td>-</td>
+                            <td>-</td>
                         </tr>
                         <tr>
                             <td><strong>External tables</strong></td>
@@ -1558,7 +1606,7 @@
                             <td>N/A</td>
                             <td>No</td>
                             <td>N/A</td>
-                            <td>—</td>
+                            <td>-</td>
                             <td>N/A</td>
                         </tr>
                         <tr>
@@ -1660,59 +1708,59 @@
                             <td>✓ (partial)</td>
                             <td>Delayed</td>
                             <td>✓</td>
-                            <td>—</td>
-                            <td>—</td>
+                            <td>-</td>
+                            <td>-</td>
                         </tr>
                         <tr>
                             <td><strong>Rename column</strong></td>
-                            <td>—</td>
+                            <td>-</td>
                             <td><strong>Blocked</strong></td>
-                            <td>—</td>
+                            <td>-</td>
                             <td><strong>Stop/restart</strong></td>
                             <td><strong>Disrupts replication</strong></td>
                             <td>✓</td>
-                            <td>—</td>
+                            <td>-</td>
                             <td>✓ (old + new col retained)</td>
-                            <td>—</td>
-                            <td>—</td>
+                            <td>-</td>
+                            <td>-</td>
                         </tr>
                         <tr>
                             <td><strong>Change column type</strong></td>
-                            <td>—</td>
+                            <td>-</td>
                             <td><strong>Blocked</strong></td>
-                            <td>—</td>
+                            <td>-</td>
                             <td><strong>Stop/restart</strong></td>
                             <td><strong>Disrupts replication</strong></td>
                             <td><strong>Blocked</strong></td>
-                            <td>—</td>
+                            <td>-</td>
                             <td>Compatible types only</td>
-                            <td>—</td>
-                            <td>—</td>
+                            <td>-</td>
+                            <td>-</td>
                         </tr>
                         <tr>
                             <td><strong>Alter / add primary key</strong></td>
                             <td><strong>Blocked</strong></td>
                             <td><strong>Blocked</strong></td>
                             <td><strong>Blocked</strong></td>
-                            <td>—</td>
-                            <td>—</td>
+                            <td>-</td>
+                            <td>-</td>
                             <td>N/A</td>
-                            <td>—</td>
+                            <td>-</td>
                             <td>N/A</td>
                             <td>N/A</td>
                             <td>N/A</td>
                         </tr>
                         <tr>
                             <td><strong>TRUNCATE replicated?</strong></td>
-                            <td>—</td>
-                            <td>—</td>
-                            <td>—</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
                             <td><strong>No</strong></td>
-                            <td>—</td>
-                            <td>—</td>
-                            <td>—</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
                             <td>N/A</td>
-                            <td>—</td>
+                            <td>-</td>
                             <td>N/A</td>
                         </tr>
                     </tbody>
@@ -1861,11 +1909,11 @@
                             <td><strong>No</strong></td>
                             <td><strong>No</strong></td>
                             <td>N/A</td>
-                            <td>—</td>
+                            <td>-</td>
                             <td>✓</td>
-                            <td>—</td>
-                            <td>—</td>
-                            <td>—</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
                         </tr>
                         <tr>
                             <td><strong>Ownership change supported</strong></td>
