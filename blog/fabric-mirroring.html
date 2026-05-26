@@ -1120,6 +1120,117 @@
                 The evaluation is two-dimensional. Your source constrains what is technically possible; your requirements determine whether what is possible is actually suitable. Most practitioners inherit their source - they do not choose it. Start there.
             </p>
 
+            <figure class="diagram-wrapper">
+                <svg viewBox="0 0 720 600" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;" aria-label="Decision flowchart for choosing between native database mirroring, open mirroring, and traditional pipelines based on source assessment and requirements fit">
+                    <rect width="720" height="600" fill="#0d1117"/>
+                    <defs>
+                        <marker id="fc-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#3b82f6"/></marker>
+                        <marker id="fc-amber" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#d97706"/></marker>
+                        <marker id="fc-purple" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#a78bfa"/></marker>
+                        <marker id="fc-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#10b981"/></marker>
+                        <marker id="fc-grey" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#6b7280"/></marker>
+                    </defs>
+
+                    <!-- PHASE 1 HEADER -->
+                    <rect x="10" y="10" width="700" height="28" rx="2" fill="#172554" stroke="#3b82f6" stroke-width="1"/>
+                    <text x="360" y="28" text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="700" font-family="'JetBrains Mono', monospace">Phase 1 — Source Assessment</text>
+
+                    <!-- D1: Has native connector? (cx=200, cy=82) -->
+                    <polygon points="200,60 258,82 200,104 142,82" fill="#111827" stroke="#3b82f6" stroke-width="1.5"/>
+                    <text x="200" y="78" text-anchor="middle" fill="#e5e7eb" font-size="9" font-family="'JetBrains Mono', monospace">Has native</text>
+                    <text x="200" y="90" text-anchor="middle" fill="#e5e7eb" font-size="9" font-family="'JetBrains Mono', monospace">connector?</text>
+
+                    <!-- D1 → D2: Yes down -->
+                    <line x1="200" y1="104" x2="200" y2="163" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#fc-blue)"/>
+                    <text x="211" y="137" fill="#3b82f6" font-size="9" font-family="'JetBrains Mono', monospace">Yes</text>
+
+                    <!-- D1 exit: None → bus right -->
+                    <line x1="258" y1="82" x2="425" y2="82" stroke="#d97706" stroke-width="1.5"/>
+                    <text x="338" y="75" text-anchor="middle" fill="#d97706" font-size="9" font-family="'JetBrains Mono', monospace">None</text>
+                    <circle cx="425" cy="82" r="3.5" fill="#d97706"/>
+
+                    <!-- D2: Hard blockers? (cx=200, cy=185) -->
+                    <polygon points="200,163 258,185 200,207 142,185" fill="#111827" stroke="#3b82f6" stroke-width="1.5"/>
+                    <text x="200" y="181" text-anchor="middle" fill="#e5e7eb" font-size="9" font-family="'JetBrains Mono', monospace">Hard</text>
+                    <text x="200" y="193" text-anchor="middle" fill="#e5e7eb" font-size="9" font-family="'JetBrains Mono', monospace">blockers?</text>
+
+                    <!-- D2 → D3: No down -->
+                    <line x1="200" y1="207" x2="200" y2="268" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#fc-blue)"/>
+                    <text x="211" y="241" fill="#3b82f6" font-size="9" font-family="'JetBrains Mono', monospace">No</text>
+
+                    <!-- D2 exit: Yes → bus right -->
+                    <line x1="258" y1="185" x2="425" y2="185" stroke="#d97706" stroke-width="1.5"/>
+                    <text x="338" y="178" text-anchor="middle" fill="#d97706" font-size="9" font-family="'JetBrains Mono', monospace">Yes</text>
+                    <circle cx="425" cy="185" r="3.5" fill="#d97706"/>
+
+                    <!-- D3: Config approved? (cx=200, cy=290) -->
+                    <polygon points="200,268 258,290 200,312 142,290" fill="#111827" stroke="#3b82f6" stroke-width="1.5"/>
+                    <text x="200" y="286" text-anchor="middle" fill="#e5e7eb" font-size="9" font-family="'JetBrains Mono', monospace">Config</text>
+                    <text x="200" y="298" text-anchor="middle" fill="#e5e7eb" font-size="9" font-family="'JetBrains Mono', monospace">approved?</text>
+
+                    <!-- D3 exit: No → bus bottom -->
+                    <line x1="258" y1="290" x2="425" y2="290" stroke="#d97706" stroke-width="1.5"/>
+                    <text x="338" y="283" text-anchor="middle" fill="#d97706" font-size="9" font-family="'JetBrains Mono', monospace">No</text>
+
+                    <!-- BUS VERTICAL (x=425, y=82→290) + arrow to D_OM -->
+                    <line x1="425" y1="82" x2="425" y2="290" stroke="#d97706" stroke-width="1.5"/>
+                    <line x1="425" y1="290" x2="478" y2="290" stroke="#d97706" stroke-width="1.5" marker-end="url(#fc-amber)"/>
+                    <text x="436" y="225" fill="#d97706" font-size="8" font-family="'JetBrains Mono', monospace">Phase 1</text>
+                    <text x="436" y="236" fill="#d97706" font-size="8" font-family="'JetBrains Mono', monospace">exits</text>
+
+                    <!-- D_OM: Open Mirroring viable? (cx=545, cy=290) -->
+                    <polygon points="545,268 610,290 545,312 480,290" fill="#111827" stroke="#a78bfa" stroke-width="1.5"/>
+                    <text x="545" y="286" text-anchor="middle" fill="#e5e7eb" font-size="9" font-family="'JetBrains Mono', monospace">Open Mirroring</text>
+                    <text x="545" y="298" text-anchor="middle" fill="#e5e7eb" font-size="9" font-family="'JetBrains Mono', monospace">viable?</text>
+
+                    <!-- D_OM No → right → Traditional Phase 1 outcome -->
+                    <line x1="610" y1="290" x2="622" y2="290" stroke="#6b7280" stroke-width="1.5" marker-end="url(#fc-grey)"/>
+                    <text x="611" y="283" fill="#6b7280" font-size="8" font-family="'JetBrains Mono', monospace">No</text>
+                    <rect x="624" y="272" width="88" height="36" rx="3" fill="#1c1917" stroke="#6b7280" stroke-width="1"/>
+                    <text x="668" y="287" text-anchor="middle" fill="#9ca3af" font-size="8.5" font-family="'JetBrains Mono', monospace">Traditional</text>
+                    <text x="668" y="300" text-anchor="middle" fill="#9ca3af" font-size="8.5" font-family="'JetBrains Mono', monospace">pipeline only</text>
+
+                    <!-- D3 Yes + D_OM Yes → down to Phase 2 (paths drawn before D4) -->
+                    <path d="M200,312 V420 H360" stroke="#3b82f6" stroke-width="1.5" fill="none"/>
+                    <text x="211" y="368" fill="#3b82f6" font-size="9" font-family="'JetBrains Mono', monospace">Yes</text>
+                    <path d="M545,312 V420 H360" stroke="#a78bfa" stroke-width="1.5" fill="none"/>
+                    <text x="556" y="368" fill="#a78bfa" font-size="9" font-family="'JetBrains Mono', monospace">Yes</text>
+
+                    <!-- PHASE 2 HEADER -->
+                    <rect x="10" y="345" width="700" height="28" rx="2" fill="#14291a" stroke="#10b981" stroke-width="1"/>
+                    <text x="360" y="363" text-anchor="middle" fill="#10b981" font-size="11" font-weight="700" font-family="'JetBrains Mono', monospace">Phase 2 — Requirements Fit</text>
+
+                    <!-- D4: All requirements met? (cx=360, cy=452, hw=95, hh=32) -->
+                    <polygon points="360,420 455,452 360,484 265,452" fill="#111827" stroke="#10b981" stroke-width="1.5"/>
+                    <text x="360" y="447" text-anchor="middle" fill="#e5e7eb" font-size="9" font-family="'JetBrains Mono', monospace">All requirements</text>
+                    <text x="360" y="460" text-anchor="middle" fill="#e5e7eb" font-size="9" font-family="'JetBrains Mono', monospace">met? (steps 5–8)</text>
+
+                    <!-- Steps 5–8 annotation below D4 -->
+                    <text x="360" y="499" text-anchor="middle" fill="#374151" font-size="8" font-family="'JetBrains Mono', monospace">current-state only · no replay · no RLS · no SLA guarantee</text>
+
+                    <!-- D4 Yes → left + down → Mirroring outcome -->
+                    <path d="M360,484 H167 V525" stroke="#10b981" stroke-width="1.5" fill="none" marker-end="url(#fc-green)"/>
+                    <text x="264" y="478" text-anchor="middle" fill="#10b981" font-size="9" font-family="'JetBrains Mono', monospace">Yes</text>
+
+                    <!-- D4 No → right + down → Traditional/Hybrid outcome -->
+                    <path d="M455,452 H553 V525" stroke="#6b7280" stroke-width="1.5" fill="none" marker-end="url(#fc-grey)"/>
+                    <text x="499" y="445" text-anchor="middle" fill="#6b7280" font-size="9" font-family="'JetBrains Mono', monospace">No (any)</text>
+
+                    <!-- OUTCOME: Mirroring (rect center x=167) -->
+                    <rect x="47" y="525" width="240" height="55" rx="4" fill="#052e16" stroke="#10b981" stroke-width="1.5"/>
+                    <text x="167" y="547" text-anchor="middle" fill="#10b981" font-size="10.5" font-weight="700" font-family="'JetBrains Mono', monospace">✓ Mirroring is a fit</text>
+                    <text x="167" y="562" text-anchor="middle" fill="#6ee7b7" font-size="8.5" font-family="'JetBrains Mono', monospace">native or open mirroring</text>
+                    <text x="167" y="574" text-anchor="middle" fill="#4b5563" font-size="8" font-family="'JetBrains Mono', monospace">depending on Phase 1 path</text>
+
+                    <!-- OUTCOME: Traditional/Hybrid (rect center x=553) -->
+                    <rect x="433" y="525" width="240" height="55" rx="4" fill="#1c1917" stroke="#6b7280" stroke-width="1.5"/>
+                    <text x="553" y="547" text-anchor="middle" fill="#9ca3af" font-size="10.5" font-weight="700" font-family="'JetBrains Mono', monospace">Traditional pipeline</text>
+                    <text x="553" y="562" text-anchor="middle" fill="#9ca3af" font-size="8.5" font-family="'JetBrains Mono', monospace">or hybrid approach</text>
+                    <text x="553" y="574" text-anchor="middle" fill="#4b5563" font-size="8" font-family="'JetBrains Mono', monospace">mirroring does not fit</text>
+                </svg>
+                <figcaption>Follow the blue path down Phase 1: if your source has a native connector and clears blockers and config approval, proceed to Phase 2. Any "No" exit routes via the amber bus to the Open Mirroring viability check (purple diamond). If Open Mirroring is also not viable, the outcome is traditional pipeline only. Phase 2 requirements — current-state reporting, no replay, no RLS auto-propagation, no SLA — apply equally to both paths.</figcaption>
+            </figure>
+
             <h3>Phase 1: Source assessment</h3>
 
             <h4>1. Does your source have a native connector, and how mature is it?</h4>
