@@ -643,7 +643,11 @@
             </p>
 
             <p>
-                <strong>CI/CD is supported, with one manual step.</strong> Mirrored databases can be <a href="https://learn.microsoft.com/en-us/fabric/mirroring/mirrored-database-cicd" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">committed to Git and deployed through Fabric deployment pipelines</a>. The database definition is stored as a <code>{name}.MirroredDatabase</code> folder containing <code>mirroring.json</code>. The caveat: mirroring does not start automatically after a deployment pipeline runs. You must manually start or resume replication in each target workspace. Configuration promotion is automated; the replication start is not.
+                <strong>CI/CD is supported, with one manual step — and likely a full initial load.</strong> Mirrored databases can be <a href="https://learn.microsoft.com/en-us/fabric/mirroring/mirrored-database-cicd" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">committed to Git and deployed through Fabric deployment pipelines</a>. The database definition is stored as a <code>{name}.MirroredDatabase</code> folder containing <code>mirroring.json</code>. The caveat: mirroring does not start automatically after a deployment pipeline runs. You must manually start replication in each target workspace.
+            </p>
+
+            <p>
+                Deployment pipelines deploy the item definition — connection settings and table selection — not the underlying Delta data in OneLake. The target workspace receives a configured but empty mirrored database item with no existing replication state. Starting mirroring after deployment almost certainly triggers a full initial load from current source state rather than an incremental pickup from where the source workspace left off. For large databases, this means the target workspace has no data until the seed completes. This behaviour has not been explicitly documented by Microsoft and is worth verifying before relying on deployment pipelines for large-source promotions.
             </p>
 
             <p>
