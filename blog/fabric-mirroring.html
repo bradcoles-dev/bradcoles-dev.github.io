@@ -1256,7 +1256,7 @@
             <h2>Security and governance</h2>
 
             <p>
-                Row-level security (RLS), column-level security (OLS), and dynamic data masking configured in the source system are <strong>not propagated to the mirrored database</strong>. This is documented for all SQL-family sources and applies universally. A user restricted from seeing certain rows or columns in the source will have no such restrictions applied when querying the mirrored replica via the SQL analytics endpoint or Spark, unless those controls are manually re-implemented at the Fabric layer.
+                Row-level security (RLS), column-level security (CLS), and dynamic data masking configured in the source system are <strong>not propagated to the mirrored database</strong>. This is documented for all SQL-family sources and applies universally. A user restricted from seeing certain rows or columns in the source will have no such restrictions applied when querying the mirrored replica via the SQL analytics endpoint or Spark, unless those controls are manually re-implemented at the Fabric layer.
             </p>
 
             <p>
@@ -1644,13 +1644,22 @@
                 Mirroring is one of the more genuinely compelling things in the Fabric toolkit - continuous ingestion at near-zero cost is a meaningful offer, and for a large class of operational reporting use cases it works exactly as described. The qualification is precision: it solves a specific problem, and the more clearly that problem is defined before committing, the less likely its limits are to surface in production.
             </p>
 
-            <p>
-                <strong>Where it fits well:</strong> near-real-time operational reporting where the mirror reflects current source state; replacing DirectQuery with Direct Lake on large datasets; reducing analytical query pressure on production sources; Open Mirroring as a flexible ingestion mechanism for sources without a native connector.
-            </p>
+            <p><strong>Where it fits well:</strong></p>
+            <ul>
+                <li>near-real-time operational reporting where the mirror reflects current source state</li>
+                <li>replacing DirectQuery with Direct Lake on large datasets</li>
+                <li>reducing analytical query pressure on production sources</li>
+                <li>Open Mirroring as a flexible ingestion mechanism for sources without a native connector</li>
+            </ul>
 
-            <p>
-                <strong>Where it does not fit:</strong> architectures that require historical replay or reprocessable ingestion; workloads where append-only, idempotent semantics matter; organisations with compliance requirements for immutable historical records; sources with Oracle <code>NUMBER</code> columns, MySQL on Burstable compute, or SQL Server availability group secondaries; any scenario where source security policies must be automatically enforced in Fabric.
-            </p>
+            <p><strong>Where it does not fit:</strong></p>
+            <ul>
+                <li>architectures that require historical replay or reprocessable ingestion</li>
+                <li>workloads where append-only, idempotent semantics matter</li>
+                <li>organisations with compliance requirements for immutable historical records</li>
+                <li>sources with Oracle <code>NUMBER</code> columns, MySQL on Burstable compute, or SQL Server availability group secondaries</li>
+                <li>any scenario where source security policies must be automatically enforced in Fabric</li>
+            </ul>
 
             <p>
                 <strong>On the raw layer question.</strong> Whether mirroring is an appropriate "bronze" or raw layer comes down to what that layer needs to guarantee. If it needs to be a current-state replica - a query target for operational reporting - mirroring is an excellent implementation of it. If it needs to be an immutable historical store, a replayable event stream, or a disaster recovery asset, mirroring is not a substitute. These two roles are not in competition; many production architectures will benefit from both running in parallel, with mirroring handling the real-time operational layer and a separate lightweight capture handling the historical record.
@@ -2067,7 +2076,7 @@
                             <td>N/A</td>
                         </tr>
                         <tr>
-                            <td><strong>Column / OLS propagated</strong></td>
+                            <td><strong>Column / CLS propagated</strong></td>
                             <td><strong>No</strong></td>
                             <td><strong>No</strong></td>
                             <td><strong>No</strong></td>
@@ -2239,7 +2248,7 @@
     <script>
         document.querySelectorAll('td').forEach(function(cell) {
             var text = cell.textContent.trim();
-            if (text === 'Blocked') { cell.style.color = '#ef4444'; }
+            if (text === 'Blocked' || text === 'No') { cell.style.color = '#ef4444'; }
             else if (text === 'Stop/restart') { cell.style.color = '#f59e0b'; }
             else if (text === 'Disrupts replication') { cell.style.color = '#f97316'; }
         });
