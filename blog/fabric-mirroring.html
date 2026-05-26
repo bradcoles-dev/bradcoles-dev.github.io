@@ -1562,45 +1562,45 @@
                     <tbody>
                         <tr>
                             <td><strong>Native connector required</strong></td>
-                            <td style="color:#10b981">Yes</td>
-                            <td style="color:#ef4444">No</td>
-                            <td style="color:#ef4444">No</td>
+                            <td style="color:#f59e0b">Yes</td>
+                            <td style="color:#10b981">No</td>
+                            <td style="color:#10b981">No</td>
                         </tr>
                         <tr>
                             <td><strong>Source-side config required</strong></td>
-                            <td style="color:#10b981">Yes (varies by source)</td>
-                            <td style="color:#ef4444">No</td>
+                            <td style="color:#f59e0b">Yes (varies by source)</td>
+                            <td style="color:#10b981">No</td>
                             <td>Depends on approach</td>
                         </tr>
                         <tr>
                             <td><strong>Near-real-time freshness</strong></td>
-                            <td>Strong fit</td>
-                            <td>Strong fit</td>
-                            <td>Harder to achieve</td>
+                            <td style="color:#10b981">Strong fit</td>
+                            <td style="color:#10b981">Strong fit</td>
+                            <td style="color:#f59e0b">Harder to achieve</td>
                         </tr>
                         <tr>
                             <td><strong>Source-to-semantic, no transforms</strong></td>
-                            <td>Ideal</td>
-                            <td>Viable</td>
-                            <td>Overkill</td>
+                            <td style="color:#10b981">Ideal</td>
+                            <td style="color:#f59e0b">Viable</td>
+                            <td style="color:#f97316">Overkill</td>
                         </tr>
                         <tr>
                             <td><strong>Transform layers (clean, join, aggregate)</strong></td>
-                            <td>Ingestion only; transforms extra</td>
-                            <td>Ingestion only; transforms extra</td>
-                            <td>Full stack</td>
+                            <td style="color:#f59e0b">Ingestion only; transforms extra</td>
+                            <td style="color:#f59e0b">Ingestion only; transforms extra</td>
+                            <td style="color:#10b981">Full stack</td>
                         </tr>
                         <tr>
                             <td><strong>Replayable raw layer</strong></td>
-                            <td>Not provided</td>
-                            <td>Not provided</td>
-                            <td>Built-in</td>
+                            <td style="color:#ef4444">Not provided</td>
+                            <td style="color:#ef4444">Not provided</td>
+                            <td style="color:#10b981">Built-in</td>
                         </tr>
                         <tr>
                             <td><strong>Immutable append-only history</strong></td>
-                            <td>Not provided</td>
-                            <td>Not provided</td>
-                            <td>Built-in if designed for it</td>
+                            <td style="color:#ef4444">Not provided</td>
+                            <td style="color:#ef4444">Not provided</td>
+                            <td style="color:#f59e0b">Built-in if designed for it</td>
                         </tr>
                         <tr>
                             <td><strong>Source RLS / column security propagated</strong></td>
@@ -1610,7 +1610,7 @@
                         </tr>
                         <tr>
                             <td><strong>Private link (Block Internet enabled)</strong></td>
-                            <td>Most connectors unsupported</td>
+                            <td style="color:#f59e0b">Most connectors unsupported</td>
                             <td style="color:#10b981">Supported</td>
                             <td style="color:#10b981">Supported</td>
                         </tr>
@@ -1622,15 +1622,15 @@
                         </tr>
                         <tr>
                             <td><strong>Engineering overhead</strong></td>
-                            <td>Low</td>
-                            <td>Medium</td>
-                            <td>High</td>
+                            <td style="color:#10b981">Low</td>
+                            <td style="color:#f59e0b">Medium</td>
+                            <td style="color:#ef4444">High</td>
                         </tr>
                         <tr>
                             <td><strong>Ingestion cost</strong></td>
-                            <td>Free</td>
-                            <td>Free (write transactions charged)</td>
-                            <td>Consumes capacity</td>
+                            <td style="color:#10b981">Free</td>
+                            <td style="color:#f59e0b">Free (write transactions charged)</td>
+                            <td style="color:#f97316">Consumes capacity</td>
                         </tr>
                     </tbody>
                 </table>
