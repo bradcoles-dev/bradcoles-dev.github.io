@@ -2224,5 +2224,12 @@
             <p>&copy; 2026 Brad Coles. <a href="../index.html" style="color: var(--accent-bright); text-decoration: none;">Back to Portfolio</a></p>
         </footer>
     </div>
+    <script>
+        document.querySelectorAll('td').forEach(function(cell) {
+            if (cell.textContent.trim() === 'Blocked') {
+                cell.style.color = '#ef4444';
+            }
+        });
+    </script>
 </body>
 </html>
