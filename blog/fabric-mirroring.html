@@ -855,6 +855,94 @@
                 <strong>Definition 3 - Immutable append-only store.</strong> A write-once, never-delete collection of extracted records, typically with extraction timestamps. Source deletes and updates do not remove historical records; they are appended as new versions alongside originals. This is what "bronze" means in recovery-oriented architectures - a layer from which any downstream state can be reconstructed at any point in time. Mirroring explicitly does not provide this: source deletes are applied to the mirror, and stop/restart reseeds from current state.
             </p>
 
+            <figure class="diagram-wrapper">
+                <svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;" aria-label="Comparison table showing three raw layer definitions — current-state replica, change event stream, and immutable store — across data model, mutability, and query model dimensions">
+                    <rect width="720" height="320" fill="#0d1117"/>
+
+                    <!-- Label column header -->
+                    <rect x="10" y="10" width="100" height="52" fill="#111827" stroke="#374151" stroke-width="1" rx="2"/>
+
+                    <!-- Col A header: current-state replica (blue) -->
+                    <rect x="118" y="10" width="187" height="52" fill="#172554" stroke="#3b82f6" stroke-width="1.5" rx="2"/>
+                    <text x="211" y="33" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#93c5fd">Current-state</text>
+                    <text x="211" y="50" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#93c5fd">replica</text>
+
+                    <!-- Col B header: change event stream (amber) -->
+                    <rect x="313" y="10" width="187" height="52" fill="#1c1400" stroke="#d97706" stroke-width="1.5" rx="2"/>
+                    <text x="406" y="33" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#fcd34d">Change event</text>
+                    <text x="406" y="50" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#fcd34d">stream</text>
+
+                    <!-- Col C header: immutable store (green) -->
+                    <rect x="508" y="10" width="202" height="52" fill="#052e16" stroke="#10b981" stroke-width="1.5" rx="2"/>
+                    <text x="609" y="33" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#6ee7b7">Immutable</text>
+                    <text x="609" y="50" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#6ee7b7">store</text>
+
+                    <!-- Mirroring badge under col A -->
+                    <rect x="118" y="66" width="187" height="20" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1" rx="2"/>
+                    <text x="211" y="80" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="9" fill="#60a5fa">Mirroring provides this</text>
+
+                    <!-- Row label: Data model -->
+                    <rect x="10" y="91" width="100" height="70" fill="#111827" stroke="#374151" stroke-width="1" rx="2"/>
+                    <text x="60" y="121" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="9" fill="#9ca3af">Data</text>
+                    <text x="60" y="134" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="9" fill="#9ca3af">model</text>
+
+                    <!-- Row label: Mutability -->
+                    <rect x="10" y="166" width="100" height="70" fill="#111827" stroke="#374151" stroke-width="1" rx="2"/>
+                    <text x="60" y="205" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="9" fill="#9ca3af">Mutability</text>
+
+                    <!-- Row label: Query model -->
+                    <rect x="10" y="241" width="100" height="70" fill="#111827" stroke="#374151" stroke-width="1" rx="2"/>
+                    <text x="60" y="271" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="9" fill="#9ca3af">Query</text>
+                    <text x="60" y="284" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="9" fill="#9ca3af">model</text>
+
+                    <!-- DATA MODEL ROW -->
+                    <rect x="118" y="91" width="187" height="70" fill="#111d35" stroke="#3b82f6" stroke-width="1" rx="2"/>
+                    <text x="128" y="113" font-family="'JetBrains Mono', monospace" font-size="10" fill="#bfdbfe">Upserted rows</text>
+                    <text x="128" y="127" font-family="'JetBrains Mono', monospace" font-size="10" fill="#bfdbfe">reflecting source now</text>
+
+                    <rect x="313" y="91" width="187" height="70" fill="#1a1200" stroke="#d97706" stroke-width="1" rx="2"/>
+                    <text x="323" y="113" font-family="'JetBrains Mono', monospace" font-size="10" fill="#fde68a">Insert / update / delete</text>
+                    <text x="323" y="127" font-family="'JetBrains Mono', monospace" font-size="10" fill="#fde68a">events in commit order</text>
+
+                    <rect x="508" y="91" width="202" height="70" fill="#061a10" stroke="#10b981" stroke-width="1" rx="2"/>
+                    <text x="518" y="113" font-family="'JetBrains Mono', monospace" font-size="10" fill="#a7f3d0">Appended extracts;</text>
+                    <text x="518" y="127" font-family="'JetBrains Mono', monospace" font-size="10" fill="#a7f3d0">all versions retained</text>
+
+                    <!-- MUTABILITY ROW -->
+                    <rect x="118" y="166" width="187" height="70" fill="#111d35" stroke="#3b82f6" stroke-width="1" rx="2"/>
+                    <text x="128" y="188" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#f87171">Mutable</text>
+                    <text x="128" y="202" font-family="'JetBrains Mono', monospace" font-size="10" fill="#bfdbfe">Source deletes applied;</text>
+                    <text x="128" y="216" font-family="'JetBrains Mono', monospace" font-size="10" fill="#bfdbfe">reseeds replace all</text>
+
+                    <rect x="313" y="166" width="187" height="70" fill="#1a1200" stroke="#d97706" stroke-width="1" rx="2"/>
+                    <text x="323" y="188" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#fcd34d">Append-only</text>
+                    <text x="323" y="202" font-family="'JetBrains Mono', monospace" font-size="10" fill="#fde68a">Source deletes become</text>
+                    <text x="323" y="216" font-family="'JetBrains Mono', monospace" font-size="10" fill="#fde68a">tombstone event records</text>
+
+                    <rect x="508" y="166" width="202" height="70" fill="#061a10" stroke="#10b981" stroke-width="1" rx="2"/>
+                    <text x="518" y="188" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#34d399">Immutable</text>
+                    <text x="518" y="202" font-family="'JetBrains Mono', monospace" font-size="10" fill="#a7f3d0">Source changes add new</text>
+                    <text x="518" y="216" font-family="'JetBrains Mono', monospace" font-size="10" fill="#a7f3d0">records; none deleted</text>
+
+                    <!-- QUERY MODEL ROW -->
+                    <rect x="118" y="241" width="187" height="70" fill="#111d35" stroke="#3b82f6" stroke-width="1" rx="2"/>
+                    <text x="128" y="263" font-family="'JetBrains Mono', monospace" font-size="10" fill="#bfdbfe">Snapshot today;</text>
+                    <text x="128" y="277" font-family="'JetBrains Mono', monospace" font-size="10" fill="#bfdbfe">Delta time travel:</text>
+                    <text x="128" y="291" font-family="'JetBrains Mono', monospace" font-size="10" fill="#93c5fd">~1-7 day lookback only</text>
+
+                    <rect x="313" y="241" width="187" height="70" fill="#1a1200" stroke="#d97706" stroke-width="1" rx="2"/>
+                    <text x="323" y="263" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#fcd34d">Replayable</text>
+                    <text x="323" y="277" font-family="'JetBrains Mono', monospace" font-size="10" fill="#fde68a">Replay events to rebuild</text>
+                    <text x="323" y="291" font-family="'JetBrains Mono', monospace" font-size="10" fill="#fde68a">any historical state</text>
+
+                    <rect x="508" y="241" width="202" height="70" fill="#061a10" stroke="#10b981" stroke-width="1" rx="2"/>
+                    <text x="518" y="263" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#6ee7b7">Full history</text>
+                    <text x="518" y="277" font-family="'JetBrains Mono', monospace" font-size="10" fill="#a7f3d0">Rebuild any downstream</text>
+                    <text x="518" y="291" font-family="'JetBrains Mono', monospace" font-size="10" fill="#a7f3d0">state at any point</text>
+                </svg>
+                <figcaption>Three interpretations of a raw layer. Current-state replica (blue, what mirroring delivers): mutable, snapshot-only. Change event stream (amber): append-only event log, replayable to any past state. Immutable store (green): no rows ever deleted, full history available for reconstruction. Mirroring's mutability is the key constraint that rules it out for recovery-oriented architectures.</figcaption>
+            </figure>
+
             <h3>When mirroring is sufficient as an ingestion layer</h3>
 
             <ul>
