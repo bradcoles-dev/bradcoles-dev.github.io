@@ -4,17 +4,17 @@ This file provides important context for AI assistants working on this portfolio
 
 ## Project Overview
 
-Single-page portfolio website for Brad Coles, a Senior Data Engineering Consultant based in Adelaide, South Australia. The site showcases professional experience, technical skills, projects, certifications, and contact information.
+Portfolio website and technical blog for Brad Coles, a Senior Data Engineering Consultant based in Adelaide, South Australia. The site showcases professional experience, technical skills, projects, certifications, and contact information. Blog articles on data engineering and Microsoft Fabric are published under `blog/`.
 
 **Language:** Australian English (en-AU) - Use Australian spelling conventions throughout (e.g., "optimisation" not "optimization", "utilisation" not "utilization", "colour" not "color" in text content).
 
 ## Architecture Decisions
 
-### Single-Page Design
-The entire website is contained in a single `index.html` file with embedded CSS and JavaScript. This was chosen for:
+### Site Structure
+The portfolio is a single `index.html` file with embedded CSS and JavaScript. Blog articles are individual self-contained HTML files under `blog/`, each with embedded styles consistent with the main site theme. This structure was chosen for:
 - Simplicity - no build process required
 - Fast loading - everything loads at once
-- Easy maintenance - one file to manage
+- Easy maintenance - no framework or dependencies
 - GitHub Pages compatibility - works out of the box
 
 ### Styling Approach

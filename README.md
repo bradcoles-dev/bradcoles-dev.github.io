@@ -1,10 +1,10 @@
 # Brad Coles - Personal Portfolio Website
 
-Senior Data Engineering Consultant portfolio website showcasing experience, projects, certifications, and technical expertise.
+Senior Data Engineering Consultant portfolio website showcasing experience, projects, certifications, technical expertise, and blog articles.
 
 ## Overview
 
-This is a single-page portfolio website built with vanilla HTML, CSS, and JavaScript. It features a modern, tech-focused design with animated backgrounds, responsive layouts, and smooth scrolling navigation.
+A portfolio website and technical blog built with vanilla HTML, CSS, and JavaScript. It features a modern, tech-focused design with animated backgrounds, responsive layouts, and smooth scrolling navigation.
 
 **Live Site:** [https://bradcoles-dev.github.io](https://bradcoles-dev.github.io)
 
@@ -12,7 +12,12 @@ This is a single-page portfolio website built with vanilla HTML, CSS, and JavaSc
 
 ```
 bradcoles-dev.github.io/
-├── index.html              # Main portfolio page (single-page application)
+├── index.html              # Main portfolio page
+├── blog/                   # Technical blog articles
+│   ├── fabric-mirroring.html
+│   ├── fabric-delta-table-maintenance.html
+│   ├── fabric-private-links.html
+│   └── ai-augmented-engineering.html
 ├── images/                 # Image assets
 │   └── Head_shot-removebg-preview.png  # Profile headshot image
 ├── _config.yml             # Jekyll configuration (GitHub Pages)
@@ -32,7 +37,7 @@ bradcoles-dev.github.io/
 - **Responsive Design** - Mobile-first approach with breakpoints at 768px
 - **Animated Background** - Moving grid pattern using CSS animations
 - **Sticky Navigation** - Shows/hides on scroll with smooth transitions
-- **Sections:**
+- **Portfolio Sections:**
   - Hero with profile image and social links
   - Technical Stack grid
   - Experience timeline
@@ -41,6 +46,7 @@ bradcoles-dev.github.io/
   - Education & Awards
   - About Me
   - Contact form (Netlify integration)
+- **Technical Blog** - In-depth articles on data engineering and Microsoft Fabric
 - **SEO Optimized** - Meta tags, Open Graph, Twitter Cards, structured data
 - **Accessibility** - ARIA labels, semantic HTML, keyboard navigation
 
@@ -52,19 +58,11 @@ Simply open `index.html` in a web browser. No build process required.
 
 ### Making Changes
 
-The website is a single HTML file with embedded CSS and JavaScript. Key sections to update:
-
-- **Profile/Bio**: Lines 780-790 (hero section)
-- **Skills**: Lines 794-846 (skills grid)
-- **Experience**: Lines 849-872 (timeline)
-- **Projects**: Lines 875-912 (project cards)
-- **Certifications**: Lines 914-1025 (cert grid)
-- **Education**: Lines 1027-1066 (education grid)
-- **Contact**: Lines 970-999 (contact section)
+The portfolio is a single HTML file (`index.html`) with embedded CSS and JavaScript. Blog articles are individual HTML files in the `blog/` directory, each self-contained with embedded styles consistent with the main site theme.
 
 ### Styling
 
-All CSS is embedded in the `<style>` tag (lines 28-761). Key CSS variables are defined in `:root` for easy theming:
+All CSS is embedded in each file's `<style>` tag. Key CSS variables are defined in `:root` for easy theming:
 
 ```css
 --bg-dark: #0a0e1a;
@@ -72,6 +70,14 @@ All CSS is embedded in the `<style>` tag (lines 28-761). Key CSS variables are d
 --accent: #3b82f6;
 --success: #10b981;
 ```
+
+### Adding a Blog Article
+
+Create a new HTML file in `blog/` using an existing article as a template. Ensure the file includes:
+- Consistent `<head>` metadata (Open Graph, Twitter Cards, GA tag)
+- An accuracy notice callout if the content may date quickly
+- A back link to `../index.html`
+- The standard footer
 
 ### Deployment
 
@@ -92,11 +98,10 @@ The contact form uses Netlify Forms for submission handling. If not deployed on 
 
 Potential improvements to consider:
 - Add dark/light mode toggle
-- Implement blog section
 - Add project case studies with detailed pages
 - Integrate analytics
 - Add downloadable resume/CV
-- Create separate CSS/JS files for better organization
+- Create separate CSS/JS files for better organisation
 
 ## License
 
