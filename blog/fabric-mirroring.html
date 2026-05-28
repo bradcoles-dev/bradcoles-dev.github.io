@@ -1106,7 +1106,7 @@
             </p>
 
             <p>
-                <strong>Oracle <code>NUMBER</code> without explicit precision or scale causes hard failures.</strong> The common Oracle pattern <code>col NUMBER</code> rather than <code>col NUMBER(10,2)</code> causes the error <code>Invalid Decimal Precision or Scale. Precision: 38, Scale: 127</code>, blocking the entire table. There is no workaround within mirroring - it does not support custom SELECT queries that could add an explicit cast. Changing a production Oracle column type is typically not feasible, meaning affected tables must be handled outside mirroring via pipelines or copy jobs.
+                <strong>Oracle <code>NUMBER</code> without explicit precision or scale triggers <code>Invalid Decimal Precision or Scale. Precision: 38, Scale: 127</code>, blocking the entire table.</strong> The root cause is an outdated Oracle client/ODP driver on the On-Premises Data Gateway machine — not a fundamental mirroring limitation. Microsoft has <a href="https://learn.microsoft.com/en-us/fabric/mirroring/oracle-limitations#cause" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">published a resolution</a>: install the latest Oracle Client for Microsoft Tools (ODP driver) on the gateway VM, restart the gateway service, and restart mirroring. If upgrading the Oracle client is not feasible in your environment, affected tables must be handled outside mirroring via pipelines or copy jobs.
             </p>
 
             <p>
@@ -1441,7 +1441,7 @@
             <p>Check these before going further. Any one of them may end the native mirroring evaluation:</p>
 
             <ul>
-                <li><strong>Oracle:</strong> <code>NUMBER</code> columns without explicit precision/scale cause table-level failures; On-Premises Data Gateway required in all environments including cloud-hosted Oracle</li>
+                <li><strong>Oracle:</strong> <code>NUMBER</code> columns without explicit precision/scale can cause table-level failures — resolvable by upgrading the Oracle Client for Microsoft Tools (ODP driver) on the gateway VM; On-Premises Data Gateway required in all environments including cloud-hosted Oracle</li>
                 <li><strong>MySQL:</strong> Burstable compute tier unsupported; only one database per server can be mirrored; tables cannot be added or removed after initial setup</li>
                 <li><strong>SQL Server:</strong> Availability group secondaries not supported - connection must be to the primary</li>
                 <li><strong>Any source:</strong> If your Fabric tenant has "Block Public Internet Access" enabled, check the <a href="https://learn.microsoft.com/en-us/fabric/security/security-private-links-overview" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">private link support list</a> - most connectors will enter a paused state</li>
@@ -1669,7 +1669,7 @@
                 <li>architectures that require historical replay or reprocessable ingestion</li>
                 <li>workloads where append-only, idempotent semantics matter</li>
                 <li>organisations with compliance requirements for immutable historical records</li>
-                <li>sources with Oracle <code>NUMBER</code> columns, MySQL on Burstable compute, or SQL Server availability group secondaries</li>
+                <li>sources with Oracle <code>NUMBER</code> columns where upgrading the Oracle Client for Microsoft Tools on the gateway VM is not feasible, MySQL on Burstable compute, or SQL Server availability group secondaries</li>
                 <li>any scenario where source security policies must be automatically enforced in Fabric</li>
             </ul>
 
