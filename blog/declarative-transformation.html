@@ -19,18 +19,18 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://bradcoles-dev.github.io/blog/declarative-transformation.html">
-    <meta property="og:title" content="The Transformation of Data Transformation: A Decade of the Declarative Shift">
+    <meta property="og:title" content="From Imperative to Declarative: How Data Engineering Found a Better Way">
     <meta property="og:description" content="How declarative transformation frameworks replaced notebook-first pipelines over a decade — what the shift looks like in practice, why every major platform arrived at the same answer, and how to think about moving forward.">
     <meta property="og:image" content="https://bradcoles-dev.github.io/preview.png">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://bradcoles-dev.github.io/blog/declarative-transformation.html">
-    <meta property="twitter:title" content="The Transformation of Data Transformation: A Decade of the Declarative Shift">
+    <meta property="twitter:title" content="From Imperative to Declarative: How Data Engineering Found a Better Way">
     <meta property="twitter:description" content="How declarative transformation frameworks replaced notebook-first pipelines over a decade — what the shift looks like in practice, why every major platform arrived at the same answer, and how to think about moving forward.">
     <meta property="twitter:image" content="https://bradcoles-dev.github.io/preview.png">
 
-    <title>The Transformation of Data Transformation: A Decade of the Declarative Shift | Brad Coles</title>
+    <title>From Imperative to Declarative: How Data Engineering Found a Better Way | Brad Coles</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Press+Start+2P&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -289,6 +289,24 @@
             font-style: italic;
         }
 
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            padding: 1.25rem 1.5rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        pre code {
+            background: none;
+            border: none;
+            padding: 0;
+            font-size: inherit;
+            color: var(--text-primary);
+        }
+
         figure.chart-wrapper {
             margin: 2rem 0;
             border: 1px solid var(--border);
@@ -339,7 +357,7 @@
                 <span class="blog-category">Architecture</span>
                 <span class="blog-category">dbt</span>
             </div>
-            <h1>The Transformation of Data Transformation: A Decade of the Declarative Shift</h1>
+            <h1>From Imperative to Declarative: How Data Engineering Found a Better Way</h1>
             <p class="blog-subtitle">Notebook-first workloads are being replaced. Not overnight, and not entirely — but the direction of travel is clear. This covers what the shift looks like in practice, how it played out historically, and how to think about moving forward.</p>
             <p class="blog-byline">Brad Coles · May 2026</p>
         </header>
@@ -385,12 +403,29 @@
                 The shift we're talking about isn't about SQL the language, or graphical ETL designers. It's about the framework built around SQL — how dependencies between models get managed, how testing gets enforced, how documentation stays current, and whether your business logic is tied to a specific execution engine or not. That's what's changed.
             </p>
 
+            <p>
+                A concrete example: SCD Type 2. In an imperative approach, you write the logic yourself — join new data to the existing table on the business key, check whether any tracked columns have changed, end-date the old row, insert a new version. In PySpark that's roughly 30 lines of Delta merge logic, and you own every edge case.
+            </p>
+
+            <p>In a declarative framework, you describe what you want:</p>
+
+<pre><code>snapshots:
+  - name: customers
+    config:
+      unique_key: customer_id
+      strategy: timestamp
+      updated_at: updated_at</code></pre>
+
+            <p>
+                Run <code>dbt snapshot</code>. The framework handles the comparison, the end-dating, and the insert. You declared the desired outcome — track history on this table using this key — and the system worked out the how.
+            </p>
+
             <hr>
 
             <h2>2. When: A Decade in the Making</h2>
 
             <div class="callout">
-                Find where your current transformation tooling sits in the left column. That date is your baseline.
+                Find where your current data engineering tooling sits in the left column. That date is your baseline.
             </div>
 
             <div class="table-wrapper">
@@ -608,7 +643,7 @@
             <h3>Scope first</h3>
 
             <p>
-                This article has focused on the T in ELT, but it's worth noting that the declarative shift is happening across the whole stack — not just the transformation layer.
+                The declarative shift is happening across the whole ELT stack — but the tooling is most mature, and the evidence most compelling, in the transformation layer. That's where most of this article has focused.
             </p>
 
             <p>
@@ -697,8 +732,9 @@
             <h2 style="margin-top: 1rem;">Coming Next</h2>
 
             <div class="verdict">
-                <p>I've been building a medallion lakehouse architecture on Microsoft Fabric — four Lakehouses, bronze through gold, orchestrated end-to-end — using dbt for the T in ELT. The follow-up guide covers the full setup: adapter choice, cross-Lakehouse routing, notebook orchestration, authentication, the gotchas that actually cost time, and a practical comparison with Fabric's native Materialized Lake Views.</p>
-                <p style="margin-bottom: 0; margin-top: 0.75rem;">If you're evaluating dbt on Fabric for a client engagement, or just trying to understand where the platform is heading, that one's for you.</p>
+                <p>The follow-up to this article is a hands-on guide to building declarative ELT on Microsoft Fabric — a full medallion architecture, bronze through gold, with Copy Job handling ingestion declaratively and dbt handling the transformation layer. It covers the full setup: adapter choice, cross-Lakehouse routing, notebook orchestration, and authentication.</p>
+                <p style="margin-top: 0.75rem;">It also covers the gaps honestly — what's not yet enterprise-ready, what requires workarounds, and a clear breakdown of who should build this now and who should wait for the ecosystem to mature.</p>
+                <p style="margin-bottom: 0; margin-top: 0.75rem;">If you're evaluating declarative ELT on Fabric for a client engagement, that one's for you.</p>
             </div>
 
             <hr>
