@@ -346,11 +346,11 @@
 
         <article>
             <p>
-                Declarative transformation has been gaining momentum over the past decade, heralded in by dbt back in 2016. Data engineering teams have slowly but surely been replacing their notebook-first workloads and not looking back — finding a remedy for notebook sprawl, inconsistent documentation, and a lack of consistent testing.
+                Declarative programming has been gaining momentum across the data engineering stack over the past decade. The transformation layer got there first — heralded in by dbt back in 2016, with data engineering teams slowly but surely replacing their notebook-first workloads and not looking back. But the shift hasn't stopped at transformation. Ingestion tools like Fivetran, Airbyte, Fabric's Copy Job, and Databricks' Lakeflow Connect have brought the same idea to the Extract and Load steps — you declare what you want moved and where, and the platform handles execution, schema changes, and incremental state. The whole ELT stack is moving in the same direction.
             </p>
 
             <p>
-                But what exactly is declarative transformation, and how does it differ from the notebook approach? You've probably heard of dbt and SQLMesh. If you're on Databricks, Snowflake, or Fabric you're likely aware of Delta Live Tables, Dynamic Tables, or Materialized Lake Views. It's not the vendor or the tool that matters — it's the underlying approach.
+                But what exactly does declarative mean, and how does it differ from the way most teams work today? You've probably heard of dbt and SQLMesh. If you're on Databricks, Snowflake, or Fabric you're likely aware of Delta Live Tables, Dynamic Tables, or Materialized Lake Views. It's not the vendor or the tool that matters — it's the underlying approach.
             </p>
 
             <p>
@@ -608,15 +608,19 @@
             <h3>Scope first</h3>
 
             <p>
-                Declarative transformation tools cover the T in ELT — not all of it, and it's worth being clear about that upfront.
+                This article has focused on the T in ELT, but it's worth noting that the declarative shift is happening across the whole stack — not just the transformation layer.
             </p>
 
             <p>
-                The Extract and Load steps are inherently procedural. Connecting to external systems, moving data, handling schemas you don't control — Python and PySpark are the right tools there. Streaming, ML inference, complex nested data, iterative algorithms — also legitimately procedural. Declarative tools don't handle these well, and the good ones don't try to.
+                Common ingestion patterns are increasingly declarative too. Fivetran, Airbyte, and Microsoft Fabric's Copy Job all follow the same principle — you declare which sources and destinations to connect, what to copy and how, and the platform handles execution, schema changes, and incremental state. Lakeflow Connect on Databricks takes the same approach. You configure the desired outcome; the tool owns the how.
             </p>
 
             <p>
-                The sweet spot is the <strong>transformation layer</strong>: stable, well-defined, SQL-expressible business logic that turns landed data into clean, trusted models. That's where the notebook costs compound, and that's where declarative tools pay for themselves.
+                Where procedural code still makes sense: complex API ingestion with custom authentication, bespoke data sources, streaming, ML inference, complex nested data, and iterative algorithms. These legitimately need Python and PySpark, and declarative tools don't try to replace them.
+            </p>
+
+            <p>
+                The <strong>transformation layer</strong> is where the shift has been most pronounced and where the tooling is most mature — stable, well-defined, SQL-expressible business logic that turns landed data into clean, trusted models. That's where the notebook costs compound most visibly, and that's where declarative tools have the clearest payoff. But the direction of travel for the broader stack is the same.
             </p>
 
             <h3>The declarative spectrum</h3>
