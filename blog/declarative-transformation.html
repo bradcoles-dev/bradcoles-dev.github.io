@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="How declarative transformation frameworks replaced notebook-first pipelines over a decade — what the shift looks like in practice, why every major platform arrived at the same answer, and how to think about moving forward.">
+    <meta name="keywords" content="dbt, declarative transformation, data engineering, SQLMesh, Delta Live Tables, Materialized Lake Views, Spark Declarative Pipelines, Databricks, Snowflake, Microsoft Fabric, ELT, analytics engineering">
+    <meta name="author" content="Brad Coles">
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E8BDECYXD8"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-E8BDECYXD8');
+    </script>
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://bradcoles-dev.github.io/blog/declarative-transformation.html">
+    <meta property="og:title" content="The Transformation of Data Transformation: A Decade of the Declarative Shift">
+    <meta property="og:description" content="How declarative transformation frameworks replaced notebook-first pipelines over a decade — what the shift looks like in practice, why every major platform arrived at the same answer, and how to think about moving forward.">
+    <meta property="og:image" content="https://bradcoles-dev.github.io/preview.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://bradcoles-dev.github.io/blog/declarative-transformation.html">
+    <meta property="twitter:title" content="The Transformation of Data Transformation: A Decade of the Declarative Shift">
+    <meta property="twitter:description" content="How declarative transformation frameworks replaced notebook-first pipelines over a decade — what the shift looks like in practice, why every major platform arrived at the same answer, and how to think about moving forward.">
+    <meta property="twitter:image" content="https://bradcoles-dev.github.io/preview.png">
+
+    <title>The Transformation of Data Transformation: A Decade of the Declarative Shift | Brad Coles</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Press+Start+2P&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0e1a;
+            --bg-card: #111827;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent: #3b82f6;
+            --accent-bright: #60a5fa;
+            --accent-dim: #1e40af;
+            --success: #10b981;
+            --warning: #d97706;
+            --border: #1f2937;
+            --code-bg: #0d1117;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+                linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            padding: 3rem 0 2rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .back-link {
+            display: inline-block;
+            color: var(--accent-bright);
+            text-decoration: none;
+            margin-bottom: 2rem;
+            font-size: 0.875rem;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: var(--text-primary);
+        }
+
+        .back-link::before {
+            content: '← ';
+        }
+
+        .blog-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .blog-date,
+        .blog-category {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .blog-category {
+            color: var(--accent-bright);
+            border-color: var(--accent-dim);
+        }
+
+        h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .blog-subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        .blog-byline {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0;
+        }
+
+        h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-top: 3rem;
+            margin-bottom: 1rem;
+            color: var(--accent-bright);
+        }
+
+        h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent-bright);
+        }
+
+        article {
+            margin-top: 2rem;
+            line-height: 1.8;
+        }
+
+        article p {
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        article ul,
+        article ol {
+            margin: 1.5rem 0 1.5rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        article li {
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+
+        article strong {
+            color: var(--accent-bright);
+            font-weight: 700;
+        }
+
+        article em {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        article p > code,
+        article li > code,
+        article td > code,
+        article th > code {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            padding: 0.1rem 0.4rem;
+            font-size: 0.85em;
+            color: var(--accent-bright);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 3rem 0;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+
+        th {
+            background: var(--code-bg);
+            color: var(--accent-bright);
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border: 1px solid var(--border);
+            font-weight: 700;
+        }
+
+        td {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            vertical-align: top;
+        }
+
+        tr:nth-child(even) td {
+            background: rgba(17, 24, 39, 0.6);
+        }
+
+        .verdict {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .verdict strong {
+            color: var(--accent-bright);
+        }
+
+        .callout {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        figure.chart-wrapper {
+            margin: 2rem 0;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            background: var(--bg-dark);
+        }
+
+        figure.chart-wrapper img {
+            width: 100%;
+            display: block;
+        }
+
+        figure.chart-wrapper figcaption {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-top: 1px solid var(--border);
+            font-style: italic;
+        }
+
+        footer {
+            padding: 3rem 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-secondary);
+            margin-top: 4rem;
+        }
+
+        footer a {
+            color: var(--accent-bright);
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            h2 { font-size: 1.5rem; }
+            .container { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="../index.html" class="back-link">Back to Portfolio</a>
+            <div class="blog-meta">
+                <span class="blog-date">May 2026</span>
+                <span class="blog-category">Data Engineering</span>
+                <span class="blog-category">Architecture</span>
+                <span class="blog-category">dbt</span>
+            </div>
+            <h1>The Transformation of Data Transformation: A Decade of the Declarative Shift</h1>
+            <p class="blog-subtitle">Notebook-first workloads are being replaced. Not overnight, and not entirely — but the direction of travel is clear. This covers what the shift looks like in practice, how it played out historically, and how to think about moving forward.</p>
+            <p class="blog-byline">Brad Coles · May 2026</p>
+        </header>
+
+        <article>
+            <p>
+                Declarative transformation has been gaining momentum over the past decade, heralded in by dbt back in 2016. Data engineering teams have slowly but surely been replacing their notebook-first workloads and not looking back — finding a remedy for notebook sprawl, inconsistent documentation, and a lack of consistent testing.
+            </p>
+
+            <p>
+                But what exactly is declarative transformation, and how does it differ from the notebook approach? You've probably heard of dbt and SQLMesh. If you're on Databricks, Snowflake, or Fabric you're likely aware of Delta Live Tables, Dynamic Tables, or Materialized Lake Views. It's not the vendor or the tool that matters — it's the underlying approach.
+            </p>
+
+            <p>
+                Think of it like a house renovation. Notebook transformations are like telling your tradespeople which wall goes where, at what size and in which order. Declarative transformations are more like handing the builder a set of plans and letting them own the process.
+            </p>
+
+            <p>
+                This article covers what that shift looks like in practice, how it played out historically, why it's gained traction, and how to think about moving forward.
+            </p>
+
+            <hr>
+
+            <h2>1. What: Imperative vs. Declarative</h2>
+
+            <p>
+                The terms get thrown around a lot, so it's worth being clear about what they actually mean.
+            </p>
+
+            <p>
+                <strong>Procedural</strong> programming (a sub-class of imperative) is what most data engineers have been doing for years — you write explicit, step-by-step instructions. Read this table, filter these rows, join here, write the output there. You define the order, manage the control flow, and handle each step yourself.
+            </p>
+
+            <p>
+                <strong>Declarative</strong> programming flips this around — you describe what the output should look like, and the system works out how to produce it.
+            </p>
+
+            <p>
+                One quick clarification, because it tends to come up: SQL has always been declarative. When you write <code>SELECT * FROM orders WHERE status = 'pending'</code>, you're describing what you want — not which index to use or how to scan the table. Early ETL tools like DataStage and Informatica had visual drag-and-drop interfaces that were also declarative in spirit.
+            </p>
+
+            <p>
+                The shift we're talking about isn't about SQL the language, or graphical ETL designers. It's about the framework built around SQL — how dependencies between models get managed, how testing gets enforced, how documentation stays current, and whether your business logic is tied to a specific execution engine or not. That's what's changed.
+            </p>
+
+            <hr>
+
+            <h2>2. When: A Decade in the Making</h2>
+
+            <div class="callout">
+                Find where your current transformation tooling sits in the left column. That date is your baseline.
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Procedural / Imperative</th>
+                            <th>Declarative</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Jan 1997</strong></td>
+                            <td><a href="https://en.wikipedia.org/wiki/IBM_InfoSphere_DataStage" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">DataStage GA</a> — hand-coded ETL jobs become the enterprise standard</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><strong>2005</strong></td>
+                            <td><a href="https://en.wikipedia.org/wiki/SQL_Server_Integration_Services" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">SSIS ships with SQL Server 2005</a> — drag-and-drop pipelines dominate Microsoft shops</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Apr 2006</strong></td>
+                            <td><a href="https://en.wikipedia.org/wiki/Apache_Hadoop" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Apache Hadoop</a> — teams write Java MapReduce jobs to transform data at scale</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><strong>2009</strong></td>
+                            <td><a href="https://en.wikipedia.org/wiki/Apache_Spark" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Apache Spark</a> created at UC Berkeley AMPLab</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><strong>2010</strong></td>
+                            <td>Apache Spark open-sourced — Python replaces Java, but logic stays procedural</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><strong>2013</strong></td>
+                            <td>Databricks founded; Spark donated to Apache — PySpark notebooks begin replacing ETL tools</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Feb 2014</strong></td>
+                            <td>Spark Top-Level Apache Project — notebooks become the default transformation environment</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><strong>2016</strong></td>
+                            <td>PySpark notebooks are the de facto T layer across cloud data platforms</td>
+                            <td>Fishtown Analytics (later dbt Labs) founded</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Jan 2019</strong></td>
+                            <td>Notebooks remain dominant for most teams</td>
+                            <td><a href="https://www.getdbt.com/blog/what-is-analytics-engineering" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">"Analytics Engineer" coined</a> — naming the practitioner role the new frameworks were enabling</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Nov 2020</strong></td>
+                            <td>Notebooks still the default at most organisations</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><strong>May 2021</strong></td>
+                            <td></td>
+                            <td>Databricks previews Delta Live Tables at Data + AI Summit</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Jun 2021</strong></td>
+                            <td></td>
+                            <td>Declarative transformation reaches unicorn status — $1.5B market validation</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Feb 2022</strong></td>
+                            <td></td>
+                            <td>$222M raised at $4.2B — <a href="https://tracxn.com/d/companies/dbtlabs/__uetvGc5wXa2wwZOwATP8qaOeg7oS0Dcnlxf8-bQRXS4/funding-and-investors#funding-rounds" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Snowflake and Databricks among investors</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Apr 2022</strong></td>
+                            <td></td>
+                            <td><a href="https://www.databricks.com/blog/2022/04/05/announcing-generally-availability-of-databricks-delta-live-tables-dlt.html" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Databricks Delta Live Tables reaches GA</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Jun 2022</strong></td>
+                            <td></td>
+                            <td><a href="https://www.snowflake.com/en/blog/dynamic-tables-delivering-declarative-streaming-data-pipelines/" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Snowflake Dynamic Tables debut</a> at Data Cloud Summit</td>
+                        </tr>
+                        <tr>
+                            <td><strong>May 2025</strong></td>
+                            <td>Notebooks remain the default for the majority of teams</td>
+                            <td><a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Simplifying-Medallion-Implementation-with-Materialized-Lake/ba-p/5172766" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Microsoft Fabric previews Materialized Lake Views</a> at Microsoft Build</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Jun 2025</strong></td>
+                            <td></td>
+                            <td><a href="https://www.databricks.com/blog/bringing-declarative-pipelines-apache-spark-open-source-project" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Databricks contributes Spark Declarative Pipelines (SDP) to Apache Spark</a> — a new open-source framework informed by years of running DLT in production</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Oct 2025</strong></td>
+                            <td></td>
+                            <td><a href="https://www.fivetran.com/press/fivetran-and-dbt-labs-unite-to-set-the-standard-for-open-data-infrastructure-2025" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Fivetran merges with dbt Labs</a> — EL and T combine at ~$600M ARR</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Dec 2025</strong></td>
+                            <td></td>
+                            <td><a href="https://spark.apache.org/news/index.html" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Apache Spark 4.1.0 ships</a> with SDP as a headline feature</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Mar 2026</strong></td>
+                            <td></td>
+                            <td>Microsoft Fabric Materialized Lake Views reach GA at FabCon Atlanta</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p>
+                The two columns overlap, which is intentional. Declarative didn't replace procedural overnight — it grew alongside it. PySpark notebooks didn't stop being used when dbt launched in 2016, and they haven't stopped being used today. The direction of travel for new work is what's changing, and the cost of staying put is gradually rising.
+            </p>
+
+            <p>
+                The February 2022 entries are worth a closer look. Snowflake and Databricks both invested in dbt Labs — and then, within months, shipped their own native declarative transformation tools. They backed the independent framework to validate the market, then built platform-native versions of the same idea. Six weeks apart. That's not a coincidence.
+            </p>
+
+            <figure class="chart-wrapper">
+                <img src="../images/declarative-shift-chart.svg" alt="Chart showing the rise of declarative transformation tooling from 1994 to 2026">
+                <figcaption>The declarative shift in context — from legacy ETL tools through the PySpark era to the current convergence on declarative frameworks across every major platform.</figcaption>
+            </figure>
+
+            <hr>
+
+            <h2>3. Why: The Cost of Procedural at Scale</h2>
+
+            <h3>The problem with notebooks</h3>
+
+            <p>
+                PySpark notebooks are genuinely good at certain things — ML feature engineering, complex Python logic, and bespoke ingestion work that dedicated EL tools don't handle. Plenty of teams use Fivetran, Azure Data Factory, or Airbyte for ingestion and never open a notebook for it.
+            </p>
+
+            <p>
+                And to be fair, notebooks have worked perfectly fine for transformation too. Teams have been doing it for years and shipping production pipelines with them. The question isn't really whether notebooks work — they do — it's whether declarative frameworks do it better.
+            </p>
+
+            <p>For the transformation layer specifically, here's how they compare:</p>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Procedural notebooks</th>
+                            <th>Declarative frameworks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Dependencies</strong></td>
+                            <td>Execution order implied by cell position. Downstream impact when you change an upstream model is yours to track manually.</td>
+                            <td>You declare relationships between models; the framework determines execution order automatically.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Error detection</strong></td>
+                            <td>Fails at runtime — a broken column reference, a schema change, a typo in a join key only surfaces when the job actually executes.</td>
+                            <td>Errors surface at compile time, before a single row is processed.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Testing</strong></td>
+                            <td>Whatever someone remembered to write. No standard framework, no consistent enforcement.</td>
+                            <td>Data quality constraints declared alongside the model definition. Run automatically.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Documentation</strong></td>
+                            <td>Wikis and comments go stale as code evolves. No mechanism to keep them in sync.</td>
+                            <td>Generated from the same source as the logic. Always in sync.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Version control</strong></td>
+                            <td>Notebooks stored as JSON. Diffs are noisy and hard to review — cell metadata and output state mix with logic. Merge conflicts in multi-developer teams are painful.</td>
+                            <td>Plain SQL files. Clean diffs. Meaningful code review.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Portability</strong></td>
+                            <td>Business logic coupled to the execution engine — PySpark DataFrames don't travel.</td>
+                            <td>Portable SQL. Swap the adapter or platform; the logic stays intact.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p>
+                At small scale, the notebook approach is perfectly manageable. As the codebase grows and more people touch it, the gaps in the left column start to compound — and that's where declarative frameworks tend to pull ahead.
+            </p>
+
+            <h3>Why every major platform arrived at the same answer</h3>
+
+            <p>
+                If you want evidence that the shift is real, look at what the major platforms have done independently:
+            </p>
+
+            <ul>
+                <li>Snowflake built Dynamic Tables. Databricks built Delta Live Tables (now Lakeflow). Microsoft built Materialized Lake Views.</li>
+                <li>In February 2022, Snowflake and Databricks both invested in dbt Labs — then shipped their own competing native tools within months.</li>
+                <li>In October 2025, Fivetran — the leading EL platform — <a href="https://www.fivetran.com/press/fivetran-and-dbt-labs-unite-to-set-the-standard-for-open-data-infrastructure-2025" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">merged with dbt Labs</a> at ~$600M ARR. The company owning the Extract and Load merged with the company owning the Transform.</li>
+                <li>In June 2025, Databricks <a href="https://www.databricks.com/blog/bringing-declarative-pipelines-apache-spark-open-source-project" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">contributed Spark Declarative Pipelines (SDP) to Apache Spark</a> — not a straight open-sourcing of DLT, but a new framework built on lessons learned from running DLT in production at scale. It shipped as a headline feature in Spark 4.1.0 in December 2025. Databricks didn't just build a declarative tool; they used it to inform an open standard for the broader ecosystem.</li>
+            </ul>
+
+            <p>
+                Snowflake and Microsoft got there independently. Databricks got there first and then open-sourced their answer. Either way, the direction is the same.
+            </p>
+
+            <hr>
+
+            <h2>4. How: Moving Forward</h2>
+
+            <h3>Scope first</h3>
+
+            <p>
+                Declarative transformation tools cover the T in ELT — not all of it, and it's worth being clear about that upfront.
+            </p>
+
+            <p>
+                The Extract and Load steps are inherently procedural. Connecting to external systems, moving data, handling schemas you don't control — Python and PySpark are the right tools there. Streaming, ML inference, complex nested data, iterative algorithms — also legitimately procedural. Declarative tools don't handle these well, and the good ones don't try to.
+            </p>
+
+            <p>
+                The sweet spot is the <strong>transformation layer</strong>: stable, well-defined, SQL-expressible business logic that turns landed data into clean, trusted models. That's where the notebook costs compound, and that's where declarative tools pay for themselves.
+            </p>
+
+            <h3>The declarative spectrum</h3>
+
+            <p>
+                Not all declarative tools are declarative in the same way, and understanding the differences helps you pick the right starting point.
+            </p>
+
+            <h4>Interface-level declarative — dbt and similar frameworks</h4>
+
+            <p>
+                dbt Labs describes it well: <em>"dbt takes a declarative approach to managing datasets by using SELECT statements to describe the set of data that should make up the table."</em> You describe the desired end state, and the framework handles dependency resolution, materialisation, and testing. Worth being transparent though — at the execution level, dbt is running an imperative sequence of SQL mutations against a mutable database. It's declarative in what you write, not necessarily in how it executes. Think of it like Makefiles — declarative-looking rules, imperative underneath. For most teams moving away from notebooks, this is the right and sufficient starting point.
+            </p>
+
+            <h4>Execution-level declarative — SQLMesh</h4>
+
+            <p>
+                SQLMesh explicitly markets itself as declarative and is built to back that claim at the execution level too. MODEL blocks declare properties, dependencies, update methods, and schedules directly in code. Its plan/apply workflow shows you exactly what will change before anything executes. Virtual environments let you test pipeline changes in isolation without touching production. If you want declarativeness at the execution level — not just the interface — SQLMesh is the more rigorous choice.
+            </p>
+
+            <h4>Platform-native declarative — Dynamic Tables, Lakeflow, MLVs, Spark SDP</h4>
+
+            <p>
+                If you're already committed to a single platform, the native tooling is worth a look. No framework to install, no adapter to configure. The trade-off is portability — these tools are tied to their host platform in ways that open-source frameworks aren't.
+            </p>
+
+            <h4>A general caveat — leaky abstractions</h4>
+
+            <p>
+                Declarative tools abstract away execution, which is mostly the point. But abstractions are leaky, and when they break down you feel it. You lose some of the granular control that imperative code gives you — specific compute configurations, spot instance selection, fine-grained performance tuning. For most transformation workloads this doesn't matter. For teams with complex performance or cost requirements, it's worth knowing upfront that you're trading control for convenience, and occasionally you'll hit the edges of what the abstraction covers.
+            </p>
+
+            <h3>Where to start</h3>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>If you're on…</th>
+                            <th>Worth considering…</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>SSIS / legacy ETL tools</td>
+                            <td>A SQL-first declarative framework — dbt Core is the most widely adopted starting point. The jump is significant but the payoff is proportional.</td>
+                        </tr>
+                        <tr>
+                            <td>PySpark notebooks on Databricks</td>
+                            <td>Databricks Lakeflow (platform-native, minimal setup) or an open-source framework if portability matters</td>
+                        </tr>
+                        <tr>
+                            <td>PySpark notebooks on Microsoft Fabric</td>
+                            <td>Fabric's native Materialized Lake Views for low friction, or an open-source framework for richer testing and portability</td>
+                        </tr>
+                        <tr>
+                            <td>Already on dbt, want more rigour</td>
+                            <td>SQLMesh — plan/apply, virtual environments, execution-level state management</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p>
+                You don't need to migrate everything at once. The typical pattern is to start with one domain — a staging layer, a single subject area — run it alongside existing notebooks, and compare. The difference tends to be obvious pretty quickly.
+            </p>
+
+            <p>
+                Notebooks don't disappear — they just get used where they're actually needed: ingestion, streaming, ML, complex Python logic. Going back to the house analogy: handing the builder a set of plans doesn't mean tools stop being used on site. It just means they're used where they're needed, not for everything by default.
+            </p>
+
+            <hr>
+
+            <h2 style="margin-top: 1rem;">Coming Next</h2>
+
+            <div class="verdict">
+                <p>I've been building a medallion lakehouse architecture on Microsoft Fabric — four Lakehouses, bronze through gold, orchestrated end-to-end — using dbt for the T in ELT. The follow-up guide covers the full setup: adapter choice, cross-Lakehouse routing, notebook orchestration, authentication, the gotchas that actually cost time, and a practical comparison with Fabric's native Materialized Lake Views.</p>
+                <p style="margin-bottom: 0; margin-top: 0.75rem;">If you're evaluating dbt on Fabric for a client engagement, or just trying to understand where the platform is heading, that one's for you.</p>
+            </div>
+
+            <hr>
+
+            <h2 style="margin-top: 1rem;">Sources</h2>
+
+            <ul>
+                <li>IBM InfoSphere DataStage history: <a href="https://en.wikipedia.org/wiki/IBM_InfoSphere_DataStage" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Wikipedia</a></li>
+                <li>SQL Server Integration Services history: <a href="https://en.wikipedia.org/wiki/SQL_Server_Integration_Services" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Wikipedia</a></li>
+                <li>Apache Hadoop history: <a href="https://en.wikipedia.org/wiki/Apache_Hadoop" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Wikipedia</a></li>
+                <li>Apache Spark history: <a href="https://en.wikipedia.org/wiki/Apache_Spark" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Wikipedia</a></li>
+                <li>"Analytics Engineer" origin: <a href="https://www.getdbt.com/blog/what-is-analytics-engineering" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">dbt Labs blog</a></li>
+                <li>dbt Labs funding history: <a href="https://tracxn.com/d/companies/dbtlabs/__uetvGc5wXa2wwZOwATP8qaOeg7oS0Dcnlxf8-bQRXS4/funding-and-investors#funding-rounds" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Tracxn</a></li>
+                <li>Databricks Delta Live Tables GA: <a href="https://www.databricks.com/blog/2022/04/05/announcing-generally-availability-of-databricks-delta-live-tables-dlt.html" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Databricks blog, April 2022</a></li>
+                <li>Databricks contributes SDP to Apache Spark: <a href="https://www.databricks.com/blog/bringing-declarative-pipelines-apache-spark-open-source-project" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Databricks blog, June 2025</a></li>
+                <li>Snowflake Dynamic Tables: <a href="https://www.snowflake.com/en/blog/dynamic-tables-delivering-declarative-streaming-data-pipelines/" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Snowflake blog, August 2022</a></li>
+                <li>Microsoft Fabric MLVs announced: <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Simplifying-Medallion-Implementation-with-Materialized-Lake/ba-p/5172766" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Microsoft Fabric blog, May 2025</a></li>
+                <li>Apache Spark 4.1.0 release: <a href="https://spark.apache.org/news/index.html" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Apache Spark News</a></li>
+                <li>Spark Declarative Pipelines programming guide: <a href="https://spark.apache.org/docs/latest/declarative-pipelines-programming-guide.html" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Apache Spark docs</a></li>
+                <li>Fivetran + dbt Labs merger: <a href="https://www.fivetran.com/press/fivetran-and-dbt-labs-unite-to-set-the-standard-for-open-data-infrastructure-2025" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Fivetran press release, October 2025</a></li>
+                <li>Databricks on procedural vs. declarative: <a href="https://docs.databricks.com/aws/en/data-engineering/procedural-vs-declarative" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Databricks docs</a></li>
+                <li>dbt's declarative approach: <a href="https://docs.getdbt.com/blog/migrating-from-stored-procs" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Migrating from stored procedures — dbt Labs</a></li>
+                <li>SQLMesh as a declarative framework: <a href="https://www.getorchestra.io/guides/sqlmesh-tutorials-sqlmesh-pros-and-cons" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Orchestra</a>, <a href="https://www.synq.io/blog/dbt-vs-sqlmesh-a-comparison-for-modern-data-teams" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Synq dbt vs SQLMesh comparison</a></li>
+                <li>"dbt isn't declarative": <a href="https://jennykwan.org/posts/dbt-isnt-declarative/" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Jenny Kwan</a></li>
+            </ul>
+
+            <hr>
+
+            <p><em>Brad Coles is a Senior Consultant and Data Engineering Capability Lead at <a href="https://www.synechron.com/en-au" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Synechron Australia</a>, specialising in Microsoft Fabric and modern data platform engineering. Connect on <a href="https://www.linkedin.com/in/brad-coles/" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">LinkedIn</a>.</em></p>
+
+            <div style="margin-top: 1.5rem; padding: 1.25rem 1.5rem; border: 1px solid var(--accent-dim); background: var(--bg-card); text-align: center; font-size: 0.9rem;">
+                <a href="https://linkedin.com/in/brad-coles" style="color: var(--accent-bright); text-decoration: none; font-weight: 700;" target="_blank" rel="noopener noreferrer">Follow me on LinkedIn</a><span style="color: var(--text-secondary);"> — I write about Microsoft Fabric, real implementation gotchas, and what the docs don't tell you.</span>
+            </div>
+        </article>
+
+        <footer>
+            <p>&copy; 2026 Brad Coles. <a href="../index.html">Back to Portfolio</a></p>
+        </footer>
+    </div>
+</body>
+</html>
