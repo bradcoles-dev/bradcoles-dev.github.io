@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="How declarative transformation frameworks replaced notebook-first pipelines over a decade — what the shift looks like in practice, why every major platform arrived at the same answer, and how to think about moving forward.">
-    <meta name="keywords" content="dbt, declarative transformation, data engineering, SQLMesh, Delta Live Tables, Materialized Lake Views, Spark Declarative Pipelines, Databricks, Snowflake, Microsoft Fabric, ELT, analytics engineering">
+    <meta name="description" content="Data engineering has been shifting from imperative to declarative for a decade — and AI makes the case stronger. Why every major platform arrived at the same answer, and how to think about moving forward.">
+    <meta name="keywords" content="dbt, declarative transformation, data engineering, SQLMesh, Delta Live Tables, Materialized Lake Views, Spark Declarative Pipelines, Databricks, Snowflake, Microsoft Fabric, ELT, analytics engineering, AI agents, LLM data engineering">
     <meta name="author" content="Brad Coles">
 
     <!-- Google tag (gtag.js) -->
@@ -19,18 +19,18 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://bradcoles-dev.github.io/blog/declarative-transformation.html">
-    <meta property="og:title" content="From Imperative to Declarative: How Data Engineering Found a Better Way">
-    <meta property="og:description" content="How declarative transformation frameworks replaced notebook-first pipelines over a decade — what the shift looks like in practice, why every major platform arrived at the same answer, and how to think about moving forward.">
+    <meta property="og:title" content="Data Engineering's Shift from Imperative to Declarative — and Why It Matters More in the Age of AI">
+    <meta property="og:description" content="Data engineering has been shifting from imperative to declarative for a decade — and AI makes the case stronger. Why every major platform arrived at the same answer, and how to think about moving forward.">
     <meta property="og:image" content="https://bradcoles-dev.github.io/preview.png">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://bradcoles-dev.github.io/blog/declarative-transformation.html">
-    <meta property="twitter:title" content="From Imperative to Declarative: How Data Engineering Found a Better Way">
-    <meta property="twitter:description" content="How declarative transformation frameworks replaced notebook-first pipelines over a decade — what the shift looks like in practice, why every major platform arrived at the same answer, and how to think about moving forward.">
+    <meta property="twitter:title" content="Data Engineering's Shift from Imperative to Declarative — and Why It Matters More in the Age of AI">
+    <meta property="twitter:description" content="Data engineering has been shifting from imperative to declarative for a decade — and AI makes the case stronger. Why every major platform arrived at the same answer, and how to think about moving forward.">
     <meta property="twitter:image" content="https://bradcoles-dev.github.io/preview.png">
 
-    <title>From Imperative to Declarative: How Data Engineering Found a Better Way | Brad Coles</title>
+    <title>Data Engineering's Shift from Imperative to Declarative — and Why It Matters More in the Age of AI | Brad Coles</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Press+Start+2P&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -357,26 +357,46 @@
                 <span class="blog-category">Architecture</span>
                 <span class="blog-category">dbt</span>
             </div>
-            <h1>From Imperative to Declarative: How Data Engineering Found a Better Way</h1>
-            <p class="blog-subtitle">Notebook-first workloads are being replaced. Not overnight, and not entirely — but the direction of travel is clear. This covers what the shift looks like in practice, how it played out historically, and how to think about moving forward.</p>
+            <h1>Data Engineering's Shift from Imperative to Declarative — and Why It Matters More in the Age of AI</h1>
+            <p class="blog-subtitle">What started with dbt in 2016 has spread across the full ELT stack. Every major platform arrived at the same answer independently. And AI makes the case stronger, not weaker.</p>
             <p class="blog-byline">Brad Coles · May 2026</p>
         </header>
 
         <article>
             <p>
-                Declarative programming has been gaining momentum across the data engineering stack over the past decade. The transformation layer got there first — heralded in by dbt back in 2016, with data engineering teams slowly but surely replacing their notebook-first workloads and not looking back. But the shift hasn't stopped at transformation. Ingestion tools like Fivetran, Airbyte, Fabric's Copy Job, and Databricks' Lakeflow Connect have brought the same idea to the Extract and Load steps — you declare what you want moved and where, and the platform handles execution, schema changes, and incremental state. The whole ELT stack is moving in the same direction.
+                If you've been paying attention, you'd have noticed a distinct shift in data engineering — away from imperative, towards declarative.
             </p>
 
             <p>
-                But what exactly does declarative mean, and how does it differ from the way most teams work today? You've probably heard of dbt and SQLMesh. If you're on Databricks, Snowflake, or Fabric you're likely aware of Delta Live Tables, Dynamic Tables, or Materialized Lake Views. It's not the vendor or the tool that matters — it's the underlying approach.
+                What started with dbt in 2016 has since spread across the full ELT stack — on the transformation side: Databricks Delta Live Tables, Snowflake Dynamic Tables, Microsoft Fabric Materialized Lake Views, and Spark Declarative Pipelines; on the ingestion side: Fivetran, Airbyte, and Fabric's Copy Job.
             </p>
 
             <p>
-                Think of it like a house renovation. Notebook transformations are like telling your tradespeople which wall goes where, at what size and in which order. Declarative transformations are more like handing the builder a set of plans and letting them own the process.
+                Data engineering isn't alone here. Infrastructure as code made this move years ago — Terraform, Kubernetes, Helm. We're following a pattern software engineering set long before us. DataOps, anyone?
             </p>
 
             <p>
-                This article covers what that shift looks like in practice, how it played out historically, why it's gained traction, and how to think about moving forward.
+                The appeal for human engineers is straightforward. In an imperative setup, every loading pattern — append-only, upsert, merge, SCD Type 2 — means writing and maintaining the logic yourself.
+            </p>
+
+            <p>
+                In a federated model, where multiple domain teams each own their own pipelines, this compounds quickly: how do you ensure the finance team's SCD Type 2 logic matches the central data team's?
+            </p>
+
+            <p>
+                Declarative frameworks remove that problem. Say "I want SCD Type 2" and the engine handles the rest — the same tested, version-controlled implementation for every team.
+            </p>
+
+            <p>
+                What started as a way to abstract complexity away from engineers has, coincidentally, done the same for AI agents.
+            </p>
+
+            <p>
+                <em>"The only thing that should be custom in your codebase is your organisation's transformation business logic."</em> Everything else should be a well-known public framework — one that AI tools were trained on.
+            </p>
+
+            <p>
+                If you were building a house, would you tell the bricklayer how and where to lay each brick, how to mix the mortar — or would you just say "I want brick veneer"?
             </p>
 
             <hr>
@@ -384,30 +404,26 @@
             <h2>1. What: Imperative vs. Declarative</h2>
 
             <p>
-                The terms get thrown around a lot, so it's worth being clear about what they actually mean.
+                <strong>Procedural</strong> programming — the way most data engineers have worked for years — means step-by-step instructions. Read this table, filter these rows, join here, write the output there. You own the order, the control flow, and every decision in between.
             </p>
 
             <p>
-                <strong>Procedural</strong> programming (a sub-class of imperative) is what most data engineers have been doing for years — you write explicit, step-by-step instructions. Read this table, filter these rows, join here, write the output there. You define the order, manage the control flow, and handle each step yourself.
+                <strong>Declarative</strong> programming flips it. Describe what the output should look like; the system works out how to get there.
             </p>
 
             <p>
-                <strong>Declarative</strong> programming flips this around — you describe what the output should look like, and the system works out how to produce it.
+                One thing worth clarifying: SQL has always been declarative. <code>SELECT * FROM orders WHERE status = 'pending'</code> describes what you want, not how to retrieve it. Early ETL tools like DataStage and Informatica had visual drag-and-drop interfaces that were also declarative in spirit.
             </p>
 
             <p>
-                One quick clarification, because it tends to come up: SQL has always been declarative. When you write <code>SELECT * FROM orders WHERE status = 'pending'</code>, you're describing what you want — not which index to use or how to scan the table. Early ETL tools like DataStage and Informatica had visual drag-and-drop interfaces that were also declarative in spirit.
+                The shift we're talking about isn't SQL the language. It's the framework built around SQL — how model dependencies get managed, how testing gets enforced, how documentation stays current, whether your business logic is tied to a specific execution engine. That's what's changed.
             </p>
 
             <p>
-                The shift we're talking about isn't about SQL the language, or graphical ETL designers. It's about the framework built around SQL — how dependencies between models get managed, how testing gets enforced, how documentation stays current, and whether your business logic is tied to a specific execution engine or not. That's what's changed.
+                Take SCD Type 2. Imperatively, you write the logic yourself: join new data to the existing table on the business key, check whether tracked columns changed, end-date the old row, insert a new version. In PySpark, that's roughly 30 lines of Delta merge logic — and you own every edge case.
             </p>
 
-            <p>
-                A concrete example: SCD Type 2. In an imperative approach, you write the logic yourself — join new data to the existing table on the business key, check whether any tracked columns have changed, end-date the old row, insert a new version. In PySpark that's roughly 30 lines of Delta merge logic, and you own every edge case.
-            </p>
-
-            <p>In a declarative framework, you describe what you want:</p>
+            <p>Declaratively:</p>
 
 <pre><code>snapshots:
   - name: customers
@@ -417,7 +433,7 @@
       updated_at: updated_at</code></pre>
 
             <p>
-                Run <code>dbt snapshot</code>. The framework handles the comparison, the end-dating, and the insert. You declared the desired outcome — track history on this table using this key — and the system worked out the how.
+                Run <code>dbt snapshot</code>. The framework handles the comparison, the end-dating, and the insert. You declared the outcome — track history on this table using this key — and the system worked out the how.
             </p>
 
             <hr>
@@ -543,17 +559,16 @@
             </div>
 
             <p>
-                The two columns overlap, which is intentional. Declarative didn't replace procedural overnight — it grew alongside it. PySpark notebooks didn't stop being used when dbt launched in 2016, and they haven't stopped being used today. The direction of travel for new work is what's changing, and the cost of staying put is gradually rising.
+                The two columns overlap, which is intentional. Declarative didn't replace procedural overnight — it grew alongside it. PySpark notebooks didn't stop being used when dbt launched in 2016, and they haven't stopped today.
             </p>
 
             <p>
-                The February 2022 entries are worth a closer look. Snowflake and Databricks both invested in dbt Labs — and then, within months, shipped their own native declarative transformation tools. They backed the independent framework to validate the market, then built platform-native versions of the same idea. Six weeks apart. That's not a coincidence.
+                The direction of travel for new work is what's changing, and the cost of staying put is rising.
             </p>
 
-            <figure class="chart-wrapper">
-                <img src="../images/declarative-shift-chart.svg" alt="Chart showing the rise of declarative transformation tooling from 1994 to 2026">
-                <figcaption>The declarative shift in context — from legacy ETL tools through the PySpark era to the current convergence on declarative frameworks across every major platform.</figcaption>
-            </figure>
+            <p>
+                The February 2022 entries are worth a closer look. Snowflake and Databricks both invested in dbt Labs — and then, within months, shipped their own native declarative tools. They backed the independent framework to validate the market, then built platform-native versions of the same idea. Six weeks apart! That's not a coincidence.
+            </p>
 
             <hr>
 
@@ -636,6 +651,34 @@
                 Snowflake and Microsoft got there independently. Databricks got there first and then open-sourced their answer. Either way, the direction is the same.
             </p>
 
+            <h3>Why AI amplifies the shift</h3>
+
+            <p>
+                There's one more layer that wasn't in play when dbt launched in 2016.
+            </p>
+
+            <p>
+                LLMs don't know your custom metadata framework. They don't know your in-house state store or your bespoke pipeline config. You have to describe your schema and hope the model infers the rest correctly.
+            </p>
+
+            <p>
+                On top of that, declarative frameworks give AI a structural safety net: the server validates the declaration before execution begins. Each of the major declarative tools ships with a dry-run:
+            </p>
+
+            <ul>
+                <li><strong>dbt</strong>: <code>dbt-dry-run</code> — validates your models compile and resolve without running them</li>
+                <li><strong>Spark Declarative Pipelines</strong>: <code>--dry-run</code> flag — checks pipeline structure before execution</li>
+                <li><strong>Kubernetes / Helm</strong>: <code>--dry-run</code> on apply and install</li>
+            </ul>
+
+            <p>
+                When an LLM generates declarative config and gets something wrong, the framework catches it at compile time — before a single row moves. With imperative notebook code, the same mistake only surfaces at runtime.
+            </p>
+
+            <div class="callout">
+                Raki Rahman, a Microsoft employee active in the Fabric community, put it well: <em>"As AI driven code explodes, declarative is awesome because the LLM cannot mess it up. There's a clear client-server relationship in declarative and the server can throw early if your code is not correct. You put the onus on the server to assert correctness. The client can remain simple and dumb."</em>
+            </div>
+
             <hr>
 
             <h2>4. How: Moving Forward</h2>
@@ -661,31 +704,51 @@
             <h3>The declarative spectrum</h3>
 
             <p>
-                Not all declarative tools are declarative in the same way, and understanding the differences helps you pick the right starting point.
+                Not all declarative tools are declarative in the same way.
             </p>
 
             <h4>Interface-level declarative — dbt and similar frameworks</h4>
 
             <p>
-                dbt Labs describes it well: <em>"dbt takes a declarative approach to managing datasets by using SELECT statements to describe the set of data that should make up the table."</em> You describe the desired end state, and the framework handles dependency resolution, materialisation, and testing. Worth being transparent though — at the execution level, dbt is running an imperative sequence of SQL mutations against a mutable database. It's declarative in what you write, not necessarily in how it executes. Think of it like Makefiles — declarative-looking rules, imperative underneath. For most teams moving away from notebooks, this is the right and sufficient starting point.
+                You describe the desired end state; the framework handles dependency resolution, materialisation, and testing.
+            </p>
+
+            <p>
+                Worth being transparent: at the execution level, dbt runs an imperative sequence of SQL mutations against a mutable database. It's declarative in what you write, not necessarily in how it executes — think Makefiles.
+            </p>
+
+            <p>
+                For most teams moving away from notebooks, this is the right starting point.
             </p>
 
             <h4>Execution-level declarative — SQLMesh</h4>
 
             <p>
-                SQLMesh explicitly markets itself as declarative and is built to back that claim at the execution level too. MODEL blocks declare properties, dependencies, update methods, and schedules directly in code. Its plan/apply workflow shows you exactly what will change before anything executes. Virtual environments let you test pipeline changes in isolation without touching production. If you want declarativeness at the execution level — not just the interface — SQLMesh is the more rigorous choice.
+                SQLMesh goes further. MODEL blocks declare properties, dependencies, update methods, and schedules directly in code.
+            </p>
+
+            <p>
+                Its plan/apply workflow shows exactly what will change before anything executes. Virtual environments let you test pipeline changes in isolation without touching production.
+            </p>
+
+            <p>
+                If you want declarativeness at the execution level — not just the interface — SQLMesh is the more rigorous choice.
             </p>
 
             <h4>Platform-native declarative — Dynamic Tables, Lakeflow, MLVs, Spark SDP</h4>
 
             <p>
-                If you're already committed to a single platform, the native tooling is worth a look. No framework to install, no adapter to configure. The trade-off is portability — these tools are tied to their host platform in ways that open-source frameworks aren't.
+                If you're committed to a single platform, the native tooling is worth a look. No framework to install, no adapter to configure. The trade-off is portability — these tools are tied to their host platform in ways open-source frameworks aren't.
             </p>
 
-            <h4>A general caveat — leaky abstractions</h4>
+            <h4>One caveat across all of the above — leaky abstractions</h4>
 
             <p>
-                Declarative tools abstract away execution, which is mostly the point. But abstractions are leaky, and when they break down you feel it. You lose some of the granular control that imperative code gives you — specific compute configurations, spot instance selection, fine-grained performance tuning. For most transformation workloads this doesn't matter. For teams with complex performance or cost requirements, it's worth knowing upfront that you're trading control for convenience, and occasionally you'll hit the edges of what the abstraction covers.
+                Declarative tools abstract away execution, which is mostly the point. But abstractions leak, and when they do you feel it. You give up some granular control — specific compute configurations, spot instance selection, fine-grained performance tuning. For most transformation workloads that doesn't matter.
+            </p>
+
+            <p>
+                For teams with complex performance or cost requirements, it's worth knowing upfront: you're trading control for convenience, and occasionally you'll hit the edges of what the abstraction covers.
             </p>
 
             <h3>Where to start</h3>
@@ -724,18 +787,20 @@
             </p>
 
             <p>
-                Notebooks don't disappear — they just get used where they're actually needed: ingestion, streaming, ML, complex Python logic. Going back to the house analogy: handing the builder a set of plans doesn't mean tools stop being used on site. It just means they're used where they're needed, not for everything by default.
+                Notebooks don't disappear — they just get used where they're actually needed: ingestion, streaming, ML, complex Python logic.
+            </p>
+
+            <p>
+                Going back to the brick veneer analogy: saying you want brick veneer doesn't mean the bricklayer goes home. They're still on site — laying bricks where bricks need to be laid.
             </p>
 
             <hr>
 
             <h2 style="margin-top: 1rem;">Coming Next</h2>
 
-            <div class="verdict">
-                <p>The follow-up to this article is a hands-on guide to building declarative ELT on Microsoft Fabric — a full medallion architecture, bronze through gold, with Copy Job handling ingestion declaratively and dbt handling the transformation layer. It covers the full setup: adapter choice, cross-Lakehouse routing, notebook orchestration, and authentication.</p>
-                <p style="margin-top: 0.75rem;">It also covers the gaps honestly — what's not yet enterprise-ready, what requires workarounds, and a clear breakdown of who should build this now and who should wait for the ecosystem to mature.</p>
-                <p style="margin-bottom: 0; margin-top: 0.75rem;">If you're evaluating declarative ELT on Fabric for a client engagement, that one's for you.</p>
-            </div>
+            <p>Declarative ELT on Microsoft Fabric: is it even possible... yet?</p>
+
+            <p><em>— Brad Coles</em></p>
 
             <hr>
 
