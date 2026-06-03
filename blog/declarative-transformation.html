@@ -399,12 +399,20 @@
                 If you were building a house, would you tell the bricklayer how and where to lay each brick, how to mix the mortar — or would you just say "I want brick veneer"?
             </p>
 
+            <p>
+                It's a question I've been working through in practice — and Microsoft Fabric is where I've been putting it to the test.
+            </p>
+
             <hr>
 
             <h2>1. What: Imperative vs. Declarative</h2>
 
             <p>
-                <strong>Procedural</strong> programming (a sub-class of imperative) — the way most data engineers have worked for years — means step-by-step instructions. Read this table, filter these rows, join here, write the output there. You own the order, the control flow, and every decision in between.
+                <strong>Procedural</strong> programming — the way most data engineers have worked for years — means step-by-step instructions.
+            </p>
+
+            <p>
+                Read this table, filter these rows, join here, write the output there. You own the order, the control flow, and every decision in between.
             </p>
 
             <p>
@@ -420,7 +428,11 @@
             </p>
 
             <p>
-                Take SCD Type 2. Imperatively, you write the logic yourself: join new data to the existing table on the business key, check whether tracked columns changed, end-date the old row, insert a new version. In PySpark, that's roughly 30 lines of Delta merge logic — and you own every edge case.
+                Take SCD Type 2. Imperatively, you write the logic yourself: join new data to the existing table on the business key, check whether tracked columns changed, end-date the old row, insert a new version.
+            </p>
+
+            <p>
+                In PySpark, that's roughly 30 lines of Delta merge logic — and you own every edge case.
             </p>
 
             <p>Declaratively:</p>
@@ -567,7 +579,11 @@
             </p>
 
             <p>
-                The February 2022 entries are worth a closer look. Snowflake and Databricks both invested in dbt Labs — and then, within months, shipped their own native declarative tools. They backed the independent framework to validate the market, then built platform-native versions of the same idea. Six weeks apart! That's not a coincidence.
+                The February 2022 entries are worth a closer look. Snowflake and Databricks both invested in dbt Labs — and then, within months, shipped their own native declarative tools. They backed the independent framework to validate the market, then built platform-native versions of the same idea.
+            </p>
+
+            <p>
+                Six weeks apart! That's not a coincidence.
             </p>
 
             <figure class="chart-wrapper">
@@ -582,14 +598,14 @@
             <h3>The problem with notebooks</h3>
 
             <p>
-                PySpark notebooks are genuinely good at certain things — ML feature engineering, complex Python logic, and bespoke ingestion work that dedicated EL tools don't handle. Plenty of teams use Fivetran, Azure Data Factory, or Airbyte for ingestion and never open a notebook for it.
+                PySpark notebooks have their place — ML feature engineering, complex Python logic, bespoke ingestion that dedicated EL tools don't cover. Plenty of teams use Fivetran, Azure Data Factory, or Airbyte for ingestion and never open a notebook for it.
             </p>
 
             <p>
-                And to be fair, notebooks have worked perfectly fine for transformation too. Teams have been doing it for years and shipping production pipelines with them. The question isn't really whether notebooks work — they do — it's whether declarative frameworks do it better.
+                And notebooks have worked fine for transformation too. Teams have been shipping production pipelines with them for years. The question isn't whether notebooks work — they do — it's whether declarative frameworks do it better.
             </p>
 
-            <p>For the transformation layer specifically, here's how they compare:</p>
+            <p>For the transformation layer, here's how they compare:</p>
 
             <div class="table-wrapper">
                 <table>
@@ -636,24 +652,24 @@
             </div>
 
             <p>
-                At small scale, the notebook approach is perfectly manageable. As the codebase grows and more people touch it, the gaps in the left column start to compound — and that's where declarative frameworks tend to pull ahead.
+                At small scale, notebooks are perfectly manageable. As the codebase grows and more people touch it, the gaps in the left column compound — and that's where declarative frameworks pull ahead.
             </p>
 
             <h3>Why every major platform arrived at the same answer</h3>
 
             <p>
-                If you want evidence that the shift is real, look at what the major platforms have done independently:
+                The clearest evidence that this shift is real isn't any one tool — it's that competing platforms appear to have arrived at the same conclusion independently.
             </p>
 
             <ul>
                 <li>Snowflake built Dynamic Tables. Databricks built Delta Live Tables (now Lakeflow). Microsoft built Materialized Lake Views.</li>
                 <li>In February 2022, Snowflake and Databricks both invested in dbt Labs — then shipped their own competing native tools within months.</li>
-                <li>In October 2025, Fivetran — the leading EL platform — <a href="https://www.fivetran.com/press/fivetran-and-dbt-labs-unite-to-set-the-standard-for-open-data-infrastructure-2025" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">merged with dbt Labs</a> at ~$600M ARR. The company owning the Extract and Load merged with the company owning the Transform.</li>
-                <li>In June 2025, Databricks <a href="https://www.databricks.com/blog/bringing-declarative-pipelines-apache-spark-open-source-project" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">contributed Spark Declarative Pipelines (SDP) to Apache Spark</a> — not a straight open-sourcing of DLT, but a new framework built on lessons learned from running DLT in production at scale. It shipped as a headline feature in Spark 4.1.0 in December 2025. Databricks didn't just build a declarative tool; they used it to inform an open standard for the broader ecosystem.</li>
+                <li>In October 2025, Fivetran — the leading EL platform — <a href="https://www.fivetran.com/press/fivetran-and-dbt-labs-unite-to-set-the-standard-for-open-data-infrastructure-2025" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">merged with dbt Labs</a> at ~$600M ARR. The company owning Extract and Load merged with the company owning Transform.</li>
+                <li>In June 2025, Databricks <a href="https://www.databricks.com/blog/bringing-declarative-pipelines-apache-spark-open-source-project" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">contributed Spark Declarative Pipelines (SDP) to Apache Spark</a> — not a straight open-sourcing of DLT, but a new framework informed by years of running DLT in production. It shipped as a headline feature in Spark 4.1.0 in December 2025.</li>
             </ul>
 
             <p>
-                Snowflake and Microsoft got there independently. Databricks got there first and then open-sourced their answer. Either way, the direction is the same.
+                These aren't coordinated moves. When competitors build the same thing without talking to each other, that's usually a signal the underlying idea is right.
             </p>
 
             <h3>Why AI amplifies the shift</h3>
@@ -663,11 +679,11 @@
             </p>
 
             <p>
-                LLMs don't know your custom metadata framework. They don't know your in-house state store or your bespoke pipeline config. You have to describe your schema and hope the model infers the rest correctly.
+                LLMs don't know your custom metadata framework. They don't know your in-house state store or your bespoke pipeline config. You describe your schema and hope the model infers the rest.
             </p>
 
             <p>
-                On top of that, declarative frameworks give AI a structural safety net: the server validates the declaration before execution begins. Each of the major declarative tools ships with a dry-run:
+                Declarative frameworks give AI a structural safety net on top: the server validates the declaration before execution begins. Most major declarative tools ship with some form of dry-run validation:
             </p>
 
             <ul>
@@ -684,6 +700,10 @@
                 Raki Rahman, a Microsoft employee active in the Fabric community, put it well: <em>"As AI driven code explodes, declarative is awesome because the LLM cannot mess it up. There's a clear client-server relationship in declarative and the server can throw early if your code is not correct. You put the onus on the server to assert correctness. The client can remain simple and dumb."</em>
             </div>
 
+            <p>
+                In the agent-based workflows I've been experimenting with, this structural property matters more than I initially expected. The constraint that the only custom code should be your business logic isn't just a design preference — it's what makes the whole thing debuggable when something goes wrong.
+            </p>
+
             <hr>
 
             <h2>4. How: Moving Forward</h2>
@@ -691,19 +711,23 @@
             <h3>Scope first</h3>
 
             <p>
-                The declarative shift is happening across the whole ELT stack — but the tooling is most mature, and the evidence most compelling, in the transformation layer. That's where most of this article has focused.
+                The declarative shift is happening across the whole ELT stack, but the tooling is most mature in the transformation layer.
             </p>
 
             <p>
-                Common ingestion patterns are increasingly declarative too. Fivetran, Airbyte, and Microsoft Fabric's Copy Job all follow the same principle — you declare which sources and destinations to connect, what to copy and how, and the platform handles execution, schema changes, and incremental state. Lakeflow Connect on Databricks takes the same approach. You configure the desired outcome; the tool owns the how.
+                Ingestion is catching up. Fivetran, Airbyte, Fabric's Copy Job, and Lakeflow Connect all follow the same principle: declare what you want moved and where, and the platform handles execution, schema changes, and incremental state.
             </p>
 
             <p>
-                Where procedural code still makes sense: complex API ingestion with custom authentication, bespoke data sources, streaming, ML inference, complex nested data, and iterative algorithms. These legitimately need Python and PySpark, and declarative tools don't try to replace them.
+                Python and PySpark still have a role where they're genuinely needed: complex API ingestion, streaming, ML inference, iterative algorithms, deeply nested data. Declarative tools don't try to replace them there.
             </p>
 
             <p>
-                The <strong>transformation layer</strong> is where the shift has been most pronounced and where the tooling is most mature — stable, well-defined, SQL-expressible business logic that turns landed data into clean, trusted models. That's where the notebook costs compound most visibly, and that's where declarative tools have the clearest payoff. But the direction of travel for the broader stack is the same.
+                The transformation layer is where the shift is most pronounced and the tooling most mature — stable, SQL-expressible business logic turning landed data into clean, trusted models. That's where notebook costs compound most visibly, and where the declarative payoff is clearest.
+            </p>
+
+            <p>
+                The rest of this series is focused on Microsoft Fabric specifically — not because it's the only viable platform, but because it's where I've been doing the work. And the honest answer to whether it's production-ready is more nuanced than most of the marketing material suggests.
             </p>
 
             <h3>The declarative spectrum</h3>
@@ -712,48 +736,24 @@
                 Not all declarative tools are declarative in the same way.
             </p>
 
-            <h4>Interface-level declarative — dbt and similar frameworks</h4>
-
             <p>
-                You describe the desired end state; the framework handles dependency resolution, materialisation, and testing.
+                <strong>Interface-level declarative — dbt and similar frameworks</strong><br>
+                You describe the desired end state; the framework handles dependency resolution, materialisation, and testing. Worth being transparent: at the execution level, dbt runs an imperative sequence of SQL mutations against a mutable database. It's declarative in what you write, not necessarily in how it executes — think Makefiles. For most teams moving away from notebooks, this is the right starting point.
             </p>
 
             <p>
-                Worth being transparent: at the execution level, dbt runs an imperative sequence of SQL mutations against a mutable database. It's declarative in what you write, not necessarily in how it executes — think Makefiles.
+                <strong>Execution-level declarative — SQLMesh</strong><br>
+                SQLMesh takes a more rigorous approach. MODEL blocks are designed to declare properties, dependencies, update methods, and schedules directly in code. Its plan/apply workflow aims to show exactly what will change before anything executes, and virtual environments are intended to allow pipeline changes to be tested in isolation. For teams that want declarativeness at the execution level — not just the interface — it's worth evaluating, though Fabric-specific support is limited at time of writing.
             </p>
 
             <p>
-                For most teams moving away from notebooks, this is the right starting point.
-            </p>
-
-            <h4>Execution-level declarative — SQLMesh</h4>
-
-            <p>
-                SQLMesh goes further. MODEL blocks declare properties, dependencies, update methods, and schedules directly in code.
-            </p>
-
-            <p>
-                Its plan/apply workflow shows exactly what will change before anything executes. Virtual environments let you test pipeline changes in isolation without touching production.
-            </p>
-
-            <p>
-                If you want declarativeness at the execution level — not just the interface — SQLMesh is the more rigorous choice.
-            </p>
-
-            <h4>Platform-native declarative — Dynamic Tables, Lakeflow, MLVs, Spark SDP</h4>
-
-            <p>
+                <strong>Platform-native declarative — Dynamic Tables, Lakeflow, MLVs, Spark SDP</strong><br>
                 If you're committed to a single platform, the native tooling is worth a look. No framework to install, no adapter to configure. The trade-off is portability — these tools are tied to their host platform in ways open-source frameworks aren't.
             </p>
 
-            <h4>One caveat across all of the above — leaky abstractions</h4>
-
             <p>
-                Declarative tools abstract away execution, which is mostly the point. But abstractions leak, and when they do you feel it. You give up some granular control — specific compute configurations, spot instance selection, fine-grained performance tuning. For most transformation workloads that doesn't matter.
-            </p>
-
-            <p>
-                For teams with complex performance or cost requirements, it's worth knowing upfront: you're trading control for convenience, and occasionally you'll hit the edges of what the abstraction covers.
+                <strong>One caveat across all of the above — leaky abstractions</strong><br>
+                Declarative tools abstract away execution, which is mostly the point. But abstractions leak, and when they do you feel it. You give up some granular control — specific compute configurations, spot instance selection, fine-grained performance tuning. For most transformation workloads that doesn't matter. For teams with complex performance or cost requirements, it's worth knowing upfront: you're trading control for convenience, and occasionally you'll hit the edges of what the abstraction covers.
             </p>
 
             <h3>Where to start</h3>
@@ -777,7 +777,7 @@
                         </tr>
                         <tr>
                             <td>PySpark notebooks on Microsoft Fabric</td>
-                            <td>Fabric's native Materialized Lake Views for low friction, or an open-source framework for richer testing and portability</td>
+                            <td>Fabric's native Materialized Lake Views for low friction, or dbt for richer testing, CI/CD, and portability</td>
                         </tr>
                         <tr>
                             <td>Already on dbt, want more rigour</td>
@@ -792,18 +792,22 @@
             </p>
 
             <p>
-                Notebooks don't disappear — they just get used where they're actually needed: ingestion, streaming, ML, complex Python logic.
-            </p>
-
-            <p>
-                Going back to the brick veneer analogy: saying you want brick veneer doesn't mean the bricklayer goes home. They're still on site — laying bricks where bricks need to be laid.
+                Notebooks don't disappear — they just get used where they're actually needed: ingestion, streaming, ML, complex Python logic. Going back to the brick veneer analogy: saying you want brick veneer doesn't mean the bricklayer goes home. They're still on site — laying bricks where bricks need to be laid.
             </p>
 
             <hr>
 
             <h2 style="margin-top: 1rem;">Coming Next</h2>
 
-            <p>Declarative ELT on Microsoft Fabric: is it even possible... yet?</p>
+            <p>
+                I've been building a declarative ELT medallion architecture on Microsoft Fabric — bronze through gold — and experimenting with external tools like dbt and dlt where Fabric's native capabilities fall short.
+            </p>
+
+            <p>
+                It involves more gaps and workarounds than the marketing suggests, and a few things I'd do differently next time.
+            </p>
+
+            <p>That's the next article.</p>
 
             <p><em>— Brad Coles</em></p>
 
