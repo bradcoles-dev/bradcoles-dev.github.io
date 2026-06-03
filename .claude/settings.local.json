@@ -8,7 +8,20 @@
       "Bash(where gh:*)",
       "Bash(gh repo view:*)",
       "Bash(gh api:*)",
-      "Bash(git mv:*)"
+      "Bash(git mv:*)",
+      "PowerShell(Remove-Item *)",
+      "Bash(git -C \"C:\\\\Users\\\\bradc\\\\OneDrive\\\\Desktop\\\\Git Repos\\\\bradcoles-dev.github.io\" status)",
+      "Bash(git -C \"C:\\\\Users\\\\bradc\\\\OneDrive\\\\Desktop\\\\Git Repos\\\\bradcoles-dev.github.io\" diff --stat)",
+      "Bash(git *)",
+      "Bash(gh run *)",
+      "Bash(Get-Item \"C:\\\\Users\\\\bradc\\\\.claude\\\\projects\\\\C--Users-bradc-OneDrive-Desktop-Git-Repos-bradcoles-dev-github-io\\\\67ce70e6-3610-40f6-a3e4-c18d0b341e83.jsonl\")",
+      "Bash(Select-Object Length)",
+      "Bash(dd if=\"C:/Users/bradc/.claude/projects/C--Users-bradc-OneDrive-Desktop-Git-Repos-bradcoles-dev-github-io/67ce70e6-3610-40f6-a3e4-c18d0b341e83.jsonl\" bs=1 skip=1170000 count=5000)",
+      "Bash(dd if=\"C:/Users/bradc/.claude/projects/C--Users-bradc-OneDrive-Desktop-Git-Repos-bradcoles-dev-github-io/67ce70e6-3610-40f6-a3e4-c18d0b341e83.jsonl\" bs=1 skip=1235000 count=20000)",
+      "Bash(dd if=\"C:/Users/bradc/.claude/projects/C--Users-bradc-OneDrive-Desktop-Git-Repos-bradcoles-dev-github-io/67ce70e6-3610-40f6-a3e4-c18d0b341e83.jsonl\" bs=1 skip=1176000 count=60000)",
+      "Read(//tmp/**)",
+      "Bash(python3 *)",
+      "Bash(dd if=\"C:/Users/bradc/.claude/projects/C--Users-bradc-OneDrive-Desktop-Git-Repos-bradcoles-dev-github-io/67ce70e6-3610-40f6-a3e4-c18d0b341e83.jsonl\" bs=1 skip=1176200 count=55000)"
     ],
     "deny": [],
     "ask": []
