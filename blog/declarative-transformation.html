@@ -692,10 +692,6 @@
                 When an LLM generates declarative config and gets something wrong, the framework catches it at compile time — before a single row moves. With imperative notebook code, the same mistake only surfaces at runtime.
             </p>
 
-            <div class="callout">
-                Raki Rahman, a Microsoft employee active in the Fabric community, put it well: <em>"As AI driven code explodes, declarative is awesome because the LLM cannot mess it up. There's a clear client-server relationship in declarative and the server can throw early if your code is not correct. You put the onus on the server to assert correctness. The client can remain simple and dumb."</em>
-            </div>
-
             <p>
                 In the agent-based workflows I've been experimenting with, this structural property matters more than I initially expected. The constraint that the only custom code should be your business logic isn't just a design preference — it's what makes the whole thing debuggable when something goes wrong.
             </p>
