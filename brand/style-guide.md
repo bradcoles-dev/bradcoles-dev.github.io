@@ -12,6 +12,8 @@ Internal reference for video, presentation, and demo assets. Extends the visual 
 
 - **Primary mark:** stacked `bc` / `dev_` lockup in JetBrains Mono Bold on deep navy — `bc` in light text, `dev_` in accent blue with the trailing underscore styled as a blinking terminal cursor (SVG `<animate>`, degrades gracefully to a static underscore in raster exports).
   - File: `brand/logo-bc-mark.svg` (square, 512×512 — suitable as channel avatar / favicon / watermark)
+- **Horizontal lockup:** `bc dev_` side-by-side in the same style, for narrow horizontal spaces (e.g. site nav bar) where the stacked mark would render `dev_` illegibly small.
+  - File: `brand/logo-bc-horizontal.svg` (180×56) — site copy at `images/logo-bc-horizontal.svg`, used in `index.html` nav.
 - **Wordmark (secondary):** `bradcoles.dev` set in JetBrains Mono — for end screens / lower-thirds.
 - **Clear space:** pad at least 0.5× the mark's height on all sides.
 - **Don't:** place on busy photo backgrounds, recolour outside the palette, or stretch/distort.
@@ -63,6 +65,7 @@ Internal reference for video, presentation, and demo assets. Extends the visual 
 
 - `brand/` — kit source files (this guide, logo, templates)
 - `brand/logo-bc-mark.svg` — primary mark (v1 draft)
+- `brand/logo-bc-horizontal.svg` — horizontal `bc dev_` lockup for nav bars/headers (copied to `images/` for site use)
 - `brand/qr-code.svg` — QR code linking to bradcoles.dev
 - `brand/title-card-template.svg` — 1920×1080 video intro/section title slide
 - `brand/youtube-thumbnail-template.svg` — 1280×720 YouTube thumbnail

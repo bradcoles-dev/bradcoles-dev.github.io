@@ -502,10 +502,15 @@
         }
 
         .nav-brand {
-            font-family: 'Syne', sans-serif;
-            font-weight: 700;
-            font-size: 1.25rem;
-            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-brand img {
+            height: 40px;
+            width: auto;
+            display: block;
+            border-radius: 8px;
         }
 
         .nav-links {
@@ -844,7 +849,7 @@
 <body>
     <nav id="navbar">
         <div class="container">
-            <div class="nav-brand">BC</div>
+            <a href="#" class="nav-brand"><img src="images/logo-bc-horizontal.svg" alt="Brad Coles"></a>
             <button class="nav-toggle" aria-label="Toggle navigation">☰</button>
             <ul class="nav-links">
                 <li><a href="#about">About</a></li>

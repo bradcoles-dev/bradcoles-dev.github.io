@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 56" role="img" aria-label="bc dev_ logo">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&amp;display=swap');
+    </style>
+  </defs>
+  <rect width="180" height="56" rx="10" fill="#0a0e1a" stroke="#1f2937" stroke-width="2"/>
+  <text x="14" y="39" font-family="'JetBrains Mono', monospace" font-weight="700" font-size="32" fill="#e5e7eb">bc</text>
+  <text x="63" y="39" font-family="'JetBrains Mono', monospace" font-weight="700" font-size="32" fill="#60a5fa">dev<tspan>_<animate attributeName="opacity" values="1;1;0;0;1" keyTimes="0;0.5;0.5;1;1" dur="1s" repeatCount="indefinite"/></tspan></text>
+</svg>

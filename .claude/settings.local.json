@@ -21,7 +21,19 @@
       "Bash(dd if=\"C:/Users/bradc/.claude/projects/C--Users-bradc-OneDrive-Desktop-Git-Repos-bradcoles-dev-github-io/67ce70e6-3610-40f6-a3e4-c18d0b341e83.jsonl\" bs=1 skip=1176000 count=60000)",
       "Read(//tmp/**)",
       "Bash(python3 *)",
-      "Bash(dd if=\"C:/Users/bradc/.claude/projects/C--Users-bradc-OneDrive-Desktop-Git-Repos-bradcoles-dev-github-io/67ce70e6-3610-40f6-a3e4-c18d0b341e83.jsonl\" bs=1 skip=1176200 count=55000)"
+      "Bash(dd if=\"C:/Users/bradc/.claude/projects/C--Users-bradc-OneDrive-Desktop-Git-Repos-bradcoles-dev-github-io/67ce70e6-3610-40f6-a3e4-c18d0b341e83.jsonl\" bs=1 skip=1176200 count=55000)",
+      "Bash(python -c \"import qrcode; print\\('qrcode available'\\)\")",
+      "Bash(node -e \"console.log\\(require.resolve\\('qrcode'\\)\\)\")",
+      "Bash(curl -sI https://registry.npmjs.org --max-time 5)",
+      "Bash(pip --version)",
+      "Bash(npx -y qrcode -t svg -e H -o qr-raw.svg \"https://bradcoles-dev.github.io/\")",
+      "PowerShell(\\(Get-Location\\).Path)",
+      "WebSearch",
+      "Bash(npx -y qrcode -t svg -e H -o qr-raw.svg \"https://bradcoles.dev/\")",
+      "Bash(\"/c/Program Files \\(x86\\)/Microsoft/Edge/Application/msedge.exe\" --headless --disable-gpu --screenshot=\"qr-code-preview.png\" --window-size=300,330 \"file:///$\\(pwd\\)/qr-code.svg\")",
+      "Bash(\"/c/Program Files \\(x86\\)/Microsoft/Edge/Application/msedge.exe\" --headless --disable-gpu --screenshot=\"title-card-preview.png\" --window-size=1920,1080 \"file:///$\\(pwd\\)/title-card-template.svg\")",
+      "Bash(\"/c/Program Files \\(x86\\)/Microsoft/Edge/Application/msedge.exe\" --headless --disable-gpu --screenshot=\"thumbnail-preview.png\" --window-size=1280,720 \"file:///$\\(pwd\\)/youtube-thumbnail-template.svg\")",
+      "Bash(\"/c/Program Files \\(x86\\)/Microsoft/Edge/Application/msedge.exe\" --version)"
     ],
     "deny": [],
     "ask": []
