@@ -46,17 +46,24 @@ Internal reference for video, presentation, and demo assets. Extends the visual 
 - **Code/terminal framing:** present demos in a dark terminal-style window (`#0d1117` background, `#1f2937` border, JetBrains Mono) to match the site's existing code blocks.
 - **Icon style:** simple line icons / text tags consistent with the site's skill tags — avoid stock photography.
 
-## 6. Video & Slide Specs
+## 6. URL & QR Code
+
+- **Canonical URL:** `bradcoles.dev` (custom domain, configured via `CNAME`). The original `bradcoles-dev.github.io` GitHub Pages URL automatically 301-redirects here — don't reference it in new assets.
+- **QR code:** `brand/qr-code.svg` — links to `https://bradcoles.dev/`, generated with high (H) error-correction so a small centre logo could be overlaid later if desired. Light panel (`#e5e7eb`) with deep-navy modules (`#0a0e1a`) for reliable scanning against the dark theme.
+- Embedded in `title-card-template.svg` for intro/outro slides. Drop it onto end screens, slide decks, or anywhere viewers might want a quick scan-to-visit.
+
+## 7. Video & Slide Specs
 
 - **Slide deck:** 16:9, 1920×1080. Background `#0a0e1a`; headings in Syne; body in JetBrains Mono.
 - **YouTube thumbnail:** 1280×720. High-contrast accent-blue text on navy, headshot + 3–5 word hook.
 - **Lower-third:** `#111827` panel at ~80% opacity; name in Syne Bold (`#e5e7eb`); role/title in JetBrains Mono (`#9ca3af`); thin accent-blue (`#3b82f6`) top border.
 - **Safe area:** keep key text within the centre 90% of frame (10% margin) to avoid platform UI overlap.
 
-## 7. File Naming & Location
+## 8. File Naming & Location
 
 - `brand/` — kit source files (this guide, logo, templates)
 - `brand/logo-bc-mark.svg` — primary mark (v1 draft)
+- `brand/qr-code.svg` — QR code linking to bradcoles.dev
 - `brand/title-card-template.svg` — 1920×1080 video intro/section title slide
 - `brand/youtube-thumbnail-template.svg` — 1280×720 YouTube thumbnail
 - Suggested additions as the kit grows: `brand/lower-third-template.svg`

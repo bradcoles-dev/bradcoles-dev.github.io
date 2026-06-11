@@ -6,7 +6,7 @@ Senior Data Engineering Consultant portfolio website showcasing experience, proj
 
 A portfolio website and technical blog built with vanilla HTML, CSS, and JavaScript. It features a modern, tech-focused design with animated backgrounds, responsive layouts, and smooth scrolling navigation.
 
-**Live Site:** [https://bradcoles-dev.github.io](https://bradcoles-dev.github.io)
+**Live Site:** [https://bradcoles.dev](https://bradcoles.dev)
 
 ## Project Structure
 

@@ -18,17 +18,17 @@
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://bradcoles-dev.github.io/">
+    <meta property="og:url" content="https://bradcoles.dev/">
     <meta property="og:title" content="Brad Coles | Senior Data Engineering Consultant">
     <meta property="og:description" content="Senior Data Engineering Consultant specialising in Microsoft Fabric and Azure. A decade of data work — from actuarial foundations to enterprise Lakehouse platforms."
-    <meta property="og:image" content="https://bradcoles-dev.github.io/preview.png">
+    <meta property="og:image" content="https://bradcoles.dev/preview.png">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://bradcoles-dev.github.io/">
+    <meta property="twitter:url" content="https://bradcoles.dev/">
     <meta property="twitter:title" content="Brad Coles | Senior Data Engineering Consultant">
     <meta property="twitter:description" content="Senior Data Engineering Consultant specialising in Microsoft Fabric and Azure. A decade of data work — from actuarial foundations to enterprise Lakehouse platforms."
-    <meta property="twitter:image" content="https://bradcoles-dev.github.io/preview.png">
+    <meta property="twitter:image" content="https://bradcoles.dev/preview.png">
 
     <title>Brad Coles | Senior Data Engineering Consultant</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -527,6 +527,18 @@
             color: var(--accent-bright);
         }
 
+        .nav-links a.nav-coffee {
+            color: var(--accent-bright);
+            border: 1px solid var(--accent-dim);
+            padding: 0.35rem 0.85rem;
+            border-radius: 4px;
+        }
+
+        .nav-links a.nav-coffee:hover {
+            background: var(--accent);
+            color: var(--bg-dark);
+        }
+
         /* Experience timeline */
         .timeline {
             position: relative;
@@ -843,6 +855,7 @@
                 <li><a href="#certifications">Certifications</a></li>
                 <li><a href="#education">Education</a></li>
                 <li><a href="#contact">Contact</a></li>
+                <li><a href="support.html" class="nav-coffee">☕ Coffee</a></li>
             </ul>
         </div>
     </nav>
@@ -1156,7 +1169,7 @@
                 </p>
             </div>
             <form class="contact-form" name="contact" method="POST" action="https://formspree.io/f/meeoyeoz" id="contact-form">
-                <input type="hidden" name="_subject" value="New contact form submission from bradcoles-dev.github.io">
+                <input type="hidden" name="_subject" value="New contact form submission from bradcoles.dev">
                 <input type="hidden" name="_replyto" value="">
                 <input type="text" name="_gotcha" style="display:none">
                 <div class="form-group">
@@ -1178,7 +1191,7 @@
 
     <footer>
         <div class="container">
-            <p>&copy; 2026 Brad Coles. Built with HTML, CSS, and hosted on GitHub Pages.</p>
+            <p>&copy; 2026 Brad Coles. Built with HTML, CSS, and hosted on GitHub Pages. <a href="support.html" style="color: var(--accent-bright); text-decoration: none;">☕ Buy me a coffee</a></p>
         </div>
     </footer>
 
@@ -1294,7 +1307,7 @@
                 const navLink = document.querySelector(`.nav-links a[href="#${sectionId}"]`);
 
                 if (navLink && scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
-                    document.querySelectorAll('.nav-links a').forEach(link => {
+                    document.querySelectorAll('.nav-links a:not(.nav-coffee)').forEach(link => {
                         link.style.color = 'var(--text-secondary)';
                     });
                     navLink.style.color = 'var(--accent-bright)';
@@ -1312,7 +1325,7 @@
         "@type": "Person",
         "name": "Brad Coles",
         "jobTitle": "Senior Data Engineering Consultant & Capability Lead",
-        "url": "https://bradcoles-dev.github.io",
+        "url": "https://bradcoles.dev",
         "email": "bradcoles@outlook.com.au",
         "telephone": "+61423237043",
         "address": {
