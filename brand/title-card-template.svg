@@ -1,0 +1,60 @@
+<!--
+  Title card template — 1920x1080 (16:9)
+  Use as a video intro / section title slide.
+  Edit text content directly, or open in Figma/Inkscape to adjust layout.
+  Headshot path is relative to this file (../images/...).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&amp;family=Syne:wght@700;800&amp;display=swap');
+    </style>
+    <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+      <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#3b82f6" stroke-width="1" opacity="0.06"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1920" height="1080" fill="#0a0e1a"/>
+  <rect width="1920" height="1080" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1920" height="6" fill="#3b82f6"/>
+  <rect x="0" y="1074" width="1920" height="6" fill="#3b82f6"/>
+
+  <!-- Logo mark, top-left -->
+  <g transform="translate(80, 60)">
+    <rect width="120" height="100" rx="16" fill="#0a0e1a" stroke="#1f2937" stroke-width="2"/>
+    <text x="60" y="48" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-weight="700" font-size="38" fill="#e5e7eb">bc</text>
+    <text x="60" y="84" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-weight="700" font-size="26" fill="#60a5fa">dev<tspan>_<animate attributeName="opacity" values="1;1;0;0;1" keyTimes="0;0.5;0.5;1;1" dur="1s" repeatCount="indefinite"/></tspan></text>
+  </g>
+
+  <!-- Eyebrow -->
+  <text x="80" y="320" font-family="'JetBrains Mono', monospace" font-size="28" fill="#60a5fa" letter-spacing="4">// MICROSOFT FABRIC · DATA ENGINEERING</text>
+
+  <!-- Title -->
+  <text x="80" y="410" font-family="'Syne', sans-serif" font-weight="800" font-size="56" fill="#e5e7eb">Delta Table Maintenance</text>
+  <text x="80" y="480" font-family="'Syne', sans-serif" font-weight="800" font-size="56" fill="#60a5fa">in Microsoft Fabric</text>
+
+  <!-- Subtitle -->
+  <text x="80" y="550" font-family="'JetBrains Mono', monospace" font-size="32" fill="#9ca3af">A 2026 Practitioner's Guide</text>
+
+  <!-- Code motif panel -->
+  <g transform="translate(1240, 360)">
+    <rect width="600" height="340" rx="12" fill="#0d1117" stroke="#1f2937" stroke-width="2"/>
+    <circle cx="36" cy="36" r="8" fill="#ef4444"/>
+    <circle cx="64" cy="36" r="8" fill="#f59e0b"/>
+    <circle cx="92" cy="36" r="8" fill="#10b981"/>
+    <text x="36" y="100" font-family="'JetBrains Mono', monospace" font-size="24" fill="#9ca3af">spark.sql(f"""</text>
+    <text x="56" y="138" font-family="'JetBrains Mono', monospace" font-size="24" fill="#60a5fa">  OPTIMIZE {table}</text>
+    <text x="56" y="176" font-family="'JetBrains Mono', monospace" font-size="24" fill="#60a5fa">  ZORDER BY (event_date)</text>
+    <text x="36" y="214" font-family="'JetBrains Mono', monospace" font-size="24" fill="#9ca3af">""")</text>
+    <text x="36" y="280" font-family="'JetBrains Mono', monospace" font-size="24" fill="#10b981"># VACUUM RETAIN 168 HOURS</text>
+  </g>
+
+  <!-- Presenter footer -->
+  <g transform="translate(80, 880)">
+    <image href="../images/Head_shot-removebg-preview.png" x="0" y="0" width="140" height="140"/>
+    <text x="170" y="40" font-family="'Syne', sans-serif" font-weight="700" font-size="44" fill="#e5e7eb">Brad Coles</text>
+    <text x="170" y="85" font-family="'JetBrains Mono', monospace" font-size="28" fill="#9ca3af">Senior Data Engineering Consultant</text>
+    <text x="170" y="125" font-family="'JetBrains Mono', monospace" font-size="28" fill="#3b82f6">bradcoles.dev</text>
+  </g>
+</svg>

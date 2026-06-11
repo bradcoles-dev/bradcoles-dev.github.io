@@ -1,3 +1,5 @@
 theme: jekyll-theme-minimal
 title: bradcoles-dev's homepage
 description: Bookmark this to keep an eye on my project updates!
+exclude:
+  - brand/
