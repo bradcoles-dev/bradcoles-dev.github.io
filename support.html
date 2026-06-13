@@ -43,6 +43,7 @@
             --accent-bright: #60a5fa;
             --accent-dim: #1e40af;
             --success: #10b981;
+            --error: #ef4444;
             --border: #1f2937;
             --code-bg: #0d1117;
         }
@@ -140,14 +141,37 @@
             font-weight: 700;
         }
 
-        .coffee-card {
-            text-align: center;
+        .support-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
             margin: 2.5rem 0;
         }
 
-        .coffee-btn {
+        .support-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .support-card h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.15rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .support-card p {
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .support-btn,
+        .form-submit {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 0.6rem;
             padding: 0.9rem 2.25rem;
             border: 2px solid var(--accent);
@@ -156,13 +180,15 @@
             text-decoration: none;
             font-family: 'JetBrains Mono', monospace;
             font-weight: 700;
-            font-size: 1rem;
+            font-size: 0.875rem;
             text-transform: uppercase;
             letter-spacing: 1px;
+            cursor: pointer;
             transition: all 0.3s ease;
         }
 
-        .coffee-btn:hover {
+        .support-btn:hover,
+        .form-submit:hover {
             background: var(--accent);
             color: var(--bg-dark);
         }
@@ -173,18 +199,66 @@
             color: var(--text-secondary);
         }
 
-        .secondary-note a {
-            color: var(--accent-bright);
-            text-decoration: none;
-            font-weight: 700;
-        }
-
         footer {
             padding: 3rem 0;
             border-top: 1px solid var(--border);
             text-align: center;
             color: var(--text-secondary);
             margin-top: 4rem;
+        }
+
+        .newsletter-form {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.75rem;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .newsletter-form input {
+            flex: 1;
+            min-width: 200px;
+            padding: 0.75rem;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .newsletter-form input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .newsletter-message {
+            margin-top: 0.75rem;
+            font-size: 0.85rem;
+            min-height: 1.2rem;
+        }
+
+        .newsletter-message.success {
+            color: var(--success);
+        }
+
+        .newsletter-message.error {
+            color: var(--error);
+        }
+
+        @media (max-width: 480px) {
+            .support-card {
+                padding: 1.5rem;
+            }
+
+            .newsletter-form {
+                flex-direction: column;
+            }
+
+            .newsletter-form input,
+            .newsletter-form .form-submit {
+                width: 100%;
+            }
         }
 
         @media (max-width: 768px) {
@@ -208,19 +282,35 @@
             </p>
 
             <p>
-                I'm not planning to monetise this site. You won't find ads, affiliate links, or content locked behind a newsletter signup here.
+                I'm not planning to monetise this site — you won't find ads, affiliate links, or paywalled content here. If you'd like to support the work, here are a few ways to do that. All entirely optional, never expected, and genuinely appreciated.
             </p>
 
-            <p>
-                That said — if something here saved you a few hours of troubleshooting, helped you avoid an expensive mistake, or just made your week a little easier, and you'd like to say thanks, you're welcome to <strong>buy me a coffee</strong>. It's entirely optional, never expected, and genuinely appreciated.
-            </p>
+            <div class="support-options">
+                <div class="support-card">
+                    <h2>📬 Subscribe to the Newsletter</h2>
+                    <p>Get new articles on Microsoft Fabric and data engineering delivered to your inbox.</p>
+                    <form class="newsletter-form" action="https://app.kit.com/forms/9560544/subscriptions" method="post" id="newsletter-form">
+                        <input type="email" name="email_address" placeholder="you@example.com" aria-label="Email address" required>
+                        <button type="submit" class="form-submit">Subscribe</button>
+                    </form>
+                    <p class="newsletter-message" id="newsletter-message" role="status" aria-live="polite"></p>
+                </div>
 
-            <div class="coffee-card">
-                <a href="https://buymeacoffee.com/bradcolesdev" class="coffee-btn" target="_blank" rel="noopener noreferrer">☕ Buy Me a Coffee</a>
+                <div class="support-card">
+                    <h2>☕ Buy Me a Coffee</h2>
+                    <p>If something here saved you a few hours of troubleshooting or helped you avoid an expensive mistake, you're welcome to say thanks.</p>
+                    <a href="https://buymeacoffee.com/bradcolesdev" class="support-btn" target="_blank" rel="noopener noreferrer">Buy Me a Coffee</a>
+                </div>
+
+                <div class="support-card">
+                    <h2>💼 Follow on LinkedIn</h2>
+                    <p>Prefer a free way to stay in touch? Follow along for new posts and updates.</p>
+                    <a href="https://linkedin.com/in/brad-coles" class="support-btn" target="_blank" rel="noopener noreferrer">Follow on LinkedIn</a>
+                </div>
             </div>
 
             <p class="secondary-note">
-                Prefer a free way to say thanks? <a href="https://linkedin.com/in/brad-coles" target="_blank" rel="noopener noreferrer">Follow me on LinkedIn</a> or share an article with someone who'd find it useful.
+                Sharing an article with someone who'd find it useful helps too.
             </p>
         </article>
 
@@ -228,5 +318,50 @@
             <p>&copy; 2026 Brad Coles. <a href="index.html" style="color: var(--accent-bright); text-decoration: none;">Back to Portfolio</a></p>
         </footer>
     </div>
+
+    <script>
+        const newsletterForm = document.getElementById('newsletter-form');
+        if (newsletterForm) {
+            const newsletterMessage = document.getElementById('newsletter-message');
+
+            newsletterForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const submitButton = newsletterForm.querySelector('.form-submit');
+                const originalButtonText = submitButton.textContent;
+                submitButton.disabled = true;
+                submitButton.textContent = 'Subscribing...';
+                newsletterMessage.textContent = '';
+                newsletterMessage.className = 'newsletter-message';
+
+                try {
+                    const formData = new FormData(newsletterForm);
+                    const response = await fetch(newsletterForm.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    });
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        newsletterMessage.textContent = 'Thanks! Check your inbox to confirm your subscription.';
+                        newsletterMessage.classList.add('success');
+                        newsletterForm.reset();
+                    } else {
+                        newsletterMessage.textContent = (data && data.message) || 'Something went wrong. Please try again.';
+                        newsletterMessage.classList.add('error');
+                    }
+                } catch (error) {
+                    newsletterMessage.textContent = 'Something went wrong. Please try again.';
+                    newsletterMessage.classList.add('error');
+                } finally {
+                    submitButton.disabled = false;
+                    submitButton.textContent = originalButtonText;
+                }
+            });
+        }
+    </script>
 </body>
 </html>

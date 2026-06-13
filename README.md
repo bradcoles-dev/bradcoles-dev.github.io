@@ -87,6 +87,10 @@ Automatically deployed via GitHub Pages when changes are pushed to the `main` br
 
 The contact form uses Netlify Forms for submission handling. If not deployed on Netlify, submissions will trigger a browser alert instead.
 
+## Newsletter Signup
+
+The Kit (formerly ConvertKit) newsletter signup form lives only on `support.html`, as one of three "support this site" options (alongside Buy Me a Coffee and LinkedIn). The form posts via `fetch` to Kit's Inline form endpoint (`https://app.kit.com/forms/9560544/subscriptions`) and shows an inline success/error message without leaving the page. Every other page (`index.html`, `blog/index.html`, and each blog article) ends with a single sentence linking to `support.html` rather than embedding a form directly.
+
 ## Browser Support
 
 - Chrome/Edge (latest)
@@ -102,6 +106,7 @@ Potential improvements to consider:
 - Integrate analytics
 - Add downloadable resume/CV
 - Create separate CSS/JS files for better organisation
+- Add a Jekyll RSS feed (`jekyll-feed` plugin) and switch the newsletter to Kit's RSS-to-email automation, once there are enough subscribers to justify automating "new post" emails
 
 ## License
 

@@ -532,14 +532,14 @@
             color: var(--accent-bright);
         }
 
-        .nav-links a.nav-coffee {
+        .nav-links a.nav-support {
             color: var(--accent-bright);
             border: 1px solid var(--accent-dim);
             padding: 0.35rem 0.85rem;
             border-radius: 4px;
         }
 
-        .nav-links a.nav-coffee:hover {
+        .nav-links a.nav-support:hover {
             background: var(--accent);
             color: var(--bg-dark);
         }
@@ -824,7 +824,7 @@
             gap: 1.25rem;
         }
 
-        .nav-coffee-icon {
+        .nav-support-icon {
             font-size: 1.4rem;
             line-height: 1;
             text-decoration: none;
@@ -839,7 +839,7 @@
                 display: flex;
             }
 
-            .nav-coffee-item {
+            .nav-support-item {
                 display: none;
             }
 
@@ -871,7 +871,7 @@
         <div class="container">
             <a href="#" class="nav-brand"><img src="images/logo-bc-horizontal.svg" alt="Brad Coles"></a>
             <div class="nav-actions">
-                <a href="support.html" class="nav-coffee-icon" aria-label="Buy me a coffee">☕</a>
+                <a href="support.html" class="nav-support-icon" aria-label="Support">☕</a>
                 <button class="nav-toggle" aria-label="Toggle navigation">☰</button>
             </div>
             <ul class="nav-links">
@@ -883,7 +883,7 @@
                 <li><a href="#certifications">Certifications</a></li>
                 <li><a href="#education">Education</a></li>
                 <li><a href="#contact">Contact</a></li>
-                <li class="nav-coffee-item"><a href="support.html" class="nav-coffee">☕ Coffee</a></li>
+                <li class="nav-support-item"><a href="support.html" class="nav-support">☕ Support</a></li>
             </ul>
         </div>
     </nav>
@@ -1129,9 +1129,6 @@
             <div style="text-align:center; margin-top: 1rem;">
                 <a href="blog/index.html" class="project-link">View all articles →</a>
             </div>
-            <p style="text-align:center; margin-top: 1.5rem; font-size: 0.875rem;">
-                <a href="https://linkedin.com/in/brad-coles" style="color: var(--accent-bright); text-decoration: none; border-bottom: 1px solid var(--accent-dim); padding-bottom: 1px;" target="_blank" rel="noopener noreferrer">Follow me on LinkedIn</a><span style="color: var(--text-secondary);"> — I write about Microsoft Fabric, real implementation gotchas, and what the docs don't tell you.</span>
-            </p>
         </section>
 
         <section id="certifications" aria-labelledby="certifications-heading">
@@ -1219,7 +1216,8 @@
 
     <footer>
         <div class="container">
-            <p>&copy; 2026 Brad Coles. Built with HTML, CSS, and hosted on GitHub Pages. <a href="support.html" style="color: var(--accent-bright); text-decoration: none;">☕ Buy me a coffee</a></p>
+            <p style="font-size: 0.9rem; margin-bottom: 1rem;">If you've found this site useful, <a href="support.html" style="color: var(--accent-bright); text-decoration: none; font-weight: 700;">click here to see some ways you can support me</a>.</p>
+            <p>&copy; 2026 Brad Coles. Built with HTML, CSS, and hosted on GitHub Pages.</p>
         </div>
     </footer>
 
@@ -1335,7 +1333,7 @@
                 const navLink = document.querySelector(`.nav-links a[href="#${sectionId}"]`);
 
                 if (navLink && scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
-                    document.querySelectorAll('.nav-links a:not(.nav-coffee)').forEach(link => {
+                    document.querySelectorAll('.nav-links a:not(.nav-support)').forEach(link => {
                         link.style.color = 'var(--text-secondary)';
                     });
                     navLink.style.color = 'var(--accent-bright)';
