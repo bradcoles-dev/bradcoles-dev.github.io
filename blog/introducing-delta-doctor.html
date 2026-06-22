@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Seven production-ready PySpark notebooks for automated Delta table diagnosis, maintenance, and prevention — import directly into your Fabric workspace, no pip install required.">
+    <meta name="description" content="Seven production-ready PySpark notebooks for automated Delta table diagnosis, maintenance, and prevention in Microsoft Fabric Lakehouses. Import directly into your workspace, no pip install required.">
     <meta name="keywords" content="Microsoft Fabric, Delta Lake, delta-doctor, Delta Table Maintenance, PySpark, Lakehouse, OPTIMIZE, VACUUM, Data Engineering">
     <meta name="author" content="Brad Coles">
 
@@ -19,15 +19,15 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://bradcoles.dev/blog/introducing-delta-doctor.html">
-    <meta property="og:title" content="Introducing delta-doctor — automated Delta table maintenance for Microsoft Fabric">
-    <meta property="og:description" content="Seven production-ready PySpark notebooks for automated Delta table diagnosis, maintenance, and prevention — import directly into your Fabric workspace, no pip install required.">
+    <meta property="og:title" content="Introducing delta-doctor: automated Delta table maintenance for Microsoft Fabric Lakehouses">
+    <meta property="og:description" content="Seven production-ready PySpark notebooks for automated Delta table diagnosis, maintenance, and prevention in Microsoft Fabric Lakehouses. Import directly into your workspace, no pip install required.">
     <meta property="og:image" content="https://bradcoles.dev/preview.png">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://bradcoles.dev/blog/introducing-delta-doctor.html">
-    <meta property="twitter:title" content="Introducing delta-doctor — automated Delta table maintenance for Microsoft Fabric">
-    <meta property="twitter:description" content="Seven production-ready PySpark notebooks for automated Delta table diagnosis, maintenance, and prevention — import directly into your Fabric workspace, no pip install required.">
+    <meta property="twitter:title" content="Introducing delta-doctor: automated Delta table maintenance for Microsoft Fabric Lakehouses">
+    <meta property="twitter:description" content="Seven production-ready PySpark notebooks for automated Delta table diagnosis, maintenance, and prevention in Microsoft Fabric Lakehouses. Import directly into your workspace, no pip install required.">
     <meta property="twitter:image" content="https://bradcoles.dev/preview.png">
 
     <title>Introducing delta-doctor | Brad Coles</title>
@@ -304,8 +304,8 @@
                 <span class="blog-category">Data Engineering</span>
                 <span class="blog-category">Microsoft Fabric</span>
             </div>
-            <h1>Introducing delta-doctor — automated Delta table maintenance for Microsoft Fabric</h1>
-            <p class="blog-subtitle">Seven production-ready notebooks that implement the Delta maintenance recommendations from my earlier guide — ready to import directly into your Fabric workspace.</p>
+            <h1>Introducing <a href="https://deltadoctor.dev" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none; border-bottom: 2px solid var(--accent);">delta-doctor</a>: automated Delta table maintenance for Microsoft Fabric Lakehouses</h1>
+            <p class="blog-subtitle">Seven production-ready notebooks that implement the Delta maintenance recommendations from my earlier guide, ready to import directly into your Fabric Lakehouse workspace.</p>
             <p class="blog-byline">By Brad Coles | Senior Consultant &amp; Data Engineering Capability Lead, Synechron Australia</p>
         </header>
 
@@ -315,7 +315,7 @@
             </p>
 
             <p>
-                <strong>delta-doctor</strong> is the answer — a library of seven production-ready PySpark notebooks that implement those recommendations directly in your Fabric workspace.
+                <strong><a href="https://deltadoctor.dev" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright); text-decoration: none;">delta-doctor</a></strong> is the answer: a library of seven production-ready PySpark notebooks that implement those recommendations directly in your Fabric workspace.
             </p>
 
             <hr>
@@ -327,11 +327,11 @@
             </p>
 
             <p>
-                Every Dataflow Gen2, Copy activity, and Python kernel notebook (DuckDB, Polars) lands small files with no Auto-Compaction. Spark notebooks have Auto-Compaction available, but it targets 128 MB files — not the 256–400 MB files that Silver and Gold consumers actually need. Deletion vectors accumulate silently after every MERGE and DELETE. Liquid clustering goes stale if OPTIMIZE never runs.
+                Every Dataflow Gen2, Copy activity, and Python kernel notebook (DuckDB, Polars) lands small files with no Auto-Compaction. Spark notebooks have Auto-Compaction available, but it targets 128 MB files, not the 256–400 MB files that Silver and Gold consumers actually need. Deletion vectors accumulate silently after every MERGE and DELETE. Liquid clustering goes stale if OPTIMIZE never runs.
             </p>
 
             <p>
-                You end up with a Lakehouse that works — queries return correct data — but costs more than it should, because it's scanning more files than it needs to on every query. The difference between a well-maintained Lakehouse and a neglected one can be the difference between your current SKU and the next one up.
+                You end up with a Lakehouse that works (queries return correct data) but costs more than it should, because it's scanning more files than it needs to on every query. The difference between a well-maintained Lakehouse and a neglected one can be the difference between your current SKU and the next one up.
             </p>
 
             <hr>
@@ -339,11 +339,11 @@
             <h2>What delta-doctor is</h2>
 
             <p>
-                It's a Fabric Notebook Library — seven <code>.ipynb</code> files you import directly into your workspace via the <strong>Import notebook</strong> button. No pip install, no infrastructure, no configuration files. Each notebook has one job.
+                It's a Fabric Notebook Library: seven <code>.ipynb</code> files you import directly into your workspace via the <strong>Import notebook</strong> button. No pip install, no infrastructure, no configuration files. Each notebook has one job.
             </p>
 
             <figure class="diagram">
-                <svg viewBox="0 0 800 242" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;min-width:560px;" role="img" aria-label="delta-doctor library structure — seven notebooks across three pillars: Diagnosis, Treatment, and Preventative Care">
+                <svg viewBox="0 0 800 242" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;min-width:560px;" role="img" aria-label="delta-doctor library structure: seven notebooks across three pillars: Diagnosis, Treatment, and Preventative Care">
                     <rect width="800" height="242" fill="#0d1117" stroke="#1f2937" stroke-width="1" rx="4"/>
 
                     <!-- DIAGNOSIS -->
@@ -412,40 +412,40 @@
             <h3>Diagnosis</h3>
 
             <p>
-                <strong><code>doctor_diagnosis_table_health</code></strong> — scans all tables in a Lakehouse and produces a health report: file counts, average file sizes, fragmentation status, deletion vector state, clustering state. Classifies each table as Healthy, Within tolerance, Review, Needs OPTIMIZE, Oversized, or a skip status. Runs in seconds — it's all metadata, no data scan.
+                <strong><code>doctor_diagnosis_table_health</code></strong>: scans all tables in a Lakehouse and produces a health report: file counts, average file sizes, fragmentation status, deletion vector state, clustering state. Classifies each table as Healthy, Within tolerance, Review, Needs OPTIMIZE, Oversized, or a skip status. Runs in seconds; it's all metadata, no data scan.
             </p>
 
             <figure class="diagram">
-                <img src="../images/delta-doctor/health-report.png" alt="doctor_diagnosis_table_health output in Microsoft Fabric showing a table with columns for schema, table name, num_files, size_gb, avg_file_mb, partitioned, liquid_clustering, deletion_vectors, and status — two test tables both classified as Needs OPTIMIZE" loading="lazy">
-                <figcaption>Health report output from a test Lakehouse. Two tables with 24 and 40 small files, avg file size near 0 MB — both correctly classified as Needs OPTIMIZE.</figcaption>
+                <img src="../images/delta-doctor/health-report.png" alt="doctor_diagnosis_table_health output in Microsoft Fabric showing a table with columns for schema, table name, num_files, size_gb, avg_file_mb, partitioned, liquid_clustering, deletion_vectors, and status, two test tables both classified as Needs OPTIMIZE" loading="lazy">
+                <figcaption>Health report output from a test Lakehouse. Two tables with 24 and 40 small files, avg file size near 0 MB, both correctly classified as Needs OPTIMIZE.</figcaption>
             </figure>
 
             <h3>Treatment</h3>
 
             <p>
-                <strong><code>doctor_treatment_table_maintenance</code></strong> — OPTIMIZE + VACUUM on a single table, designed to be called as the final step of each pipeline load.
+                <strong><code>doctor_treatment_table_maintenance</code></strong>: OPTIMIZE + VACUUM on a single table, designed to be called as the final step of each pipeline load.
             </p>
 
             <p>
-                <strong><code>doctor_treatment_maintenance_orchestrator</code></strong> — OPTIMIZE + VACUUM across an entire Lakehouse. The starting point before per-table pipeline calls are in place, and the ongoing scheduled option for teams that prefer Lakehouse-wide maintenance over per-table wiring.
+                <strong><code>doctor_treatment_maintenance_orchestrator</code></strong>: OPTIMIZE + VACUUM across an entire Lakehouse. The starting point before per-table pipeline calls are in place, and the ongoing scheduled option for teams that prefer Lakehouse-wide maintenance over per-table wiring.
             </p>
 
             <p>
-                <strong><code>doctor_treatment_rebaseline_orchestrator</code></strong> — a one-off REORG TABLE APPLY (PURGE) + OPTIMIZE across every table in a Lakehouse. Purges accumulated deletion vectors and resets file sizes to the layer target. Run once on a neglected Lakehouse, then hand off to the maintenance orchestrator.
+                <strong><code>doctor_treatment_rebaseline_orchestrator</code></strong>: a one-off REORG TABLE APPLY (PURGE) + OPTIMIZE across every table in a Lakehouse. Purges accumulated deletion vectors and resets file sizes to the layer target. Run once on a neglected Lakehouse, then hand off to the maintenance orchestrator.
             </p>
 
             <h3>Preventative Care</h3>
 
             <p>
-                <strong><code>doctor_prevention_session_config</code></strong> — Spark session baseline by medallion layer, called at the top of every pipeline notebook.
+                <strong><code>doctor_prevention_session_config</code></strong>: Spark session baseline by medallion layer, called at the top of every pipeline notebook.
             </p>
 
             <p>
-                <strong><code>doctor_prevention_set_table_properties</code></strong> — Delta table properties per layer on a single table: deletion vectors, Auto-Compaction, Optimize Write, V-Order, target file size, and optionally liquid clustering.
+                <strong><code>doctor_prevention_set_table_properties</code></strong>: Delta table properties per layer on a single table: deletion vectors, Auto-Compaction, Optimize Write, V-Order, target file size, and optionally liquid clustering.
             </p>
 
             <p>
-                <strong><code>doctor_prevention_set_properties_orchestrator</code></strong> — applies table properties across an entire Lakehouse in one run. The onboarding step for a new Lakehouse.
+                <strong><code>doctor_prevention_set_properties_orchestrator</code></strong>: applies table properties across an entire Lakehouse in one run. The onboarding step for a new Lakehouse.
             </p>
 
             <hr>
@@ -457,7 +457,7 @@
             </p>
 
             <p>
-                <strong>The VACUUM floor is enforced in code.</strong> VACUUM will never run with retention below 168 hours (7 days), regardless of what you pass as a parameter. This is not a documentation note — it is <code>max(retain_hours, 168)</code> on every path.
+                <strong>The VACUUM floor is enforced in code.</strong> VACUUM will never run with retention below 168 hours (7 days), regardless of what you pass as a parameter. This is not a documentation note: it is <code>max(retain_hours, 168)</code> on every path.
             </p>
 
             <p>
@@ -465,11 +465,15 @@
             </p>
 
             <p>
-                <strong>Direct Lake is accounted for.</strong> Gold-layer VACUUM requires <code>direct_lake_confirmed = True</code> — the notebook raises a <code>ValueError</code> if it's not set. This is a manual flag, not an automated check. The expected sequence is: refresh your Direct Lake semantic model, confirm it has re-framed to the latest Delta commit, then run the notebook with <code>direct_lake_confirmed = True</code>. Worth noting: the flag asserts the refresh happened — it doesn't verify it. VACUUM removing files a Direct Lake model still references causes query errors until the next refresh; the gate makes it impossible to skip that confirmation step accidentally.
+                <strong>Direct Lake is accounted for.</strong> Gold-layer VACUUM requires <code>direct_lake_confirmed = True</code> — the notebook raises a <code>ValueError</code> if it's not set. This is a manual flag, not an automated check. The expected sequence is: refresh your Direct Lake semantic model, confirm it has re-framed to the latest Delta commit, then run the notebook with <code>direct_lake_confirmed = True</code>. Worth noting: the flag asserts the refresh happened — it doesn't verify it. VACUUM removing files a Direct Lake model still references causes query errors until the next refresh; the gate forces that confirmation to be an explicit decision rather than a silent default.
             </p>
 
             <p>
                 <strong>Schema-enabled Lakehouses work automatically.</strong> Table enumeration uses <code>mssparkutils.fs.ls()</code> and <code>_delta_log</code> detection rather than <code>SHOW TABLES</code>, so both <code>Tables/{table}</code> and <code>Tables/{schema}/{table}</code> structures are handled transparently.
+            </p>
+
+            <p>
+                All of these behaviours (OPTIMIZE gating, the VACUUM retention floor, the Direct Lake gate) are covered by the <a href="https://github.com/bradcoles-dev/delta-doctor/blob/main/validation/deployment-validation.md" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">8-section deployment validation suite</a> in the repo, with expected outputs, error cases, and a sign-off checklist for each notebook.
             </p>
 
             <hr>
