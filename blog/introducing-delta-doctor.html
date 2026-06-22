@@ -255,6 +255,27 @@
             font-style: italic;
         }
 
+        .diagram {
+            margin: 2rem 0;
+            overflow-x: auto;
+        }
+
+        .diagram figcaption {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-top: 0.75rem;
+            font-style: italic;
+            line-height: 1.5;
+        }
+
+        .diagram img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border: 1px solid var(--border);
+        }
+
         footer {
             padding: 3rem 0;
             border-top: 1px solid var(--border);
@@ -321,11 +342,83 @@
                 It's a Fabric Notebook Library — seven <code>.ipynb</code> files you import directly into your workspace via the <strong>Import notebook</strong> button. No pip install, no infrastructure, no configuration files. Each notebook has one job.
             </p>
 
+            <figure class="diagram">
+                <svg viewBox="0 0 800 242" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;min-width:560px;" role="img" aria-label="delta-doctor library structure — seven notebooks across three pillars: Diagnosis, Treatment, and Preventative Care">
+                    <rect width="800" height="242" fill="#0d1117" stroke="#1f2937" stroke-width="1" rx="4"/>
+
+                    <!-- DIAGNOSIS -->
+                    <rect x="14" y="14" width="246" height="34" fill="#0a0e1a" stroke="#1e40af" stroke-width="1.5" rx="2"/>
+                    <text x="137" y="36" text-anchor="middle" font-family="Syne, sans-serif" font-size="12" font-weight="700" fill="#60a5fa">Diagnosis</text>
+
+                    <rect x="14" y="56" width="246" height="170" fill="#111827" stroke="#1f2937" stroke-width="1" rx="2"/>
+                    <rect x="14" y="56" width="3" height="170" fill="#3b82f6"/>
+                    <text x="30" y="72" font-family="JetBrains Mono, monospace" font-size="8" fill="#6b7280">doctor_diagnosis_</text>
+                    <text x="30" y="85" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#60a5fa">table_health</text>
+                    <text x="30" y="99" font-family="JetBrains Mono, monospace" font-size="8" fill="#9ca3af">File counts · avg file size</text>
+                    <text x="30" y="111" font-family="JetBrains Mono, monospace" font-size="8" fill="#9ca3af">deletion vectors · clustering state</text>
+                    <line x1="30" y1="121" x2="246" y2="121" stroke="#1f2937" stroke-width="1"/>
+                    <text x="30" y="134" font-family="JetBrains Mono, monospace" font-size="7.5" fill="#4b5563" letter-spacing="1">STATUS</text>
+                    <text x="30" y="148" font-family="JetBrains Mono, monospace" font-size="8.5" fill="#10b981">Healthy · Within tolerance</text>
+                    <text x="30" y="162" font-family="JetBrains Mono, monospace" font-size="8.5" fill="#f59e0b">Review · Needs OPTIMIZE</text>
+                    <text x="30" y="176" font-family="JetBrains Mono, monospace" font-size="8.5" fill="#6b7280">Oversized · Skip</text>
+
+                    <!-- TREATMENT -->
+                    <rect x="276" y="14" width="246" height="34" fill="#0a0e1a" stroke="#065f46" stroke-width="1.5" rx="2"/>
+                    <text x="399" y="36" text-anchor="middle" font-family="Syne, sans-serif" font-size="12" font-weight="700" fill="#10b981">Treatment</text>
+
+                    <rect x="276" y="56" width="246" height="52" fill="#111827" stroke="#1f2937" stroke-width="1" rx="2"/>
+                    <rect x="276" y="56" width="3" height="52" fill="#10b981"/>
+                    <text x="292" y="70" font-family="JetBrains Mono, monospace" font-size="8" fill="#6b7280">doctor_treatment_</text>
+                    <text x="292" y="83" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#10b981">table_maintenance</text>
+                    <text x="292" y="97" font-family="JetBrains Mono, monospace" font-size="8" fill="#9ca3af">Single table OPTIMIZE + VACUUM</text>
+
+                    <rect x="276" y="116" width="246" height="52" fill="#111827" stroke="#1f2937" stroke-width="1" rx="2"/>
+                    <rect x="276" y="116" width="3" height="52" fill="#10b981"/>
+                    <text x="292" y="130" font-family="JetBrains Mono, monospace" font-size="8" fill="#6b7280">doctor_treatment_</text>
+                    <text x="292" y="143" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#10b981">maintenance_orchestrator</text>
+                    <text x="292" y="157" font-family="JetBrains Mono, monospace" font-size="8" fill="#9ca3af">Lakehouse-wide OPTIMIZE + VACUUM</text>
+
+                    <rect x="276" y="176" width="246" height="52" fill="#111827" stroke="#1f2937" stroke-width="1" rx="2"/>
+                    <rect x="276" y="176" width="3" height="52" fill="#10b981"/>
+                    <text x="292" y="190" font-family="JetBrains Mono, monospace" font-size="8" fill="#6b7280">doctor_treatment_</text>
+                    <text x="292" y="203" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#10b981">rebaseline_orchestrator</text>
+                    <text x="292" y="217" font-family="JetBrains Mono, monospace" font-size="8" fill="#9ca3af">One-off REORG + OPTIMIZE all tables</text>
+
+                    <!-- PREVENTATIVE CARE -->
+                    <rect x="538" y="14" width="246" height="34" fill="#0a0e1a" stroke="#5b21b6" stroke-width="1.5" rx="2"/>
+                    <text x="661" y="36" text-anchor="middle" font-family="Syne, sans-serif" font-size="12" font-weight="700" fill="#a78bfa">Preventative Care</text>
+
+                    <rect x="538" y="56" width="246" height="52" fill="#111827" stroke="#1f2937" stroke-width="1" rx="2"/>
+                    <rect x="538" y="56" width="3" height="52" fill="#a78bfa"/>
+                    <text x="554" y="70" font-family="JetBrains Mono, monospace" font-size="8" fill="#6b7280">doctor_prevention_</text>
+                    <text x="554" y="83" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#a78bfa">session_config</text>
+                    <text x="554" y="97" font-family="JetBrains Mono, monospace" font-size="8" fill="#9ca3af">Spark session baseline by layer</text>
+
+                    <rect x="538" y="116" width="246" height="52" fill="#111827" stroke="#1f2937" stroke-width="1" rx="2"/>
+                    <rect x="538" y="116" width="3" height="52" fill="#a78bfa"/>
+                    <text x="554" y="130" font-family="JetBrains Mono, monospace" font-size="8" fill="#6b7280">doctor_prevention_</text>
+                    <text x="554" y="143" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#a78bfa">set_table_properties</text>
+                    <text x="554" y="157" font-family="JetBrains Mono, monospace" font-size="8" fill="#9ca3af">Delta properties, one table</text>
+
+                    <rect x="538" y="176" width="246" height="52" fill="#111827" stroke="#1f2937" stroke-width="1" rx="2"/>
+                    <rect x="538" y="176" width="3" height="52" fill="#a78bfa"/>
+                    <text x="554" y="190" font-family="JetBrains Mono, monospace" font-size="8" fill="#6b7280">doctor_prevention_</text>
+                    <text x="554" y="203" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#a78bfa">set_properties_orchestrator</text>
+                    <text x="554" y="217" font-family="JetBrains Mono, monospace" font-size="8" fill="#9ca3af">Delta properties, full Lakehouse</text>
+                </svg>
+                <figcaption>Seven notebooks across three pillars. Start with Diagnosis to understand your current state before running Treatment or Preventative Care.</figcaption>
+            </figure>
+
             <h3>Diagnosis</h3>
 
             <p>
                 <strong><code>doctor_diagnosis_table_health</code></strong> — scans all tables in a Lakehouse and produces a health report: file counts, average file sizes, fragmentation status, deletion vector state, clustering state. Classifies each table as Healthy, Within tolerance, Review, Needs OPTIMIZE, Oversized, or a skip status. Runs in seconds — it's all metadata, no data scan.
             </p>
+
+            <figure class="diagram">
+                <img src="../images/delta-doctor/health-report.png" alt="doctor_diagnosis_table_health output in Microsoft Fabric showing a table with columns for schema, table name, num_files, size_gb, avg_file_mb, partitioned, liquid_clustering, deletion_vectors, and status — two test tables both classified as Needs OPTIMIZE" loading="lazy">
+                <figcaption>Health report output from a test Lakehouse. Two tables with 24 and 40 small files, avg file size near 0 MB — both correctly classified as Needs OPTIMIZE.</figcaption>
+            </figure>
 
             <h3>Treatment</h3>
 
