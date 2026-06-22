@@ -360,7 +360,7 @@
             <h2>Design decisions worth knowing</h2>
 
             <p>
-                <strong>OPTIMIZE is gated.</strong> Every OPTIMIZE call first reads table metadata via <code>DESCRIBE DETAIL</code> — no data scan, runs in milliseconds. If average file size is already within 80% of the layer target, the table is skipped. Microsoft's Fast Optimize handles bin-level evaluation within each run. On a well-maintained Lakehouse, most tables are skipped and the orchestrator run costs almost nothing.
+                <strong>OPTIMIZE is gated.</strong> Every OPTIMIZE call first reads table metadata via <code>DESCRIBE DETAIL</code> — no data scan, runs in milliseconds. If average file size is already within 80% of the layer target, the table is skipped. Microsoft's <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/table-compaction" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Fast Optimize</a> handles bin-level evaluation within each run. On a well-maintained Lakehouse, most tables are skipped and the orchestrator run costs almost nothing.
             </p>
 
             <p>
@@ -372,7 +372,7 @@
             </p>
 
             <p>
-                <strong>Direct Lake is accounted for.</strong> Gold-layer VACUUM requires <code>direct_lake_confirmed = True</code> — the notebook raises a <code>ValueError</code> if the semantic model has not been confirmed as re-framed. VACUUM removing files a Direct Lake model is still referencing causes query errors until the next model refresh. The gate makes that impossible to skip accidentally.
+                <strong>Direct Lake is accounted for.</strong> Gold-layer VACUUM requires <code>direct_lake_confirmed = True</code> — the notebook raises a <code>ValueError</code> if it's not set. This is a manual flag, not an automated check. The expected sequence is: refresh your Direct Lake semantic model, confirm it has re-framed to the latest Delta commit, then run the notebook with <code>direct_lake_confirmed = True</code>. Worth noting: the flag asserts the refresh happened — it doesn't verify it. VACUUM removing files a Direct Lake model still references causes query errors until the next refresh; the gate makes it impossible to skip that confirmation step accidentally.
             </p>
 
             <p>
@@ -392,7 +392,7 @@
             </p>
 
             <p>
-                Full documentation and a deployment walkthrough are at <a href="https://deltadoctor.dev" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">deltadoctor.dev</a>.
+                Full documentation and a deployment walkthrough are at <a href="https://deltadoctor.dev" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">deltadoctor.dev</a>. Before running the treatment or prevention notebooks against a production Lakehouse, work through the <a href="https://github.com/bradcoles-dev/delta-doctor/blob/main/validation/deployment-validation.md" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">deployment validation guide</a> in the repo — a structured acceptance test suite covering expected outputs, error cases, and a sign-off checklist for each notebook.
             </p>
 
             <hr>
@@ -400,11 +400,11 @@
             <h2>What's next</h2>
 
             <p>
-                v0.2 will add health history logging — <code>doctor_diagnosis_table_health</code> gains an optional parameter to append each run's snapshot to a Delta table. Over time that builds a per-table health trend, which feeds a Power BI Direct Lake dashboard and a control table for per-table layer overrides in mixed-layer Lakehouses.
+                The plan for v0.2 is health history logging — <code>doctor_diagnosis_table_health</code> gains an optional parameter to append each run's snapshot to a Delta table. Over time that builds a per-table health trend, aimed at feeding a Power BI Direct Lake dashboard and a control table for per-table layer overrides in mixed-layer Lakehouses. These are directions, not commitments — the full roadmap is <a href="https://github.com/bradcoles-dev/delta-doctor?tab=readme-ov-file#roadmap" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">in the repo</a>.
             </p>
 
             <p>
-                After that, the plan is a pip-installable Python package (v1.0), and eventually a Fabric-native app built on <a href="https://www.microsoft.com/en-us/microsoft-fabric/features/rayfin" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Rayfin</a> — Microsoft's new SDK for code-first backends in Fabric workspaces — so you can run diagnosis and apply fixes without touching notebook code at all.
+                Beyond that, the aim is a pip-installable Python package (v1.0), and eventually a Fabric-native app built on <a href="https://www.microsoft.com/en-us/microsoft-fabric/features/rayfin" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Rayfin</a> — Microsoft's open-source SDK for building code-first extensions that run natively inside a Fabric workspace, announced at Build 2026. A Rayfin app would deploy directly into your workspace with no external data transfer and governance inherited automatically — so you can run diagnosis and apply fixes through a proper UI without touching notebook code.
             </p>
 
             <p>
