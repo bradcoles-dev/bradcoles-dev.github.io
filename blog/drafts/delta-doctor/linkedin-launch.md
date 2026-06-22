@@ -2,29 +2,30 @@
 
 ---
 
-Every Fabric Lakehouse I've looked at has the same problem: small files, accumulating deletion vectors, and no automated maintenance.
+After publishing my Delta table maintenance guide, the follow-up was always the same: great, but how do we actually implement this?
 
-Dataflow Gen2, Copy activity, and Python kernel notebooks don't trigger Auto-Compaction. Spark notebooks have it but target 128 MB files, not the 256-400 MB that Silver and Gold layers need. Deletion vectors pile up silently after every MERGE and DELETE. On a neglected Lakehouse the fix is usually a VACUUM and an OPTIMIZE, not a bigger SKU.
+Fabric automates Delta maintenance for Warehouses. For Lakehouses, there's nothing built in. Small files accumulate, deletion vectors build up, nothing runs automatically. Left unchecked, it compounds. And without visibility into table health, most teams don't know how bad it's got until query costs spike.
 
-Today I'm releasing delta-doctor: seven PySpark notebooks for automated Delta table maintenance on Fabric Lakehouses. Free, Apache 2.0, import directly into your workspace.
+Today I'm releasing delta-doctor: the code that guide was missing. Seven PySpark notebooks for automated Delta table maintenance on Fabric Lakehouses. Free and open source, import directly into your workspace.
 
 What's in it:
-- A health scanner that classifies every table in seconds (file counts, avg file size, deletion vectors, clustering state) with no data scan
-- Single-table and Lakehouse-wide OPTIMIZE + VACUUM, with OPTIMIZE gated on actual table health so it costs almost nothing when tables are already healthy
-- A one-off rebaseline orchestrator for purging deletion vectors and right-sizing files on a Lakehouse that's never had maintenance applied
+- Health scanner: classifies every table in seconds, no data scan
+- OPTIMIZE + VACUUM for single tables and full Lakehouses, gated on actual table health
+- Rebaseline orchestrator for right-sizing a Lakehouse that's never had maintenance applied
 - Session config and table property notebooks to set the right defaults once
 
-Built with hard constraints: VACUUM never runs below 7-day retention (enforced in code, not documentation), Gold-layer VACUUM requires explicit Direct Lake confirmation, and table enumeration works correctly for schema-enabled Lakehouses.
+Run the health scanner on your Lakehouse today to see what state it's in, without any risk.
 
-If you've been putting off Lakehouse maintenance because there was nothing to run, this is the starting point.
+Link in comments.
 
-What does your current Delta maintenance look like?
+Thanks to @Miles Cole whose Microsoft documentation and blog posts on Delta maintenance in Fabric informed a lot of this.
 
 #MicrosoftFabric #DeltaLake #DataEngineering #OpenSource
 
 ---
 
 First comment:
+Delta table maintenance guide: https://bradcoles.dev/blog/fabric-delta-table-maintenance.html
 Full write-up: https://bradcoles.dev/blog/introducing-delta-doctor.html
 Docs and download: https://deltadoctor.dev
 GitHub: https://github.com/bradcoles-dev/delta-doctor
