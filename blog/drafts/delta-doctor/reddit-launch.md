@@ -2,11 +2,11 @@
 
 **Subreddit:** r/MicrosoftFabric
 
-**Title:** I open-sourced a Delta table maintenance library for Fabric Lakehouses — 7 notebooks, free, Apache 2.0
+**Title:** I open-sourced a Delta table maintenance library for Fabric Lakehouses: 7 notebooks, free, Apache 2.0
 
 ---
 
-I wrote a post a few months back on Delta table maintenance in Fabric. The follow-up I kept getting was "where's the code?" — so I built it out properly and released it.
+I wrote a post a few months back on Delta table maintenance in Fabric. The follow-up I kept getting was "where's the code?" so I built it out properly and released it.
 
 **delta-doctor** is seven PySpark notebooks you import directly into your Fabric workspace via Import notebook. No package manager, no infrastructure.
 
@@ -26,12 +26,14 @@ I wrote a post a few months back on Delta table maintenance in Fabric. The follo
 - VACUUM has a hard 168-hour floor enforced in code (`max(retain_hours, 168)`), not just documented
 - Gold-layer VACUUM raises a `ValueError` if `direct_lake_confirmed` is not set to `True`; forces an explicit confirmation that your Direct Lake semantic model has re-framed to the latest Delta commit before VACUUM removes old files
 - Table enumeration uses `mssparkutils.fs.ls()` + `_delta_log` detection, not `SHOW TABLES`, so schema-enabled Lakehouses work correctly
-- Workspace GUID comes from `spark.conf.get("trident.workspace.id")` — not a parameter, not hardcoded
+- Workspace GUID comes from `spark.conf.get("trident.workspace.id")`, not a parameter, not hardcoded
 
 It's v0.1: the maintenance and health scanning core. The plan for v0.2 is health history logging and a Power BI dashboard built on that history, but these are directions not commitments.
 
+Run `doctor_diagnosis_table_health` on your Lakehouse and let us know what it finds. Curious how widespread the small-file problem is across production environments. It's Apache 2.0 and contributions are welcome; if you're hitting maintenance scenarios it doesn't cover yet, open an issue or a PR.
+
+---
+
+First comment:
 Repo: https://github.com/bradcoles-dev/delta-doctor
-
 Docs: https://deltadoctor.dev
-
-Happy to answer questions. If you've hit edge cases with schema-enabled Lakehouses or liquid clustering in particular I'd be interested — those were the trickiest parts to get right.
