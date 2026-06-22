@@ -62,4 +62,5 @@ _site/
 *.cache
 
 # Claude Code
-.claude/
+.claude/*
+!.claude/*.md
