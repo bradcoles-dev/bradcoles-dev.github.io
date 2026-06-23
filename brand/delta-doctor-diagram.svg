@@ -1,0 +1,69 @@
+<svg viewBox="0 0 800 242" width="1600" height="484" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="delta-doctor library structure — seven notebooks across three pillars: Diagnosis, Treatment, and Preventative Care">
+    <defs>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&amp;family=Syne:wght@700&amp;display=swap');
+        </style>
+    </defs>
+
+    <rect width="800" height="242" fill="#0d1117" stroke="#1f2937" stroke-width="1" rx="4"/>
+
+    <!-- DIAGNOSIS -->
+    <rect x="14" y="14" width="246" height="34" fill="#0a0e1a" stroke="#1e40af" stroke-width="1.5" rx="2"/>
+    <text x="137" y="36" text-anchor="middle" font-family="Syne, sans-serif" font-size="12" font-weight="700" fill="#60a5fa">Diagnosis</text>
+
+    <rect x="14" y="56" width="246" height="170" fill="#111827" stroke="#1f2937" stroke-width="1" rx="2"/>
+    <rect x="14" y="56" width="3" height="170" fill="#3b82f6"/>
+    <text x="30" y="72" font-family="JetBrains Mono, monospace" font-size="8" fill="#6b7280">doctor_diagnosis_</text>
+    <text x="30" y="85" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#60a5fa">table_health</text>
+    <text x="30" y="99" font-family="JetBrains Mono, monospace" font-size="8" fill="#9ca3af">File counts · avg file size</text>
+    <text x="30" y="111" font-family="JetBrains Mono, monospace" font-size="8" fill="#9ca3af">deletion vectors · clustering state</text>
+    <line x1="30" y1="121" x2="246" y2="121" stroke="#1f2937" stroke-width="1"/>
+    <text x="30" y="134" font-family="JetBrains Mono, monospace" font-size="7.5" fill="#4b5563" letter-spacing="1">STATUS</text>
+    <text x="30" y="148" font-family="JetBrains Mono, monospace" font-size="8.5" fill="#10b981">Healthy · Within tolerance</text>
+    <text x="30" y="162" font-family="JetBrains Mono, monospace" font-size="8.5" fill="#f59e0b">Review · Needs OPTIMIZE</text>
+    <text x="30" y="176" font-family="JetBrains Mono, monospace" font-size="8.5" fill="#6b7280">Oversized · Skip</text>
+
+    <!-- TREATMENT -->
+    <rect x="276" y="14" width="246" height="34" fill="#0a0e1a" stroke="#065f46" stroke-width="1.5" rx="2"/>
+    <text x="399" y="36" text-anchor="middle" font-family="Syne, sans-serif" font-size="12" font-weight="700" fill="#10b981">Treatment</text>
+
+    <rect x="276" y="56" width="246" height="52" fill="#111827" stroke="#1f2937" stroke-width="1" rx="2"/>
+    <rect x="276" y="56" width="3" height="52" fill="#10b981"/>
+    <text x="292" y="70" font-family="JetBrains Mono, monospace" font-size="8" fill="#6b7280">doctor_treatment_</text>
+    <text x="292" y="83" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#10b981">table_maintenance</text>
+    <text x="292" y="97" font-family="JetBrains Mono, monospace" font-size="8" fill="#9ca3af">Single table OPTIMIZE + VACUUM</text>
+
+    <rect x="276" y="116" width="246" height="52" fill="#111827" stroke="#1f2937" stroke-width="1" rx="2"/>
+    <rect x="276" y="116" width="3" height="52" fill="#10b981"/>
+    <text x="292" y="130" font-family="JetBrains Mono, monospace" font-size="8" fill="#6b7280">doctor_treatment_</text>
+    <text x="292" y="143" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#10b981">maintenance_orchestrator</text>
+    <text x="292" y="157" font-family="JetBrains Mono, monospace" font-size="8" fill="#9ca3af">Lakehouse-wide OPTIMIZE + VACUUM</text>
+
+    <rect x="276" y="176" width="246" height="52" fill="#111827" stroke="#1f2937" stroke-width="1" rx="2"/>
+    <rect x="276" y="176" width="3" height="52" fill="#10b981"/>
+    <text x="292" y="190" font-family="JetBrains Mono, monospace" font-size="8" fill="#6b7280">doctor_treatment_</text>
+    <text x="292" y="203" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#10b981">rebaseline_orchestrator</text>
+    <text x="292" y="217" font-family="JetBrains Mono, monospace" font-size="8" fill="#9ca3af">One-off REORG + OPTIMIZE all tables</text>
+
+    <!-- PREVENTATIVE CARE -->
+    <rect x="538" y="14" width="246" height="34" fill="#0a0e1a" stroke="#5b21b6" stroke-width="1.5" rx="2"/>
+    <text x="661" y="36" text-anchor="middle" font-family="Syne, sans-serif" font-size="12" font-weight="700" fill="#a78bfa">Preventative Care</text>
+
+    <rect x="538" y="56" width="246" height="52" fill="#111827" stroke="#1f2937" stroke-width="1" rx="2"/>
+    <rect x="538" y="56" width="3" height="52" fill="#a78bfa"/>
+    <text x="554" y="70" font-family="JetBrains Mono, monospace" font-size="8" fill="#6b7280">doctor_prevention_</text>
+    <text x="554" y="83" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#a78bfa">session_config</text>
+    <text x="554" y="97" font-family="JetBrains Mono, monospace" font-size="8" fill="#9ca3af">Spark session baseline by layer</text>
+
+    <rect x="538" y="116" width="246" height="52" fill="#111827" stroke="#1f2937" stroke-width="1" rx="2"/>
+    <rect x="538" y="116" width="3" height="52" fill="#a78bfa"/>
+    <text x="554" y="130" font-family="JetBrains Mono, monospace" font-size="8" fill="#6b7280">doctor_prevention_</text>
+    <text x="554" y="143" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#a78bfa">set_table_properties</text>
+    <text x="554" y="157" font-family="JetBrains Mono, monospace" font-size="8" fill="#9ca3af">Delta properties, one table</text>
+
+    <rect x="538" y="176" width="246" height="52" fill="#111827" stroke="#1f2937" stroke-width="1" rx="2"/>
+    <rect x="538" y="176" width="3" height="52" fill="#a78bfa"/>
+    <text x="554" y="190" font-family="JetBrains Mono, monospace" font-size="8" fill="#6b7280">doctor_prevention_</text>
+    <text x="554" y="203" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#a78bfa">set_properties_orchestrator</text>
+    <text x="554" y="217" font-family="JetBrains Mono, monospace" font-size="8" fill="#9ca3af">Delta properties, full Lakehouse</text>
+</svg>
