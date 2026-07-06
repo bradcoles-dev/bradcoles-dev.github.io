@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Fabric IQ's Data Agent nailed every question I could support with data — until I asked one I knew it couldn't. Instead of admitting the gap, it guessed. Here's what fixed it.">
+    <meta name="keywords" content="Microsoft Fabric, Fabric IQ, Ontology, Data Agent, Semantic Model, Data Engineering, Agent Instructions, Modern Portfolio Theory">
+    <meta name="author" content="Brad Coles">
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E8BDECYXD8"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-E8BDECYXD8');
+    </script>
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://bradcoles.dev/blog/fabric-iq-gold-ontology-not-enough.html">
+    <meta property="og:title" content="Fabric IQ: Gold Data and Ontology Aren't Enough">
+    <meta property="og:description" content="Fabric IQ's Data Agent nailed every question I could support with data — until I asked one I knew it couldn't. Instead of admitting the gap, it guessed. Here's what fixed it.">
+    <meta property="og:image" content="https://bradcoles.dev/preview.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://bradcoles.dev/blog/fabric-iq-gold-ontology-not-enough.html">
+    <meta property="twitter:title" content="Fabric IQ: Gold Data and Ontology Aren't Enough">
+    <meta property="twitter:description" content="Fabric IQ's Data Agent nailed every question I could support with data — until I asked one I knew it couldn't. Instead of admitting the gap, it guessed. Here's what fixed it.">
+    <meta property="twitter:image" content="https://bradcoles.dev/preview.png">
+
+    <title>Fabric IQ: Gold Data and Ontology Aren't Enough | Brad Coles</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Press+Start+2P&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0e1a;
+            --bg-card: #111827;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent: #3b82f6;
+            --accent-bright: #60a5fa;
+            --accent-dim: #1e40af;
+            --border: #1f2937;
+            --code-bg: #0d1117;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+                linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            padding: 3rem 0 2rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .back-link {
+            display: inline-block;
+            color: var(--accent-bright);
+            text-decoration: none;
+            margin-bottom: 2rem;
+            font-size: 0.875rem;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: var(--text-primary);
+        }
+
+        .back-link::before {
+            content: '← ';
+        }
+
+        .blog-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .blog-date,
+        .blog-category {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .blog-category {
+            color: var(--accent-bright);
+            border-color: var(--accent-dim);
+        }
+
+        h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .blog-subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        .blog-byline {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0;
+        }
+
+        h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-top: 3rem;
+            margin-bottom: 1rem;
+            color: var(--accent-bright);
+        }
+
+        h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        article {
+            margin-top: 2rem;
+            line-height: 1.8;
+        }
+
+        article p {
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        article ul, article ol {
+            margin: 1.5rem 0 1.5rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        article li {
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+
+        article strong {
+            color: var(--accent-bright);
+            font-weight: 700;
+        }
+
+        article em {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        article p > code,
+        article li > code {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            padding: 0.1rem 0.4rem;
+            font-size: 0.85em;
+            color: var(--accent-bright);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 3rem 0;
+        }
+
+        .callout {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .callout a {
+            color: var(--accent-bright);
+        }
+
+        .qa-block {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            padding: 1.25rem 1.5rem;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        .qa-block .q,
+        .qa-block .a {
+            display: flex;
+            gap: 0.6rem;
+            margin-bottom: 0;
+        }
+
+        .qa-block .q {
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+        }
+
+        .qa-block .a {
+            color: var(--text-secondary);
+        }
+
+        .qa-block .label {
+            flex-shrink: 0;
+            font-weight: 700;
+            color: var(--accent-bright);
+        }
+
+        .qa-block ul {
+            margin: 0.5rem 0 0 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .qa-block .note {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .instructions-block {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-left: 3px solid #a78bfa;
+            padding: 1.25rem 1.5rem;
+            margin: 1.5rem 0;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .instructions-block p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .instructions-block p:last-child {
+            margin-bottom: 0;
+        }
+
+        footer {
+            padding: 3rem 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-secondary);
+            margin-top: 4rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .qa-block .q,
+            .qa-block .a {
+                flex-direction: column;
+                gap: 0.15rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="../index.html" class="back-link">Back to Portfolio</a>
+            <div class="blog-meta">
+                <span class="blog-date">July 2026</span>
+                <span class="blog-category">Data Engineering</span>
+                <span class="blog-category">Microsoft Fabric</span>
+                <span class="blog-category">Fabric IQ</span>
+            </div>
+            <h1>Fabric IQ: Gold Data and Ontology Aren't Enough</h1>
+            <p class="blog-subtitle">I built a proper medallion platform and a fine-tuned ontology, then watched the Data Agent guess a confident, entirely fabricated answer the moment I asked it something the data didn't support.</p>
+            <p class="blog-byline">By Brad Coles | Senior Consultant &amp; Data Engineering Capability Lead, Synechron Australia</p>
+        </header>
+
+        <article>
+            <p>
+                Fabric IQ is everywhere. I can't open LinkedIn at the moment without seeing a mention of it. Clients are talking about it. But most of its components are still in Preview — and if you wait until GA, you've already missed the boat. So I've been playing around with Fabric IQ and its various components myself. There's still some things to iron out, but less than I expected.
+            </p>
+
+            <hr>
+
+            <h2>Sticking to my lane</h2>
+
+            <p>
+                I'm no Ontologist, and I don't pretend to be. But it's important for a good data engineer to know where their process fits in the stream, and what happens up- and down-stream from them. So I decided to stick to my lane — building a data platform on the Microsoft stack using Spark Notebooks for ingestion, dbt for transformation, and a Lakehouse to store my medallion architecture, with a separate schema per layer. This was all accelerated by Claude Code, which handled 90% of the dbt — the technical code-writing is no longer a barrier, but that's not what this article is about.
+            </p>
+
+            <h2>Finance over freezers</h2>
+
+            <p>
+                Microsoft's Fabric IQ tutorial suggests using freezer sales data. No offence to whitegoods enthusiasts, I found that rather dry. I have a background in Finance — a decade in funds management, a graduate certificate in commerce, and several years working as a consulting actuarial analyst. So instead, I decided to use Yahoo Finance's public dataset to help build an investment portfolio using modern portfolio theory.
+            </p>
+
+            <h2>The hypothesis</h2>
+
+            <p>
+                I always felt running a data agent on data that wasn't modelled, or on purely operational/transactional data, was doomed to fail. My theory was that the panacea was a solid data &amp; analytics platform, properly modelled data, and a solid ontology. So that's what I built.
+            </p>
+
+            <p>
+                I struggled my way through building an ontology, but eventually got my head around the concept. I finally had my pristinely modelled data in my Gold layer, and a simple but fine-tuned ontology sitting on top of it.
+            </p>
+
+            <h2>Putting it to the test</h2>
+
+            <p>
+                I spun up Fabric's Data Agent, hooked it up to my ontology, and started firing off questions. I scrutinised each answer and compared it to the Lakehouse's delta tables, and the Data Agent was spot on — full marks.
+            </p>
+
+            <p>
+                Naturally, I had to test the edges. So I decided to ask a question I knew it didn't have the data to support. Rather than admitting it was stumped, the Data Agent instead guessed a correct-<em>sounding</em>, but factually incorrect, answer.
+            </p>
+
+            <div class="qa-block">
+                <p style="color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.75rem;">First challenging test</p>
+                <div class="q"><span class="label">Q:</span><span>Which sectors have the most internally correlated securities?</span></div>
+                <div class="a">
+                    <span class="label">A:</span>
+                    <span>
+                        The sectors with the most internally correlated securities (i.e., securities within the same sector that tend to move together the most) are:
+                        <ul>
+                            <li>Basic Materials (average internal correlation: 0.56)</li>
+                            <li>Consumer Defensive (average: 0.50)</li>
+                            <li>Financial Services (average: 0.49)</li>
+                            <li>Technology (average: 0.44)</li>
+                        </ul>
+                        Sectors like Real Estate, Industrials, Healthcare, and Energy have significantly lower internal correlation among their securities. This means stocks within Basic Materials and Consumer Defensive sectors tend to move together more closely compared to those in other sectors.
+                    </span>
+                </div>
+            </div>
+
+            <p>
+                Four specific, sector-ranked numbers. Also entirely made up.
+            </p>
+
+            <h2>An inconsistent tell</h2>
+
+            <p>
+                I isolated the question and gave the agent high-level instructions on how it should go about calculating the answer — and this time, it correctly admitted it did not have the data to answer.
+            </p>
+
+            <div class="qa-block">
+                <p style="color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.75rem;">Isolated re-test</p>
+                <div class="q"><span class="label">Q:</span><span>List every pair of Financial Services securities connected by the correlatesWith relationship, including both tickers and the correlation value for each pair. Then calculate the average correlation across those pairs.</span></div>
+                <div class="a">
+                    <span class="label">A:</span>
+                    <span>
+                        Here are the Financial Services security pairs connected by the correlatesWith relationship (tickers listed):
+                        <ul>
+                            <li>JPM – USB</li>
+                            <li>JPM – WFC</li>
+                            <li>WFC – USB</li>
+                        </ul>
+                        However, the correlation values for each pair are not present in the dataset provided—they are referenced by the relationship, but no numerical correlation values are given. As a result, I cannot calculate the average correlation across these pairs.
+                        <br><br>
+                        If you have access to the actual correlation values, I can compute the average for you. Otherwise, only the connections (without correlation values) are available right now.
+                    </span>
+                </div>
+                <p class="note">Steps: Analyzed Ontology Ontology for: "List all pairs of Financial Services securities that are connected by the correlatesWith relationship, including both tickers and the correlation value for each pair. Then calculate the average correlation value across these pairs."</p>
+            </div>
+
+            <p>
+                Same underlying gap in the data. Two different behaviours. That inconsistency was the real problem — not that the agent <em>could</em> be wrong, but that whether it guessed or admitted defeat seemed to come down to how the question was phrased, not what data actually existed.
+            </p>
+
+            <h2>Borrowing from Shopify</h2>
+
+            <p>
+                The following day I read an article about how Shopify hit the same wall with <a href="https://shopify.engineering/sidekick-curation" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Sidekick</a>, their text-to-query agent. Its production logs only ever captured successful queries, so the model had no training signal for "no" — refusal was never something it had seen demonstrated as correct. Their fix was a four-judge LLM ensemble that required unanimous consensus before a query could be labelled unanswerable, then fed those curated refusals back into retraining.
+            </p>
+
+            <p>
+                I couldn't retrain my Fabric Data Agent the way Shopify retrained Sidekick — I didn't train it in the first place. But I could still give it a signal for "no," just through its instructions instead.
+            </p>
+
+            <h2>Teaching my agent to say no</h2>
+
+            <p>
+                My revised Agent Instructions:
+            </p>
+
+            <div class="instructions-block">
+                <p>Support group by in GQL.</p>
+                <p>Route questions about KPIs, aggregates, or named metrics (e.g. "average P/E", "total market cap," any measure from the semantic model) to the semantic model. Route questions involving relationships between securities — sector comparisons, correlation/diversification, portfolio holdings, financial history across years — to the ontology.</p>
+                <p>A security's <code>value_score</code> property (on the Security entity) is the definitive value-screening measure — a sector-relative composite of P/E, P/B, and ROE percentile ranks. Don't compute a different definition of "undervalued" from raw ratios directly.</p>
+                <p>If a question asks for a metric, entity, or relationship that does not exist in the semantic model or ontology, say so explicitly and do not answer using a related or approximated figure. Do not substitute a raw calculation for a metric that has a defined measure (e.g. never derive "undervalued" from raw P/E, P/B, or ROE when <code>value_score</code> exists — if <code>value_score</code> is unavailable for the requested scope, say the data isn't available rather than computing an approximation).</p>
+                <p>If a request spans a time period, entity, or grouping not present in the underlying data, state which part is missing rather than returning a partial answer without flagging the gap.</p>
+            </div>
+
+            <p>
+                I gave it the exact same original question: <em>"Which sectors have the most internally correlated securities?"</em> This time it answered:
+            </p>
+
+            <div class="callout">
+                I'm unable to retrieve correlation data between securities within each sector because the system does not expose security-to-security correlation or an average sector correlation metric.
+                <br><br>
+                As a result, I can't currently identify which sectors have the most internally correlated securities from the available data. If you have a different question or need information on another aspect of sectors or securities, let me know!
+            </div>
+
+            <hr>
+
+            <h2>Takeaways</h2>
+
+            <p>
+                If you're working on Microsoft Fabric, don't wait until Fabric IQ is GA before you start experimenting.
+            </p>
+
+            <p>
+                As this article has shown, a well-built Gold layer and ontology aren't enough on their own. My Data Agent didn't fail because it lacked data — it failed because it had no instruction to prefer admitting a gap over guessing a plausible-sounding answer. That's a lesson you only get from testing the edges, not from the modelling.
+            </p>
+
+            <p>
+                One thing I want to test next: right now every unanswerable question gets the same flat refusal. Shopify's taxonomy for Sidekick splits that into <em>missing capability</em>, <em>ambiguous</em>, and <em>wrong skill</em> — worth trying on my own instructions, since a vague question probably deserves a clarifying question, not the same "I don't have this" response as a genuinely missing metric.
+            </p>
+
+            <hr>
+
+            <p><em>Brad Coles is a Senior Consultant and Data Engineering Capability Lead at <a href="https://www.synechron.com/en-au" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Synechron Australia</a>, specialising in Microsoft Fabric and modern data platform engineering. Connect on <a href="https://www.linkedin.com/in/brad-coles/" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">LinkedIn</a>.</em></p>
+
+            <div style="margin-top: 1.5rem; padding: 1.5rem; border: 1px solid var(--accent-dim); background: var(--bg-card); text-align: center; font-size: 0.9rem;">
+                <p>If this article helped you, <a href="../support.html" style="color: var(--accent-bright); text-decoration: none; font-weight: 700;">click here to see some ways you can support me</a>.</p>
+            </div>
+        </article>
+
+        <footer>
+            <p>&copy; 2026 Brad Coles. <a href="../index.html" style="color: var(--accent-bright); text-decoration: none;">Back to Portfolio</a></p>
+        </footer>
+    </div>
+</body>
+</html>
