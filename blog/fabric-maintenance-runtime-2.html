@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Delta table maintenance in Microsoft Fabric after Runtime 2.0 GA: what's now automatic, what's still your job, and what I found when I tested it.">
+    <meta name="keywords" content="Microsoft Fabric, Runtime 2.0, Delta Lake, Spark, Liquid Clustering, Auto Compaction, Deletion Vectors, VACUUM, V-Order, Direct Lake, Data Factory, Data Engineering, Performance Optimisation, Delta Table Maintenance">
+    <meta name="author" content="Brad Coles">
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E8BDECYXD8"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-E8BDECYXD8');
+    </script>
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://bradcoles.dev/blog/fabric-maintenance-runtime-2.html">
+    <meta property="og:title" content="Delta Table Maintenance in Microsoft Fabric: The Runtime 2.0 Edition">
+    <meta property="og:description" content="Delta table maintenance in Microsoft Fabric after Runtime 2.0 GA: what's now automatic, what's still your job, and what I found when I tested it.">
+    <meta property="og:image" content="https://bradcoles.dev/preview.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://bradcoles.dev/blog/fabric-maintenance-runtime-2.html">
+    <meta property="twitter:title" content="Delta Table Maintenance in Microsoft Fabric: The Runtime 2.0 Edition">
+    <meta property="twitter:description" content="Delta table maintenance in Microsoft Fabric after Runtime 2.0 GA: what's now automatic, what's still your job, and what I found when I tested it.">
+    <meta property="twitter:image" content="https://bradcoles.dev/preview.png">
+
+    <title>Delta Table Maintenance in Microsoft Fabric: The Runtime 2.0 Edition | Brad Coles</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Press+Start+2P&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0e1a;
+            --bg-card: #111827;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent: #3b82f6;
+            --accent-bright: #60a5fa;
+            --accent-dim: #1e40af;
+            --border: #1f2937;
+            --code-bg: #0d1117;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+                linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            padding: 3rem 0 2rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .back-link {
+            display: inline-block;
+            color: var(--accent-bright);
+            text-decoration: none;
+            margin-bottom: 2rem;
+            font-size: 0.875rem;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: var(--text-primary);
+        }
+
+        .back-link::before {
+            content: '← ';
+        }
+
+        .blog-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .blog-date,
+        .blog-category {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .blog-category {
+            color: var(--accent-bright);
+            border-color: var(--accent-dim);
+        }
+
+        h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .blog-subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        .blog-byline {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0;
+        }
+
+        h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-top: 3rem;
+            margin-bottom: 1rem;
+            color: var(--accent-bright);
+        }
+
+        h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent-bright);
+        }
+
+        article {
+            margin-top: 2rem;
+            line-height: 1.8;
+        }
+
+        article p {
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        article ul, article ol {
+            margin: 1.5rem 0 1.5rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        article li {
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+
+        article strong {
+            color: var(--accent-bright);
+            font-weight: 700;
+        }
+
+        article em {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        article p > code,
+        article li > code {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            padding: 0.1rem 0.4rem;
+            font-size: 0.85em;
+            color: var(--accent-bright);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            padding: 1.5rem;
+            overflow-x: auto;
+            margin: 1rem 0 1.5rem;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        pre code {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-primary);
+        }
+
+        .comment { color: #6b7280; }
+        .keyword { color: #a78bfa; }
+        .string { color: #34d399; }
+
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+
+        th {
+            background: var(--code-bg);
+            color: var(--accent-bright);
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border: 1px solid var(--border);
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            vertical-align: top;
+        }
+
+        tr:nth-child(even) td {
+            background: rgba(17, 24, 39, 0.6);
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 3rem 0;
+        }
+
+        .diagram {
+            margin: 2rem 0;
+            overflow-x: auto;
+        }
+
+        .diagram figcaption {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-top: 0.75rem;
+            font-style: italic;
+            line-height: 1.5;
+        }
+
+        .callout {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .callout h3 {
+            margin-top: 0.5rem;
+        }
+
+        .callout p,
+        .callout ul {
+            margin-bottom: 1rem;
+        }
+
+        .callout > :last-child {
+            margin-bottom: 0;
+        }
+
+        .callout pre {
+            border-left-color: #f87171;
+        }
+
+        article a {
+            color: var(--accent-bright);
+        }
+
+        article strong a,
+        article a strong {
+            text-decoration: underline;
+        }
+
+        article li > pre {
+            margin-top: 0.75rem;
+        }
+
+        ul.checklist {
+            list-style: none;
+            margin-left: 0.5rem;
+        }
+
+        ul.checklist li::before {
+            content: '[ ] ';
+            color: var(--accent);
+        }
+
+        h2[id],
+        h3[id] {
+            scroll-margin-top: 1.5rem;
+        }
+
+        footer {
+            padding: 3rem 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-secondary);
+            margin-top: 4rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            th, td {
+                padding: 0.5rem 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="../index.html" class="back-link">Back to Portfolio</a>
+            <div class="blog-meta">
+                <span class="blog-date">October 2026</span>
+                <span class="blog-category">Data Engineering</span>
+                <span class="blog-category">Microsoft Fabric</span>
+            </div>
+            <h1>Delta Table Maintenance in Microsoft Fabric: The Runtime 2.0 Edition</h1>
+            <p class="blog-subtitle">Delta table maintenance in Microsoft Fabric after Runtime 2.0 GA: what's now automatic, what's still your job, and what I found when I tested it.</p>
+            <p class="blog-byline">By Brad Coles | Senior Consultant &amp; Data Engineering Capability Lead, Synechron Australia</p>
+        </header>
+
+        <article>
+<p>Earlier this year I published <a href="fabric-delta-table-maintenance.html">Delta Table Maintenance in Microsoft Fabric: A 2026 Practitioner's Guide</a>, written for Runtime 1.3, the current runtime at the time, with notes on the Runtime 2.0 Preview. I wrote it because Fabric is sold as SaaS, and most teams reasonably assume that table maintenance is taken care of for them. Unfortunately it isn't, and at the time the official documentation was thin, scattered and inconsistent.</p>
+<p><a href="https://learn.microsoft.com/en-us/fabric/data-engineering/runtime-2-0" target="_blank" rel="noopener noreferrer">Runtime 2.0</a> went GA on 14 August 2026, and it's now the default runtime for new workspaces. Much of my old advice is now defaults - I'd like to take credit for the good work of Miles Cole and Fabric's Spark team, though I know better, at least it's a good endorsement of my previous article if nothing else! Adaptive file sizing, Fast Optimize, deletion vectors and incremental liquid clustering are all on by default now. The big ticket improvement, incremental liquid clustering, removes the full-table rewrite that made liquid clustering impractical on Runtime 1.3.</p>
+<p>For better or worse, in Runtime 2.0 <strong>Fabric still doesn't maintain your Delta tables for you.</strong> OPTIMIZE doesn't run on a schedule - auto-compact makes up some ground here but is disabled by default - and there's no auto-VACUUM.</p>
+<p>If you want to manage your costs and capacity usage effectively, there's still manual tuning required. Microsoft <a href="https://community.fabric.microsoft.com/blog/fbc_fabricupdatesblogs/fabric-september-2026-feature-summary/5325825" target="_blank" rel="noopener noreferrer">announced on-demand billing and a zero-provisioned F0 SKU</a> at FabCon Europe in September, which should give spiky workloads a middle ground, but pricing isn't published yet, and on-demand billing doesn't make wasted compute free. Poor maintenance inflates capacity usage gradually, small files multiply, deletion vectors pile up, Direct Lake falls back to cold-state transcoding. That creeping usage is hard to diagnose, often teams assume they're just processing more data, it's easy to blame on organic growth. But eventually you'll outgrow your SKU and be forced to upgrade when the real fix might have been reading this article and implementing a few lines of configuration.</p>
+<p>My research and testing of Runtime 2.0 revealed this is actually a bigger problem under Runtime 2.0. Deletion Vectors are now enabled by default, so every UPDATE, DELETE and MERGE means they start to pile up.</p>
+<p>For this edition I trawled through the documentation and ran a notebook against a Runtime 2.0 workspace (Spark 4.1.1, Delta 4.2.0) and a Runtime 1.3 environment. I checked every default this guide relies on, benchmarked liquid clustering on both runtimes, and tested how Data Factory's Copy activity and Copy job behave against Runtime 2.0 tables. My work revealed many documentation and runtime contradictions, a reminder to trust your environment over any documentation, including this article!</p>
+<div class="callout">
+<p><strong>What's changed since my original guide.</strong> Some of its advice is now redundant because Runtime 2.0 made it the default. Some was overtaken by Microsoft's revised guidance. And a couple of points were wrong, or are now wrong on Runtime 2.0:</p>
+<ul>
+<li><strong>The 256 MB Silver/400 MB Gold file-size targets</strong> (and 400 MB–1 GB with 8M-row row groups for Direct Lake). These came from Microsoft's own <a href="https://learn.microsoft.com/en-us/fabric/fundamentals/table-maintenance-optimization" target="_blank" rel="noopener noreferrer">Cross-Workload page</a>, which <a href="https://github.com/MicrosoftDocs/fabric-docs/commit/2e2cc1c5e8c6f536d95e0066da132ab46380cdbf" target="_blank" rel="noopener noreferrer">dropped fixed targets on 26 August</a> in favour of adaptive file sizing, and now gives Direct Lake a 1–16 million row-group range.</li>
+<li><strong>"Run OPTIMIZE aggressively at Silver and Gold."</strong> Also from that page, and also removed. Microsoft's default strategy is now Auto Compaction, with scheduled OPTIMIZE kept for specific cases.</li>
+<li><strong>The V-Order figures (40–60%/~10%/15–33%) and enabling it for SQL analytics endpoint consumers.</strong> The 40–60% figure was on the same page and went in the same revision. Microsoft now says to enable V-Order only when Direct Lake is a primary consumer.</li>
+<li><strong>"Optimize Write is on by default."</strong> Under the default <code>writeHeavy</code> profile it only applies to partitioned tables.</li>
+<li><strong>"Fast Optimize does not apply to liquid clustering."</strong> That's what the <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/table-compaction#fast-optimize" target="_blank" rel="noopener noreferrer">Table Compaction page</a> said. On Runtime 2.0 it does apply, and I measured it.</li>
+<li><strong>No liquid clustering at Bronze.</strong> Bronze MERGE targets benefit as much as any table.</li>
+</ul>
+<p><strong>Scope:</strong> Lakehouse (Spark/Delta) tables only. Fabric Warehouse manages its own layout and is out of scope.</p>
+</div>
+<hr>
+<h2 id="runtime-2-0-at-a-glance">Runtime 2.0 at a Glance</h2>
+<p>If you only read one section, read this one.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Runtime 1.3</th>
+<th>Runtime 2.0</th>
+<th>What you do now</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>Adaptive Target File Size (ATFS)</td><td>Opt-in</td><td><strong>On</strong></td><td>Nothing. Remove it from your utility notebook.</td></tr>
+<tr><td>File-Level Compaction Target</td><td>Opt-in</td><td><strong>On</strong></td><td>Nothing.</td></tr>
+<tr><td>Fast Optimize</td><td>Opt-in</td><td><strong>On</strong></td><td>Nothing, but know when it skips work (see <a href="#compaction">Compaction</a>).</td></tr>
+<tr><td>Deletion vectors</td><td>Opt-in</td><td><strong>On for new tables</strong></td><td>Keep them. Schedule OPTIMIZE on update-heavy MERGE targets.</td></tr>
+<tr><td>Incremental liquid clustering</td><td>Not available (full rewrite under 100 GB)</td><td><strong>On</strong></td><td>Use liquid clustering by default.</td></tr>
+<tr><td>Auto Compaction</td><td>Off</td><td><strong>Off</strong></td><td><strong>Enable it</strong>, preferably as a table property.</td></tr>
+<tr><td>V-Order</td><td>Off</td><td>Off</td><td>Enable for Direct Lake tables, or use <code>readHeavyForPBI</code>.</td></tr>
+<tr><td>Optimize Write</td><td>Partitioned tables only (<code>writeHeavy</code>)</td><td>Same</td><td>Enable per table for streaming/microbatch writes.</td></tr>
+<tr><td>Native Execution Engine</td><td>Opt-in</td><td>Opt-in (now also accelerates liquid clustering OPTIMIZE)</td><td>Enable it.</td></tr>
+<tr><td>VACUUM LITE, <code>OPTIMIZE FULL</code>, <code>clusteringQuality()</code></td><td>Not available</td><td>Available</td><td>Use where relevant.</td></tr>
+</tbody>
+</table>
+</div>
+<p>Every "On" in the Runtime 2.0 column is something I confirmed in a fresh session, both from the session config and by testing the behaviour. You can check your own environment with this snippet:</p>
+<pre><code>for k in [<span class="string">"spark.microsoft.delta.optimize.fast.enabled"</span>,
+          <span class="string">"spark.microsoft.delta.optimize.fileLevelTarget.enabled"</span>,
+          <span class="string">"spark.microsoft.delta.targetFileSize.adaptive.enabled"</span>,
+          <span class="string">"spark.databricks.delta.autoCompact.enabled"</span>,
+          <span class="string">"spark.databricks.delta.optimizeWrite.enabled"</span>,
+          <span class="string">"spark.sql.parquet.vorder.default"</span>,
+          <span class="string">"spark.microsoft.delta.optimize.clustering.strategy.incremental"</span>,
+          <span class="string">"spark.databricks.delta.properties.defaults.enableDeletionVectors"</span>]:
+    try:
+        print(<span class="string">f"{k:70} {spark.conf.get(k)}"</span>)
+    except Exception:
+        print(<span class="string">f"{k:70} &lt;unset&gt;"</span>)</code></pre>
+<p>My original guide was largely a list of configs to set, Runtime 2.0 now sets most of them for you. Miles Cole's own summary at the <a href="https://www.reddit.com/r/MicrosoftFabric/comments/1vsw40t/experts_engines_hi_were_the_microsoft_fabric/" target="_blank" rel="noopener noreferrer">August Fabric Spark AMA</a> was that incremental liquid clustering, ATFS, Fast Optimize and the file-level target are on by default with "no reason to disable" them, and that his only two non-default go-tos are the Native Execution Engine and Auto Compaction. All that's left is a short list of decisions that you'll need to make on your own, dependent on your environment and workloads, and the rest of this guide is about those.</p>
+<hr>
+<h2 id="fabric-still-doesn-t-maintain-your-tables">Fabric Still Doesn't Maintain Your Tables</h2>
+<p><strong>What happens automatically:</strong></p>
+<ul>
+<li><strong>Delta log checkpointing</strong> every 10 commits.</li>
+<li><strong>File statistics</strong> (min, max, null counts) on every write, which power file skipping.</li>
+<li><strong>Write-time defaults:</strong> adaptive file sizing, deletion vectors on new tables, and Optimize Write on partitioned tables.</li>
+</ul>
+<p><strong>What doesn't:</strong></p>
+<ul>
+<li><strong>Scheduled OPTIMIZE.</strong> Fabric never schedules OPTIMIZE for you. (Auto Compaction is different: it runs OPTIMIZE automatically after a write, but only once you enable it. More on that below.)</li>
+<li><strong>VACUUM.</strong> Fabric never vacuums your unreferenced files, these stay in OneLake and you pay for them.</li>
+<li><strong>Auto Compaction.</strong> It's still off by default, even though Microsoft's <a href="https://learn.microsoft.com/en-us/fabric/fundamentals/table-maintenance-optimization" target="_blank" rel="noopener noreferrer">cross-workload guidance</a> now says to <em>"enable auto compaction as the default maintenance strategy."</em></li>
+</ul>
+<p>The Lakehouse explorer has a right-click <strong>Maintenance</strong> action for one-off OPTIMIZE and VACUUM on a single table. Pipelines now have a <a href="https://learn.microsoft.com/en-us/fabric/data-factory/lakehouse-maintenance-activity" target="_blank" rel="noopener noreferrer"><strong>Lakehouse Maintenance activity</strong></a> that <a href="https://community.fabric.microsoft.com/blog/fbc_fabricupdatesblogs/fabric-september-2026-feature-summary/5325825" target="_blank" rel="noopener noreferrer">went GA in Sep 2026</a> despite being painful to use, and incompatible with schema-enabled Lakehouses. I didn't get as far as testing whether it clusters liquid clustered tables since I exclusively use schema-enabled Lakehouses, and had already had a gutful trying to get the activity to work (I may also be impatient).</p>
+<p>The right maintenance strategy varies by table, e.g. an append-only Bronze table and a Gold table serving hundreds of Direct Lake users need different things, and a single automated policy would either waste capacity on the first or under-serve the second. That said, Runtime 2.0 has narrowed the gap with much better defaults.</p>
+<p>Personally, I'd still like an opt-in automatic mode for teams that want one (or can't be bothered tuning their own and are happy with 'good enough'). Databricks has <a href="https://docs.databricks.com/aws/en/optimizations/predictive-optimization" target="_blank" rel="noopener noreferrer">predictive optimisation</a>, which decides per table when to run OPTIMIZE and VACUUM. Fabric has nothing equivalent, and Cole said at the <a href="https://www.reddit.com/r/MicrosoftFabric/comments/1vsw40t/experts_engines_hi_were_the_microsoft_fabric/" target="_blank" rel="noopener noreferrer">AMA</a> there are no plans for a <code>CLUSTER BY AUTO</code>.</p>
+<hr>
+<h2 id="compaction">Compaction</h2>
+<h3>How it works</h3>
+<p>Most practitioners would (should) know that every write creates new Parquet files. Frequent small writes, MERGEs and updates leave behind lots of small files, and every query pays to open, read the footer of, and skip each one. Compaction is the panacea to the small-file problem, it rewrites many small files into fewer, right-sized ones.</p>
+<p>There are two ways to compact in Fabric:</p>
+<ul>
+<li><strong>OPTIMIZE</strong>: a command you run (or schedule).</li>
+<li><strong>Auto Compaction</strong>: an OPTIMIZE that runs in the same session immediately after a write, when it detects too many small files. In my testing it fired at exactly 50 small files, which matches the <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/table-compaction#tune-auto-compaction-thresholds" target="_blank" rel="noopener noreferrer">documented <code>minNumFiles</code> default</a>. That threshold is tunable (<code>spark.databricks.delta.autoCompact.minNumFiles</code>), but I'd leave it - lowering it makes compaction fire more often in your writes and it doesn't help with the deletion-vector case below, which isn't about small files at all.</li>
+</ul>
+<p><strong>Fast Optimize</strong> sits in front of OPTIMIZE. Before rewriting a bin of files, it checks whether doing so would meaningfully improve the table, and skips the bin if not. That makes a no-op OPTIMIZE nearly free.</p>
+<h3>What changed in Runtime 2.0</h3>
+<ul>
+<li><strong>Fast Optimize is on by default.</strong> I couldn't find any documentation that notes this, and the <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/table-compaction#fast-optimize" target="_blank" rel="noopener noreferrer">Table Compaction page</a> still shows it as something you set. But my testing showed it's on by default in RT 2.0 - running OPTIMIZE on a table with 10 tiny files made <strong>no commit at all</strong>, but with Fast Optimize disabled the same command compacted 10 files into 1.</li>
+<li><strong>Fast Optimize applies to liquid clustered tables too.</strong> Bear with me on this: my original guide said it didn't, following the <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/table-compaction#fast-optimize" target="_blank" rel="noopener noreferrer">Table Compaction page</a>, which still says it's <em>"not applicable to liquid clustering"</em>, yet the <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/liquid-clustering#interaction-with-other-features" target="_blank" rel="noopener noreferrer">Liquid Clustering page</a> says it's <em>"compatible starting in Runtime 2.0"</em>. This rattled me so I tested it: I ran ten tiny appends to a liquid clustered table, these were skipped by a default OPTIMIZE and clustered once Fast Optimize was disabled.</li>
+<li><strong>Auto Compaction is now Microsoft's recommended default strategy.</strong> That's a significant shift. Until 26 August, Microsoft's <a href="https://learn.microsoft.com/en-us/fabric/fundamentals/table-maintenance-optimization" target="_blank" rel="noopener noreferrer">Cross-Workload page</a> said to run scheduled OPTIMIZE <em>"aggressively"</em> at Silver and Gold, which is where my original guide got it. The revision that removed it is titled, in the <a href="https://github.com/MicrosoftDocs/fabric-docs/commit/2e2cc1c5e8c6f536d95e0066da132ab46380cdbf" target="_blank" rel="noopener noreferrer">docs' public change history</a>, <em>"Simplify data layout guidance based on benchmarking"</em>.</li>
+<li><strong>Auto Compaction also clusters on liquid clustered tables.</strong> I confirmed this: OPTIMIZE ran with <code>auto = true</code>, <code>clusterBy</code> set, and the new files carried <code>clusteringProvider = liquid</code>. This is a big tick for Auto Compaction in my book, by handling small files and clustering it lessens the reliance on a scheduled OPTIMIZE.</li>
+<li><a href="https://learn.microsoft.com/en-us/fabric/data-engineering/table-compaction#reduce-evaluation-overhead" target="_blank" rel="noopener noreferrer"><strong><code>onCheckpointOnly</code></strong></a> (<code>spark.microsoft.delta.autoCompact.onCheckpointOnly.enabled</code>) defers Auto Compaction's evaluation to checkpoints, which happen every 10 commits. The snapshot is already in memory at that point, so the check is close to free. This is worth enabling for high-commit-rate pipelines.</li>
+</ul>
+<h3>What to do</h3>
+<p><strong>Enable Auto Compaction, and do it as a table property.</strong> Session configs only apply to the session that sets them, so any writer that doesn't run your utility notebook won't trigger compaction. A table property applies to every writer. In my testing the table property won even when the session config was explicitly <code>false</code>.</p>
+<pre><code>ALTER TABLE silver.my_table
+SET TBLPROPERTIES (<span class="string">'delta.autoOptimize.autoCompact'</span> = <span class="string">'true'</span>);</code></pre>
+<p><strong>Know what Fast Optimize skips.</strong> It deliberately ignores a handful of small files. That's the point of it, but it means a trickle of tiny appends can sit uncompacted (and, on liquid clustered tables, unclustered) for a while. If you need to force a compaction, turn it off for that one command:</p>
+<pre><code>spark.conf.set(<span class="string">"spark.microsoft.delta.optimize.fast.enabled"</span>, <span class="string">"false"</span>)
+spark.sql(<span class="string">"OPTIMIZE silver.my_table"</span>)
+spark.conf.unset(<span class="string">"spark.microsoft.delta.optimize.fast.enabled"</span>)</code></pre>
+<p><strong>Keep a scheduled OPTIMIZE only where it earns its place:</strong></p>
+<ol>
+<li><strong>One-off backlog cleanup</strong> on tables that have never been maintained.</li>
+<li><strong>Update-heavy MERGE targets.</strong> Auto Compaction doesn't clear deletion vectors unless small files also trigger it (see <a href="#deletion-vectors">Deletion Vectors</a>). This is now the main reason scheduled OPTIMIZE is still required, particularly for tables serving Direct Lake Semantic Models.</li>
+<li><strong>Workloads that can't tolerate write latency.</strong> Auto Compaction runs in the write path, so for these workloads you'd disable (or not enable) Auto Compaction, and rely on a scheduled OPTIMIZE for compaction and clustering.</li>
+<li><strong>Direct Lake tables, timed around framing.</strong> Direct Lake models pick up new data by <a href="https://learn.microsoft.com/en-us/fabric/fundamentals/direct-lake-how-it-works#framing" target="_blank" rel="noopener noreferrer"><em>framing</em></a> the latest Delta version. With <a href="https://learn.microsoft.com/en-us/fabric/fundamentals/direct-lake-how-it-works#automatic-updates" target="_blank" rel="noopener noreferrer">automatic updates</a> on (the default), that happens whenever the table changes, so run OPTIMIZE straight after the load that created the deletion vectors. If you've turned automatic updates off to control when data appears, finish OPTIMIZE before your scheduled refresh.</li>
+</ol>
+<p>Use <code>OPTIMIZE ... DRY RUN</code> to see what a run would rewrite before committing to it. Auto Compaction runs appear in <code>DESCRIBE HISTORY</code> as <code>OPTIMIZE</code> with <code>auto = true</code>, along with file counts and size percentiles, which is the easiest way to confirm it's working.</p>
+<hr>
+<h2 id="file-sizing">File Sizing</h2>
+<h3>How it works</h3>
+<p>Every compaction, every OPTIMIZE and every Optimize Write aims at a target file size. Too small and you're back to the small-file problem. Too large and you lose parallelism and skipping granularity.</p>
+<p><a href="https://learn.microsoft.com/en-us/fabric/data-engineering/tune-file-size#adaptive-target-file-size" target="_blank" rel="noopener noreferrer"><strong>Adaptive Target File Size (ATFS)</strong></a> sets that target from the table's size: a flat 128 MB for any table under 10 GB, scaling linearly to 1 GB at 10 TB. 1 GB is the ceiling: it's the default <code>maxFileSize</code> (configurable between 128 MB and 1 GB), and once a table reaches it ATFS stops re-evaluating (<code>stopAtMaxSize</code>). The evaluated value is stored on the table as the <code>delta.targetFileSize.adaptive</code> property, so you can read it from <code>DESCRIBE DETAIL</code>.</p>
+<figure class="diagram">
+<svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;min-width:560px;" role="img" aria-label="Line chart of the ATFS target file size: 128 MB for tables up to 10 GB, then rising in a straight line to a 1 GB cap at 10 TB">
+<rect width="800" height="300" fill="#0d1117" stroke="#1f2937" stroke-width="1" rx="4"/>
+<text x="20" y="30" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="13" fill="#e5e7eb" font-weight="bold">ATFS target file size by table size</text>
+<line x1="90" y1="250" x2="760" y2="250" stroke="#1f2937" stroke-width="1"/>
+<text x="82" y="254" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="10" fill="#6b7280">0</text>
+<line x1="90" y1="200" x2="760" y2="200" stroke="#1f2937" stroke-width="1"/>
+<text x="82" y="204" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="10" fill="#6b7280">256 MB</text>
+<line x1="90" y1="150" x2="760" y2="150" stroke="#1f2937" stroke-width="1"/>
+<text x="82" y="154" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="10" fill="#6b7280">512 MB</text>
+<line x1="90" y1="100" x2="760" y2="100" stroke="#1f2937" stroke-width="1"/>
+<text x="82" y="104" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="10" fill="#6b7280">768 MB</text>
+<line x1="90" y1="50" x2="760" y2="50" stroke="#1f2937" stroke-width="1"/>
+<text x="82" y="54" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="10" fill="#6b7280">1 GB</text>
+<text x="90" y="268" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#6b7280">0</text>
+<text x="224" y="268" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#6b7280">2 TB</text>
+<text x="358" y="268" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#6b7280">4 TB</text>
+<text x="492" y="268" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#6b7280">6 TB</text>
+<text x="626" y="268" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#6b7280">8 TB</text>
+<text x="760" y="268" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#6b7280">10 TB</text>
+<text x="425" y="286" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#6b7280">table size</text>
+<path d="M90.0,225.0 L90.7,225.0 L760.0,50.0" fill="none" stroke="#3b82f6" stroke-width="2"/>
+<circle cx="90.7" cy="225.0" r="5" fill="#3b82f6" stroke="#0d1117" stroke-width="2"><title>10 GB table: ~128 MB target</title></circle>
+<circle cx="157.0" cy="207.7" r="5" fill="#3b82f6" stroke="#0d1117" stroke-width="2"><title>1 TB table: ~217 MB target</title></circle>
+<circle cx="425.0" cy="137.6" r="5" fill="#3b82f6" stroke="#0d1117" stroke-width="2"><title>5 TB table: ~576 MB target</title></circle>
+<circle cx="760.0" cy="50.0" r="5" fill="#3b82f6" stroke="#0d1117" stroke-width="2"><title>10 TB table: ~1024 MB target</title></circle>
+<text x="100.654" y="245" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="11" fill="#e5e7eb">128 MB up to 10 GB</text>
+<text x="153" y="193.654" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#e5e7eb">1 TB: ~217 MB</text>
+<text x="413" y="127.586" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="11" fill="#e5e7eb">5 TB: ~576 MB</text>
+<text x="748" y="54" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="11" fill="#e5e7eb">1 GB cap at 10 TB</text>
+</svg>
+<figcaption>Plotted from the documented rule: 128 MB up to 10 GB, then linear to 1 GB at 10 TB. Even a 1 TB table targets only ~217 MB. Read your own table's value from <code>delta.targetFileSize.adaptive</code>.</figcaption>
+</figure>
+<p>Is 1 GB too small for a very large table? I don't think so. Bigger files mean fewer files to list, but every MERGE, UPDATE or deletion-vector purge has to rewrite whole files, so larger files make those more expensive, and fewer files give file skipping less to work with. Microsoft caps it at 1 GB and doesn't let you go higher.</p>
+<p>The <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/table-compaction#file-level-compaction-targets" target="_blank" rel="noopener noreferrer"><strong>File-Level Compaction Target</strong></a> tags each compacted file with the target it was written for. When ATFS raises the target as the table grows, files that were at least half the target at the time they were compacted aren't rewritten (e.g. a 100 MB file compacted under a 128 MB target is left alone when the target rises to 256 MB, even though it's well under the new target, whereas a 50 MB file would get compacted). That avoids needless rewrites as tables grow.</p>
+<p>These are both <strong>runtime defaults, not table settings</strong>, so they apply to existing tables as soon as a Runtime 2.0 session touches them. ATFS evaluates a table's target at the start of its next OPTIMIZE (or on CTAS and overwrites), and existing files aren't rewritten just because the setting is now on. In my migration test, the files Runtime 1.3 had written were left alone. The one thing to check is that no Environment or notebook still sets these configs to <code>false</code>.</p>
+<p>Christopher Finlan (Microsoft) <a href="https://christopherfinlan.com/2026/02/15/microsoft-fabric-table-maintenance-optimization-a-cross-workload-survival-guide/" target="_blank" rel="noopener noreferrer">described the "compaction gap" well</a>: without ATFS, Auto Compaction aims at 128 MB while OPTIMIZE aims at 1 GB, so the two never converge and you end up recompacting forever. With ATFS they share one dynamic target, which is another reason why the scheduled OPTIMIZE has become less necessary.</p>
+<h3>What changed in Runtime 2.0</h3>
+<ul>
+<li><strong>ATFS and the File-Level Target are both on by default.</strong> The <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/table-compaction#file-level-compaction-targets" target="_blank" rel="noopener noreferrer">Table Compaction page</a> still says the File-Level Target is <em>"not enabled by default"</em>. The <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/tune-file-size#understand-performance-impact" target="_blank" rel="noopener noreferrer">Tune File Size page</a> says it's <em>"enabled by default starting in Runtime 2.0"</em>. My testing confirmed the latter is right.</li>
+<li><strong>Fixed per-layer targets are gone from the documentation.</strong> Until 26 August, the Cross-Workload page gave per-consumer targets (<a href="https://github.com/MicrosoftDocs/fabric-docs/commit/2e2cc1c5e8c6f536d95e0066da132ab46380cdbf" target="_blank" rel="noopener noreferrer">see the change</a>): 400 MB for the SQL analytics endpoint, 400 MB–1 GB with 8-million-row row groups for Direct Lake, and 128–256 MB at Silver. That's where my 256 MB/400 MB targets came from. Microsoft's <a href="https://learn.microsoft.com/en-us/fabric/fundamentals/table-maintenance-optimization#cross-workload-guidance" target="_blank" rel="noopener noreferrer">current advice</a> is <em>"Don't set a static target file size, arbitrary row limit, or V-Order solely for SQL analytics endpoint performance,"</em> and <code>delta.targetFileSize</code> is now <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/tune-file-size#set-target-file-size-consistently" target="_blank" rel="noopener noreferrer">described</a> as existing <em>"for legacy compatibility purposes."</em></li>
+</ul>
+<h3>What to do</h3>
+<ul>
+<li><strong>Leave ATFS alone.</strong> If you want to know a table's target, read it rather than setting it:
+<pre><code>spark.sql(<span class="string">"DESCRIBE DETAIL silver.my_table"</span>).first()[<span class="string">"properties"</span>].get(<span class="string">"delta.targetFileSize.adaptive"</span>)</code></pre></li>
+<li><strong>Remove any <code>delta.targetFileSize</code> pins</strong> unless you can justify them against a measured workload.</li>
+<li><strong>Use Optimize Write selectively.</strong> The default <code>writeHeavy</code> profile leaves <code>optimizeWrite.enabled</code> unset and applies Optimize Write to partitioned tables only. Microsoft recommends it mainly for streaming and microbatch writes. Enable it per table rather than for everything:
+<pre><code>ALTER TABLE silver.my_streaming_table
+SET TBLPROPERTIES (<span class="string">'delta.autoOptimize.optimizeWrite'</span> = <span class="string">'true'</span>);</code></pre></li>
+</ul>
+<hr>
+<h2 id="clustering">Clustering</h2>
+<p>This is where Runtime 2.0 changed the most, so it gets the most space.</p>
+<h3>How it works</h3>
+<p><strong>Partitioning</strong> physically splits a table into a folder per value of a column (e.g. one folder per <code>date</code>). Queries filtering on that column skip whole folders. The trouble is that it bakes a physical structure into the table: a high-cardinality column produces thousands of tiny partitions (the small-file problem again, at a structural level), and choosing the wrong column means rewriting the table. Microsoft's <a href="https://learn.microsoft.com/en-us/fabric/fundamentals/table-maintenance-optimization#organize-data-for-file-skipping" target="_blank" rel="noopener noreferrer">cross-workload guidance</a> now says <em>"Avoid partitioning by default."</em></p>
+<p><strong>Z-Order and liquid clustering</strong> both rearrange rows so that similar values end up in the same files. Each file then covers a narrow range of values, and its min/max statistics let queries skip the files that can't contain what they're looking for. With ATFS, a 10 GB table is roughly 80 files of ~128 MB. Unclustered, a selective query on a given column may have to open all of them. Clustered on that column, it may only need one: 128 MB read instead of 10 GB. A table split into N files can skip at most (N−1)/N of them, so clustering only pays off once a table spans several files, and only as well as the clustering quality allows.</p>
+<p><strong>Liquid clustering is the better of the two</strong>, for four reasons:</p>
+<ul>
+<li><strong>The layout lives on the table.</strong> You declare it once with <code>CLUSTER BY</code>, and every OPTIMIZE maintains it, including Auto Compaction. Z-Order is a one-off operation: you name the columns every time you run <code>OPTIMIZE ... ZORDER BY</code>, and nothing tells the next person which columns to use.</li>
+<li><strong>It's incremental.</strong> On Runtime 2.0, OPTIMIZE only reclusters the files that need it (more on that below).</li>
+<li><strong>You can change keys without a rewrite.</strong> <code>ALTER TABLE ... CLUSTER BY</code> changes the policy going forward, where switching Z-Order columns means re-running it across the table.</li>
+<li><strong>It handles multiple columns better.</strong> For two or more cluster columns, Fabric uses a Hilbert curve, which keeps neighbouring values together more consistently than Z-Order's bit-interleaving. (For a single column both reduce to a sort, so the first three points are the win.)</li>
+</ul>
+<p><strong>Clustering never happens on write.</strong> A plain INSERT or MERGE writes unclustered files, even on Runtime 2.0. Miles Cole's <a href="https://www.reddit.com/r/MicrosoftFabric/comments/1vsw40t/experts_engines_hi_were_the_microsoft_fabric/" target="_blank" rel="noopener noreferrer">reasoning</a> is that clustering on write forces a shuffle that can make writes twice as slow or worse. OPTIMIZE is a guarantee where cluster-on-write would only be optimistic. Clustering only happens when OPTIMIZE runs, either explicitly or through Auto Compaction (which, on a liquid clustered table, clusters as well as compacts). If neither ever runs, <code>CLUSTER BY</code> gives you no benefit at all. The same goes for Data Factory - a Copy activity or Copy job append into a liquid clustered table writes unclustered files.</p>
+<h3>What changed in Runtime 2.0</h3>
+<p><strong>Runtime 1.3 rewrote your whole table on every OPTIMIZE.</strong> Open-source Delta groups clustered files into Z-Cubes (a Z-Cube is a group of files clustered on the same columns, which keeps growing until it reaches 100 GB or the cluster keys change). Any Z-Cube under 100 GB is "partial" and is rewritten in full whenever there's new data to cluster, until it seals at 100 GB. Most tables are under 100 GB, so most tables were rewritten in full on every OPTIMIZE. Miles Cole, <a href="https://www.reddit.com/r/MicrosoftFabric/comments/1tpio6g/announcing_incremental_liquid_clustering/" target="_blank" rel="noopener noreferrer">on r/MicrosoftFabric</a>: <em>"Databricks doesn't even work this way, it's really just the OSS LC implementation."</em></p>
+<p>Tables under 100 GB (most tables) fit inside one Z-Cube. Let's say you have a 50 GB table that has recently been compacted and clustered and you do a 100 MB write to this table, which adds a new file outside the Z-Cube. Under Runtime 1.3, when you run OPTIMIZE this entire table 50.1 GB is rewritten. Now with Incremental Liquid Clustering on Runtime 2.0, the existing Z-Cube is left alone, and only the 100 MB of new data (plus any partly filled file it merges with) is re-written into the Z-Cube.</p>
+<p><strong>Runtime 2.0 <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/liquid-clustering#incremental-liquid-clustering" target="_blank" rel="noopener noreferrer">clusters incrementally</a>.</strong> A file is only rewritten if any of these are true:</p>
+<ul>
+<li>it's unclustered (e.g. new data)</li>
+<li>it's too small</li>
+<li>more than 5% of its rows are deleted via deletion vectors</li>
+<li>it's already clustered but overlaps too much with its neighbours (Auto Reclustering)</li>
+</ul>
+<p>Everything else is left alone.</p>
+<figure class="diagram">
+<svg viewBox="0 0 800 330" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;min-width:560px;" role="img" aria-label="Diagram comparing what liquid clustering OPTIMIZE rewrites after a 1% append: Runtime 1.3 rewrites the whole table into one file, Runtime 2.0 rewrites only the new append and one partly filled file">
+<rect width="800" height="330" fill="#0d1117" stroke="#1f2937" stroke-width="1" rx="4"/>
+<line x1="400" y1="0" x2="400" y2="330" stroke="#1f2937" stroke-width="1"/>
+<rect x="20" y="20" width="10" height="10" rx="2" fill="#d97706"/>
+<text x="38" y="30" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="13" fill="#e5e7eb" font-weight="bold">Runtime 1.3</text>
+<text x="20" y="56" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="10" fill="#6b7280">before: clustered table + 1% append</text>
+<rect x="20" y="64" width="300" height="40" rx="2" fill="#111827" stroke="#6b7280" stroke-width="1"/>
+<text x="170" y="89" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#e5e7eb">1 clustered file · 1.45 GB</text>
+<rect x="326" y="64" width="59" height="40" rx="2" fill="#111827" stroke="#6b7280" stroke-width="1" stroke-dasharray="3,2"/>
+<text x="355.5" y="89" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#9ca3af">+15 MB</text>
+<line x1="200" y1="108" x2="200" y2="146" stroke="#6b7280" stroke-width="1.5"/>
+<path d="M195,140 L205,140 L200,146 z" fill="#6b7280"/>
+<text x="212" y="131" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="10" fill="#9ca3af">OPTIMIZE</text>
+<text x="20" y="164" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="10" fill="#6b7280">after</text>
+<rect x="20" y="172" width="365" height="40" rx="2" fill="#2a1a05" stroke="#d97706" stroke-width="1.5"><title>Runtime 1.3: 1.47 GB rewritten (101% of the table)</title></rect>
+<text x="202" y="197" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#e5e7eb">1 file · 1.47 GB · all rewritten</text>
+<text x="20" y="244" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="11" fill="#9ca3af">Partial Z-Cube (&lt; 100 GB) rewritten in full</text>
+<text x="20" y="264" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="11" fill="#9ca3af">One file: nothing for queries to skip</text>
+<text x="20" y="300" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="13" fill="#e5e7eb" font-weight="bold">~101% of the table per OPTIMIZE</text>
+<rect x="415" y="20" width="10" height="10" rx="2" fill="#3b82f6"/>
+<text x="433" y="30" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="13" fill="#e5e7eb" font-weight="bold">Runtime 2.0</text>
+<text x="415" y="56" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="10" fill="#6b7280">before: clustered files + partial file + 1% append</text>
+<rect x="415" y="64" width="25" height="40" rx="2" fill="#111827" stroke="#6b7280" stroke-width="1"><title>Clustered file, ~145 MB: untouched</title></rect>
+<rect x="444" y="64" width="25" height="40" rx="2" fill="#111827" stroke="#6b7280" stroke-width="1"><title>Clustered file, ~145 MB: untouched</title></rect>
+<rect x="473" y="64" width="25" height="40" rx="2" fill="#111827" stroke="#6b7280" stroke-width="1"><title>Clustered file, ~145 MB: untouched</title></rect>
+<rect x="502" y="64" width="25" height="40" rx="2" fill="#111827" stroke="#6b7280" stroke-width="1"><title>Clustered file, ~145 MB: untouched</title></rect>
+<rect x="531" y="64" width="25" height="40" rx="2" fill="#111827" stroke="#6b7280" stroke-width="1"><title>Clustered file, ~145 MB: untouched</title></rect>
+<rect x="560" y="64" width="25" height="40" rx="2" fill="#111827" stroke="#6b7280" stroke-width="1"><title>Clustered file, ~145 MB: untouched</title></rect>
+<rect x="589" y="64" width="25" height="40" rx="2" fill="#111827" stroke="#6b7280" stroke-width="1"><title>Clustered file, ~145 MB: untouched</title></rect>
+<rect x="618" y="64" width="25" height="40" rx="2" fill="#111827" stroke="#6b7280" stroke-width="1"><title>Clustered file, ~145 MB: untouched</title></rect>
+<rect x="647" y="64" width="25" height="40" rx="2" fill="#111827" stroke="#6b7280" stroke-width="1"><title>Clustered file, ~145 MB: untouched</title></rect>
+<rect x="676" y="64" width="25" height="40" rx="2" fill="#111827" stroke="#6b7280" stroke-width="1"><title>Clustered file, ~145 MB: untouched</title></rect>
+<rect x="706" y="64" width="34" height="40" rx="2" fill="#111827" stroke="#6b7280" stroke-width="1"/>
+<text x="723" y="89" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#9ca3af">part</text>
+<rect x="744" y="64" width="36" height="40" rx="2" fill="#111827" stroke="#6b7280" stroke-width="1" stroke-dasharray="3,2"/>
+<text x="762" y="89" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#9ca3af">new</text>
+<line x1="600" y1="108" x2="600" y2="146" stroke="#6b7280" stroke-width="1.5"/>
+<path d="M595,140 L605,140 L600,146 z" fill="#6b7280"/>
+<text x="612" y="131" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="10" fill="#9ca3af">OPTIMIZE</text>
+<text x="415" y="164" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="10" fill="#6b7280">after</text>
+<rect x="415" y="172" width="25" height="40" rx="2" fill="#111827" stroke="#6b7280" stroke-width="1"><title>Clustered file, ~145 MB: untouched</title></rect>
+<rect x="444" y="172" width="25" height="40" rx="2" fill="#111827" stroke="#6b7280" stroke-width="1"><title>Clustered file, ~145 MB: untouched</title></rect>
+<rect x="473" y="172" width="25" height="40" rx="2" fill="#111827" stroke="#6b7280" stroke-width="1"><title>Clustered file, ~145 MB: untouched</title></rect>
+<rect x="502" y="172" width="25" height="40" rx="2" fill="#111827" stroke="#6b7280" stroke-width="1"><title>Clustered file, ~145 MB: untouched</title></rect>
+<rect x="531" y="172" width="25" height="40" rx="2" fill="#111827" stroke="#6b7280" stroke-width="1"><title>Clustered file, ~145 MB: untouched</title></rect>
+<rect x="560" y="172" width="25" height="40" rx="2" fill="#111827" stroke="#6b7280" stroke-width="1"><title>Clustered file, ~145 MB: untouched</title></rect>
+<rect x="589" y="172" width="25" height="40" rx="2" fill="#111827" stroke="#6b7280" stroke-width="1"><title>Clustered file, ~145 MB: untouched</title></rect>
+<rect x="618" y="172" width="25" height="40" rx="2" fill="#111827" stroke="#6b7280" stroke-width="1"><title>Clustered file, ~145 MB: untouched</title></rect>
+<rect x="647" y="172" width="25" height="40" rx="2" fill="#111827" stroke="#6b7280" stroke-width="1"><title>Clustered file, ~145 MB: untouched</title></rect>
+<rect x="676" y="172" width="25" height="40" rx="2" fill="#111827" stroke="#6b7280" stroke-width="1"><title>Clustered file, ~145 MB: untouched</title></rect>
+<rect x="706" y="172" width="74" height="40" rx="2" fill="#0b1f3d" stroke="#3b82f6" stroke-width="1.5"><title>Runtime 2.0: only the partial file and new append rewritten (1–3% of the table)</title></rect>
+<text x="743" y="197" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#e5e7eb">rewritten</text>
+<text x="415" y="230" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="9" fill="#6b7280">└── 10 files · ~145 MB · untouched ──┘</text>
+<text x="415" y="252" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="11" fill="#9ca3af">Only the new append and the partly filled</text>
+<text x="415" y="268" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="11" fill="#9ca3af">file are rewritten</text>
+<text x="415" y="300" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="13" fill="#e5e7eb" font-weight="bold">1–3% of the table per OPTIMIZE</text>
+</svg>
+<figcaption>What a liquid clustering OPTIMIZE rewrites after a 1% append, from my benchmark. Runtime 1.3 rewrites the whole table into one unskippable file. Runtime 2.0 leaves clustered files alone.</figcaption>
+</figure>
+<p>I couldn't find a published Fabric benchmark for the difference, so I ran one. I used a 20-million-row, ~1.45 GB table clustered on two columns, with settings pinned so that only the clustering algorithm differed: Fast Optimize, Optimize Write and Auto Compaction all off. After the initial OPTIMIZE, I ran three rounds of "append 1% new data, then OPTIMIZE":</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+<th>Round</th>
+<th>Runtime 1.3 rewrote</th>
+<th>Runtime 1.3 time</th>
+<th>Runtime 2.0 rewrote</th>
+<th>Runtime 2.0 time</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>0</td><td>1.47 GB (101%)</td><td>54 s</td><td>15 MB (1.0%)</td><td>6 s</td></tr>
+<tr><td>1</td><td>1.48 GB (102%)</td><td>53 s</td><td>30 MB (2.1%)</td><td>6 s</td></tr>
+<tr><td>2</td><td>1.50 GB (103%)</td><td>54 s</td><td>44 MB (3.1%)</td><td>8 s</td></tr>
+</tbody>
+</table>
+</div>
+<figure class="diagram">
+<svg viewBox="0 0 800 270" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;min-width:560px;" role="img" aria-label="Bar chart: Runtime 1.3 rewrote about 1.5 GB in 53 to 54 seconds every round; Runtime 2.0 rewrote 15 to 44 MB in 6 to 8 seconds">
+<rect width="800" height="270" fill="#0d1117" stroke="#1f2937" stroke-width="1" rx="4"/>
+<text x="20" y="30" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="13" fill="#e5e7eb" font-weight="bold">Data rewritten per OPTIMIZE (1% append each round)</text>
+<rect x="20" y="47" width="10" height="10" rx="2" fill="#d97706"/>
+<text x="36" y="56" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="11" fill="#e5e7eb">Runtime 1.3</text>
+<rect x="127" y="47" width="10" height="10" rx="2" fill="#3b82f6"/>
+<text x="143" y="56" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="11" fill="#e5e7eb">Runtime 2.0</text>
+<line x1="120" y1="72" x2="120" y2="242" stroke="#1f2937" stroke-width="1"/>
+<text x="120" y="258" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#6b7280">0</text>
+<line x1="293.333" y1="72" x2="293.333" y2="242" stroke="#1f2937" stroke-width="1"/>
+<text x="293.333" y="258" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#6b7280">500 MB</text>
+<line x1="466.667" y1="72" x2="466.667" y2="242" stroke="#1f2937" stroke-width="1"/>
+<text x="466.667" y="258" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#6b7280">1 GB</text>
+<line x1="640" y1="72" x2="640" y2="242" stroke="#1f2937" stroke-width="1"/>
+<text x="640" y="258" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#6b7280">1.5 GB</text>
+<text x="108" y="100" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="11" fill="#9ca3af">Round 0</text>
+<path d="M120,78 H625.6 Q629.6,78 629.6,82 V92 Q629.6,96 625.6,96 H120 Z" fill="#d97706"><title>Round 0, Runtime 1.3: 1.47 GB rewritten in 54 s</title></path>
+<text x="637.6" y="91" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="11" fill="#e5e7eb">1.47 GB · 54 s</text>
+<path d="M120,98 H121.2 Q125.2,98 125.2,102 V112 Q125.2,116 121.2,116 H120 Z" fill="#3b82f6"><title>Round 0, Runtime 2.0: 15 MB rewritten in 6 s</title></path>
+<text x="133.2" y="111" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="11" fill="#e5e7eb">15 MB · 6 s</text>
+<text x="108" y="158" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="11" fill="#9ca3af">Round 1</text>
+<path d="M120,136 H629.067 Q633.067,136 633.067,140 V150 Q633.067,154 629.067,154 H120 Z" fill="#d97706"><title>Round 1, Runtime 1.3: 1.48 GB rewritten in 53 s</title></path>
+<text x="641.067" y="149" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="11" fill="#e5e7eb">1.48 GB · 53 s</text>
+<path d="M120,156 H126.4 Q130.4,156 130.4,160 V170 Q130.4,174 126.4,174 H120 Z" fill="#3b82f6"><title>Round 1, Runtime 2.0: 30 MB rewritten in 6 s</title></path>
+<text x="138.4" y="169" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="11" fill="#e5e7eb">30 MB · 6 s</text>
+<text x="108" y="216" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="11" fill="#9ca3af">Round 2</text>
+<path d="M120,194 H636 Q640,194 640,198 V208 Q640,212 636,212 H120 Z" fill="#d97706"><title>Round 2, Runtime 1.3: 1.50 GB rewritten in 54 s</title></path>
+<text x="648" y="207" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="11" fill="#e5e7eb">1.50 GB · 54 s</text>
+<path d="M120,214 H131.253 Q135.253,214 135.253,218 V228 Q135.253,232 131.253,232 H120 Z" fill="#3b82f6"><title>Round 2, Runtime 2.0: 44 MB rewritten in 8 s</title></path>
+<text x="143.253" y="227" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="11" fill="#e5e7eb">44 MB · 8 s</text>
+<line x1="120" y1="72" x2="120" y2="242" stroke="#6b7280" stroke-width="1"/>
+</svg>
+<figcaption>20M-row, ~1.45 GB table clustered on two columns, with Fast Optimize, Optimize Write and Auto Compaction off. Runtime 1.3's cost tracks the whole table, Runtime 2.0's tracks the new data.</figcaption>
+</figure>
+<p>On Runtime 1.3, clustering about 15 MB of new data meant rewriting the entire table every time: roughly 100 times the new data, and 7–9 times slower. The gap only grows with table size, because Runtime 1.3's cost scales with the whole table and Runtime 2.0's scales with the new data. Note that this is just one table and one append pattern, not a universal multiplier.</p>
+<p>Two details are worth noticing:</p>
+<ul>
+<li><strong>Incremental Clustering on Runtime 2.0 isn't quite "only the new data".</strong> Each round rewrote the new data <em>plus</em> the previous round's partly-filled clustered file, which keeps growing until it reaches the target size.</li>
+<li><strong>Runtime 1.3 put the whole clustered table in a single 1.45 GB file</strong>, where Runtime 2.0 wrote 10 files of about 145 MB. A single file can't be skipped, so on Runtime 1.3 a table this size paid for a full rewrite on every OPTIMIZE <em>and</em> got no file skipping in return.</li>
+</ul>
+<p>There's a trade-off hidden in those numbers. In a separate test, each newly clustered file covered the full range of both cluster keys, so it overlapped every other file and no query could skip it. Incremental clustering keeps rewrites small by clustering new data only within itself, so a small slice of recent data stays unskippable until Auto Reclustering (or an OPTIMIZE FULL) reorganises it with its neighbours.</p>
+<p>The guidance changed accordingly. In February, <a href="https://christopherfinlan.com/2026/02/15/microsoft-fabric-table-maintenance-optimization-a-cross-workload-survival-guide/" target="_blank" rel="noopener noreferrer">Christopher Finlan wrote</a> that partitioning <em>"is often the better choice until Runtime 2.0."</em> In May, <a href="https://www.reddit.com/r/MicrosoftFabric/comments/1tpio6g/announcing_incremental_liquid_clustering/" target="_blank" rel="noopener noreferrer">Miles Cole</a>: <em>"I fully recommend using Liquid Clustering over partitioning and Z-Order, as long as you are using Runtime 2.0."</em></p>
+<p><strong>Migration from 1.3 is automatic.</strong> At the <a href="https://www.reddit.com/r/MicrosoftFabric/comments/1vsw40t/experts_engines_hi_were_the_microsoft_fabric/" target="_blank" rel="noopener noreferrer">AMA</a>, Cole's answer to "is there a migration step?" was <em>"No migration, it's automatic and seamless :)"</em>. It's not that I don't trust Miles, or Microsoft, but I tested it. I took the table Runtime 1.3 had clustered, switched to Runtime 2.0, and repeated the same three rounds. They rewrote 1.0%, 2.0% and 3.0%, and the 1.5 GB file from Runtime 1.3 was never touched. There was no one-off full rewrite and no <code>OPTIMIZE FULL</code> required.</p>
+<p><strong><code>OPTIMIZE FULL</code> is still useful, just not required.</strong> Migration stops the full-rewrite cost, but data clustered on Runtime 1.3 keeps its old layout, in my case that single 1.5 GB file. One <code>OPTIMIZE FULL</code> on Runtime 2.0 rewrote it into 11 files of 110–162 MB, the same layout a native Runtime 2.0 table gets. That's a single full rewrite, worth paying once on large or heavily queried tables you clustered on 1.3.</p>
+<p>Also new in Runtime 2.0:</p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/fabric/data-engineering/liquid-clustering#evaluate-clustering-quality" target="_blank" rel="noopener noreferrer"><strong><code>clusteringQuality()</code></strong></a> (Scala only) reports per-column clustering health. See <a href="#assessing-your-tables">Assessing Your Tables</a>.</li>
+<li><strong>The Native Execution Engine now accelerates liquid clustering OPTIMIZE</strong>, which Microsoft <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/liquid-clustering#apply-clustering-with-optimize" target="_blank" rel="noopener noreferrer">quotes</a> as <em>"30–50% faster multi-dimensional clustering."</em></li>
+<li><a href="https://learn.microsoft.com/en-us/fabric/data-engineering/liquid-clustering#supported-column-types" target="_blank" rel="noopener noreferrer"><strong>Complex-type cluster keys</strong></a> (struct, array, map) behind <code>spark.microsoft.delta.clusteredTable.complexTypes.enabled</code>.</li>
+</ul>
+<h3>What to do</h3>
+<p><strong>Use liquid clustering by default</strong>, with one to four cluster keys. Four is <a href="https://docs.delta.io/delta-clustering/" target="_blank" rel="noopener noreferrer">Delta's limit</a>, not just guidance. In practice, one or two uncorrelated, selective columns that appear in your filters and joins. The order you list them in <code>CLUSTER BY</code> doesn't matter. Low-cardinality or correlated columns waste a slot.</p>
+<p>Cluster keys also need file statistics, and by default Delta only collects statistics on the <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/delta-lake-file-skipping#default-behavior" target="_blank" rel="noopener noreferrer"><strong>first 32 columns</strong></a> of a table. If a key sits beyond column 32, move it earlier or name it in <code>delta.dataSkippingStatsColumns</code>. (<code>clusteringQuality()</code> reports <code>no_stats</code> for a key without statistics.)</p>
+<pre><code>CREATE TABLE silver.orders (...) CLUSTER BY (customer_id);
+
+<span class="comment">-- Existing table: change the policy without rewriting existing data</span>
+ALTER TABLE silver.orders CLUSTER BY (customer_id, order_date);</code></pre>
+<p><strong>MERGE targets benefit, but not quite how I expected.</strong> Cluster the target table on the merge key or, for a composite key, its most selective one or two columns, but never a hash of the key, which scatters neighbouring rows across every file.</p>
+<p>It's often said that the MERGE <code>ON</code> clause works like a filter, so a clustered target lets MERGE skip files. I tested that and it's only half true.</p>
+<p>A MERGE reads the target twice:</p>
+<ol>
+<li>A <em>matching</em> scan to find which files contain the batch's keys, then</li>
+<li>A <em>rewrite</em> scan of just those files.</li>
+</ol>
+<p>I merged the same batch (50,000 updates to a single block of consecutive order IDs, plus 10,000 new orders) into two identical 1.4 GB tables, one clustered on <code>order_id</code> and one not:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Matching scan</th>
+<th>Rewrite scan</th>
+<th>Deletion vectors added</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>Plain <code>ON</code>, clustered</td><td>18 files, 1,368 MiB</td><td><strong>1 file, 127 MiB</strong></td><td><strong>1</strong></td></tr>
+<tr><td>Plain <code>ON</code>, unclustered</td><td>18 files, 1,368 MiB</td><td>10 files, 1,360 MiB</td><td>10</td></tr>
+<tr><td><code>ON</code> + key range, clustered</td><td><strong>9 files, 396 MiB</strong></td><td><strong>1 file, 132 MiB</strong></td><td><strong>1</strong></td></tr>
+<tr><td><code>ON</code> + key range, unclustered</td><td>16 files, 1,362 MiB</td><td>10 files, 1,360 MiB</td><td>10</td></tr>
+</tbody>
+</table>
+</div>
+<figure class="diagram">
+<svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;min-width:560px;" role="img" aria-label="Stacked bar chart of MiB read by a MERGE: clustering shrinks the rewrite scan on its own, and adding a key range to the ON clause also shrinks the matching scan on the clustered table only">
+<rect width="800" height="300" fill="#0d1117" stroke="#1f2937" stroke-width="1" rx="4"/>
+<text x="20" y="30" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="13" fill="#e5e7eb" font-weight="bold">MiB read by one MERGE batch</text>
+<rect x="20" y="47" width="10" height="10" rx="2" fill="#3b82f6"/>
+<text x="36" y="56" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="11" fill="#e5e7eb">Matching scan</text>
+<rect x="141" y="47" width="10" height="10" rx="2" fill="#0d9488"/>
+<text x="157" y="56" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="11" fill="#e5e7eb">Rewrite scan</text>
+<line x1="230" y1="72" x2="230" y2="244" stroke="#1f2937" stroke-width="1"/>
+<text x="230" y="260" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#6b7280">0</text>
+<line x1="376.429" y1="72" x2="376.429" y2="244" stroke="#1f2937" stroke-width="1"/>
+<text x="376.429" y="260" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#6b7280">1,000</text>
+<line x1="522.857" y1="72" x2="522.857" y2="244" stroke="#1f2937" stroke-width="1"/>
+<text x="522.857" y="260" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#6b7280">2,000</text>
+<text x="435" y="278" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#6b7280">MiB read</text>
+<text x="218" y="95" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="11" fill="#9ca3af">Plain ON · unclustered</text>
+<rect x="230" y="80" width="200.3" height="22" fill="#3b82f6"><title>Plain ON · unclustered: matching scan 1,368 MiB</title></rect>
+<path d="M432.314,80 H627.457 Q631.457,80 631.457,84 V98 Q631.457,102 627.457,102 H432.314 Z" fill="#0d9488"><title>Plain ON · unclustered: rewrite scan 1,360 MiB</title></path>
+<text x="639.457" y="95" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="11" fill="#e5e7eb">2,728 MiB · 10 DVs</text>
+<text x="218" y="139" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="11" fill="#9ca3af">Plain ON · clustered</text>
+<rect x="230" y="124" width="200.3" height="22" fill="#3b82f6"><title>Plain ON · clustered: matching scan 1,368 MiB</title></rect>
+<path d="M432.314,124 H446.911 Q450.911,124 450.911,128 V142 Q450.911,146 446.911,146 H432.314 Z" fill="#0d9488"><title>Plain ON · clustered: rewrite scan 127 MiB</title></path>
+<text x="458.911" y="139" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="11" fill="#e5e7eb">1,495 MiB · 1 DV</text>
+<line x1="20" y1="157" x2="780" y2="157" stroke="#1f2937" stroke-width="1" stroke-dasharray="4,3"/>
+<text x="218" y="183" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="11" fill="#9ca3af">ON + range · unclustered</text>
+<rect x="230" y="168" width="199.4" height="22" fill="#3b82f6"><title>ON + range · unclustered: matching scan 1,362 MiB</title></rect>
+<path d="M431.436,168 H626.579 Q630.579,168 630.579,172 V186 Q630.579,190 626.579,190 H431.436 Z" fill="#0d9488"><title>ON + range · unclustered: rewrite scan 1,360 MiB</title></path>
+<text x="638.579" y="183" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="11" fill="#e5e7eb">2,722 MiB · 10 DVs</text>
+<text x="218" y="227" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="11" fill="#9ca3af">ON + range · clustered</text>
+<rect x="230" y="212" width="58.0" height="22" fill="#3b82f6"><title>ON + range · clustered: matching scan 396 MiB</title></rect>
+<path d="M289.986,212 H305.314 Q309.314,212 309.314,216 V230 Q309.314,234 305.314,234 H289.986 Z" fill="#0d9488"><title>ON + range · clustered: rewrite scan 132 MiB</title></path>
+<text x="317.314" y="227" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="11" fill="#e5e7eb">528 MiB · 1 DV</text>
+<line x1="230" y1="72" x2="230" y2="244" stroke="#6b7280" stroke-width="1"/>
+</svg>
+<figcaption>Same batch merged into two identical 1.4 GB tables. Clustering alone shrinks the rewrite scan, and adding a key range to <code>ON</code> also lets the matching scan skip files, but only on the clustered table.</figcaption>
+</figure>
+<ul>
+<li><strong>A plain <code>ON t.key = s.key</code> doesn't skip files.</strong> The matching scan read every file on both tables. Fabric doesn't prune target files from join keys.</li>
+<li><strong>Clustering still pays off in the rewrite.</strong> The changed rows sat in one file instead of ten, so the MERGE read about 45% less in total and left 1 deletion vector instead of 10. That's less for the next OPTIMIZE to purge and less for Direct Lake to load.</li>
+<li><strong>Add a range on the target key and clustering skips files too.</strong> With <code>AND t.order_id BETWEEN &lt;batch min&gt; AND &lt;batch max&gt;</code> in the <code>ON</code> clause, the matching scan dropped by 71%, and the whole MERGE read about 80% less than on the unclustered table. On the unclustered table the same range barely helped (16 files instead of 18), because every file spans the whole key range.</li>
+</ul>
+<p><code>&lt;batch min&gt;</code> and <code>&lt;batch max&gt;</code> aren't something Spark works out for you. Compute them from the batch first, then put them into the MERGE as literal values, so Spark can compare them against each file's min/max statistics before it reads anything:</p>
+<pre><code>from pyspark.sql import functions as F
+
+lo, hi = spark.table(<span class="string">"staging.order_batch"</span>).agg(F.min(<span class="string">"order_id"</span>), F.max(<span class="string">"order_id"</span>)).first()
+
+spark.sql(<span class="string">f"""</span>
+    MERGE INTO silver.orders t
+    USING staging.order_batch s
+    ON t.order_id = s.order_id
+       AND t.order_id BETWEEN {lo} AND {hi}
+    WHEN MATCHED THEN UPDATE SET *
+    WHEN NOT MATCHED THEN INSERT *
+<span class="string">"""</span>)</code></pre>
+<p>Two cautions:</p>
+<ol>
+<li>The range must cover every key in the batch that could match an existing row, or that row will be treated as new and inserted twice.</li>
+<li>And this is one table and one batch shape: if your batches update keys scattered across the whole table, the changed rows sit in most files anyway and the benefit shrinks.</li>
+</ol>
+<p><strong>Small tables:</strong> clustering a table that fits in one file does nothing, but it doesn't cost anything either, since Fast Optimize turns the OPTIMIZE into a no-op. You do still have to choose keys, so leaving a static lookup table unclustered is perfectly reasonable. I've considered building something custom that decides to cluster a table, or not, based on size or file count, but tables grow and it adds dev effort and complexity for little benefit.</p>
+<p><strong>Partition only for concurrent DML on disjoint partitions.</strong> My original guide recommended liquid clustering everywhere except Bronze, and didn't say when partitioning is still the right call. The answer is narrower than "multi-source ingestion": blind appends don't conflict under Delta's concurrency control, with or without partitions. The real exception is concurrent writes that update or delete existing rows (UPDATE, DELETE, or a MERGE that does either) on disjoint data. Cole, at the <a href="https://www.reddit.com/r/MicrosoftFabric/comments/1vsw40t/experts_engines_hi_were_the_microsoft_fabric/" target="_blank" rel="noopener noreferrer">AMA</a>: <em>"Partitioning is really the only way to guarantee that disjoint DML predicates won't conflict."</em></p>
+<p>Before reaching for partitions, see whether you can avoid the concurrency instead: run those writes in sequence, or combine the sources into a single MERGE. Partitioning is for when you genuinely need parallel DML on the same table. If you're in that case:</p>
+<ul>
+<li>Use low-to-moderate cardinality columns, with <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/delta-lake-partitioning#when-to-use-partitioning" target="_blank" rel="noopener noreferrer">at least 1 GB per partition</a>.</li>
+<li>Put the partition column <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/delta-lake-partitioning#partitioning-and-concurrent-writes" target="_blank" rel="noopener noreferrer"><strong>in the MERGE <code>ON</code> condition itself</strong></a>. Having it in the source data isn't enough to prevent conflicts.</li>
+<li>Use Z-Order within partitions if you also need skipping. Liquid clustering can't be combined with partitioning.</li>
+</ul>
+<p><strong>Use <code>OPTIMIZE FULL</code> after changing cluster keys</strong>, or once on Runtime 1.3-era tables, as above:</p>
+<pre><code>ALTER TABLE gold.sales CLUSTER BY (store_id, sale_date);
+OPTIMIZE gold.sales FULL;</code></pre>
+<hr>
+<h2 id="deletion-vectors">Deletion Vectors</h2>
+<h3>How it works</h3>
+<p>Without deletion vectors, any command that deletes or updates a row (DELETE, UPDATE, or a MERGE that does either) rewrites the entire Parquet file containing it. With deletion vectors, the affected rows are marked as deleted in a small sidecar file and the Parquet file is left alone. That makes writes much cheaper, at the cost of readers having to apply the deletion vectors until compaction rewrites the file.</p>
+<p>Direct Lake is where the cost shows: on cold start it has to load every deletion vector for the table, so accumulated deletion vectors directly slow the first queries your users run. Now that deletion vectors are on by default, every Direct Lake model over new Runtime 2.0 tables is exposed to this, whether or not anyone chose to enable them.</p>
+<h3>What changed in Runtime 2.0</h3>
+<ul>
+<li><strong>Deletion vectors are <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/delta-lake-deletion-vectors" target="_blank" rel="noopener noreferrer">on by default</a> for new tables.</strong> My original guide suggested enabling them layer by layer, but on Runtime 2.0 there's nothing to enable. New tables are created at protocol reader 3/writer 7 with <code>deletionVectors</code> as a table feature.</li>
+<li><strong>Only new tables.</strong> A table I created on Runtime 1.3 still had no deletion vectors after moving to Runtime 2.0 and running OPTIMIZE there. If you want deletion vectors on older tables, enable them yourself (and read the compatibility notes first).</li>
+</ul>
+<h3>What to do</h3>
+<p><strong>Keep them on.</strong> Then manage the build-up:</p>
+<ul>
+<li><strong>OPTIMIZE <a href="https://learn.microsoft.com/en-us/fabric/fundamentals/table-maintenance-optimization#prevent-and-compact-small-files" target="_blank" rel="noopener noreferrer">purges a file's deletion vectors</a> once more than 5% of its rows are deleted.</strong></li>
+<li><strong>Auto Compaction only purges them when its small-file trigger also fires.</strong> Microsoft <a href="https://learn.microsoft.com/en-us/fabric/fundamentals/table-maintenance-optimization#prevent-and-compact-small-files" target="_blank" rel="noopener noreferrer">says so explicitly</a>: <em>"If a workload performs updates or deletes without generating small files, periodically run OPTIMIZE."</em> I confirmed it. Three 10% UPDATEs on an Auto Compaction table each added deletion vectors, and no Auto Compaction ran because the table never reached 50 small files. A manual OPTIMIZE then cleared them.</li>
+</ul>
+<p>So update-heavy MERGE targets, whether at Silver, Gold or merge-style Bronze, can build up deletion vectors indefinitely under Auto Compaction alone. <strong>Schedule an OPTIMIZE on them</strong>, and for Direct Lake tables, run it straight after the loads that create the deletion vectors (see the <a href="#compaction">timing note in Compaction</a>).</p>
+<p>To spot the build-up, look at <code>DESCRIBE HISTORY</code>:</p>
+<ul>
+<li>UPDATE and DELETE report <code>numDeletionVectorsAdded</code></li>
+<li>MERGE reports <code>numTargetDeletionVectorsAdded</code></li>
+<li>OPTIMIZE reports <code>numDeletionVectorsRemoved</code></li>
+</ul>
+<p>(Don't read UPDATE cost from <code>numRemovedBytes</code>, as on the deletion-vector path it reports 0.)</p>
+<p><a href="https://learn.microsoft.com/en-us/fabric/data-engineering/delta-lake-deletion-vectors#use-reorg-purge-to-remove-accumulated-deletion-vectors" target="_blank" rel="noopener noreferrer"><code>REORG TABLE ... APPLY (PURGE)</code></a> forces deletion vectors out regardless of the 5% threshold. Use it for compliance-driven hard deletes, not routine maintenance.</p>
+<p><strong>Compatibility:</strong> deletion vectors upgrade the table protocol, and not every reader supports them. In particular, <a href="https://learn.microsoft.com/en-us/fabric/fundamentals/delta-lake-interoperability#current-limitations" target="_blank" rel="noopener noreferrer">Python notebooks (<code>delta-rs</code>, Polars) can't read them</a>. If you rely on those readers, you now have to <strong>turn deletion vectors off explicitly</strong> on the new tables they read, because Runtime 2.0 turns them on:</p>
+<pre><code>CREATE TABLE silver.my_table (...) TBLPROPERTIES (<span class="string">'delta.enableDeletionVectors'</span> = <span class="string">'false'</span>);</code></pre>
+<p>(Or set <code>spark.databricks.delta.properties.defaults.enableDeletionVectors = false</code> in the writing session.) And see the <a href="#data-factory">Data Factory section</a>: Copy's merge writer can add deletion vectors to a table even after you've turned them off.</p>
+<hr>
+<h2 id="vacuuming-and-retention">Vacuuming and Retention</h2>
+<h3>How it works</h3>
+<p>OPTIMIZE, UPDATE, DELETE and MERGE all leave old files behind. That's what makes time travel possible. <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/delta-lake-vacuum" target="_blank" rel="noopener noreferrer">VACUUM</a> deletes unreferenced files older than the retention window, which defaults to 7 days. OPTIMIZE improves performance, VACUUM is the step that actually reduces your storage bill.</p>
+<pre><code>VACUUM gold.my_table DRY RUN;   <span class="comment">-- see what would be removed</span>
+VACUUM gold.my_table;</code></pre>
+<h3>What changed in Runtime 2.0</h3>
+<p><a href="https://learn.microsoft.com/en-us/fabric/data-engineering/delta-lake-vacuum" target="_blank" rel="noopener noreferrer"><strong>VACUUM LITE</strong></a> finds unreferenced files by reading the Delta log rather than listing the whole directory, which is much cheaper on large tables. It's easy to assume it quietly falls back to a full VACUUM when it can't run, but that would be too convenient! If the log doesn't have enough history, it raises <code>DELTA_CANNOT_VACUUM_LITE</code>, and you need to handle that:</p>
+<pre><code>def vacuum(table):
+    try:
+        spark.sql(<span class="string">f"VACUUM {table} LITE"</span>)
+    except Exception as e:
+        if <span class="string">"DELTA_CANNOT_VACUUM_LITE"</span> in str(e):
+            spark.sql(<span class="string">f"VACUUM {table}"</span>)      <span class="comment"># fall back to a full directory listing</span>
+        else:
+            raise</code></pre>
+<p>For very large tables there's also <strong><code>VACUUM ... USING INVENTORY</code></strong>, where you supply a precomputed file listing instead of having VACUUM list the directory.</p>
+<h3>What to do</h3>
+<p><strong>Set retention per table, with the right property.</strong> It's important to note that <code>delta.logRetentionDuration</code> is the transaction log's retention (<a href="https://learn.microsoft.com/en-us/fabric/data-engineering/delta-lake-time-travel#understand-retention-and-availability" target="_blank" rel="noopener noreferrer">default 30 days</a>), and it doesn't change what VACUUM deletes. VACUUM retention is <code>delta.deletedFileRetentionDuration</code>. I tested both:</p>
+<ul>
+<li>Setting the file property to 14 days changed VACUUM's retention to 14 days.</li>
+<li>Setting the log property to 60 days left VACUUM at 7.</li>
+</ul>
+<p>Time travel can only go as far back as the minimum of the two (once VACUUM has run), so to keep 30 days of time travel, set both to 30 days:</p>
+<pre><code>ALTER TABLE silver.my_table SET TBLPROPERTIES (
+  <span class="string">'delta.deletedFileRetentionDuration'</span> = <span class="string">'interval 30 days'</span>,
+  <span class="string">'delta.logRetentionDuration'</span>         = <span class="string">'interval 30 days'</span>
+);</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Retention</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>Bronze</td><td>7 days (default)</td><td>Raw data, time travel rarely needed</td></tr>
+<tr><td>Silver</td><td>14–30 days</td><td>Supports debugging and rollback of transformations</td></tr>
+<tr><td>Gold</td><td>7–14 days</td><td>Longer if Change Data Feed consumers are active</td></tr>
+</tbody>
+</table>
+</div>
+<p>If anything reads a table's Change Data Feed, keep retention comfortably longer than your slowest consumer's polling interval, or it will miss changes.</p>
+<p>Run VACUUM on its own schedule, after OPTIMIZE: weekly is usually enough. Only shorten retention below 7 days deliberately. The safety check (<code>spark.databricks.delta.retentionDurationCheck.enabled</code>) exists for a reason.</p>
+<hr>
+<h2 id="v-order-and-resource-profiles">V-Order and Resource Profiles</h2>
+<h3>How it works</h3>
+<p>V-Order applies VertiPaq-style sorting and encoding to Parquet files at write time. Direct Lake benefits most. The cost is write time: Microsoft's <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/delta-optimization-and-v-order#what-is-v-order" target="_blank" rel="noopener noreferrer">V-Order page</a> puts it at <em>"often around 15% on average."</em> It's off by default.</p>
+<h3>What changed in Runtime 2.0</h3>
+<p>Nothing in the runtime, but the guidance moved:</p>
+<ul>
+<li>Microsoft <a href="https://learn.microsoft.com/en-us/fabric/fundamentals/table-maintenance-optimization#apply-the-guidance-to-medallion-layers" target="_blank" rel="noopener noreferrer">now says</a> to <em>"enable V-Order only when Direct Lake is a primary consumer"</em>, and explicitly not for SQL analytics endpoint performance alone. My original guide recommended it for SQL endpoint consumers too, so drop that.</li>
+<li>The <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/configure-resource-profile-configurations" target="_blank" rel="noopener noreferrer"><code>readHeavyForPBI</code> resource profile</a> is now <a href="https://learn.microsoft.com/en-us/fabric/fundamentals/table-maintenance-optimization#cross-workload-guidance" target="_blank" rel="noopener noreferrer">presented</a> as an equal alternative to enabling V-Order yourself.</li>
+<li>My original guide quoted 40–60% Direct Lake cold-cache gains and ~10% for the SQL endpoint. Those came from the Cross-Workload page and went in <a href="https://github.com/MicrosoftDocs/fabric-docs/commit/2e2cc1c5e8c6f536d95e0066da132ab46380cdbf" target="_blank" rel="noopener noreferrer">the same August revision</a>, and no current Learn page gives a Direct Lake figure, so I've removed them.</li>
+</ul>
+<p>The documentation disagrees on resource profiles: the <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/delta-optimization-and-v-order#control-v-order-writes" target="_blank" rel="noopener noreferrer">V-Order page</a> says <code>readHeavyForSpark</code> enables V-Order, while the <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/configure-resource-profile-configurations" target="_blank" rel="noopener noreferrer">Resource Profiles page</a> says only <code>readHeavyForPBI</code> does. I checked in a session:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+<th>Profile</th>
+<th>V-Order</th>
+<th>Optimize Write</th>
+<th>Optimize Write bin size</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><code>writeHeavy</code> (default)</td><td>Off</td><td>Unset (partitioned tables only)</td><td>128 MB</td></tr>
+<tr><td><code>readHeavyForSpark</code></td><td><strong>Off</strong></td><td>On</td><td>128 MB</td></tr>
+<tr><td><code>readHeavyForPBI</code></td><td><strong>On</strong></td><td>On</td><td>1 GB</td></tr>
+</tbody>
+</table>
+</div>
+<p><code>readHeavyForPBI</code> is the only profile that turns on V-Order.</p>
+<h3>What to do</h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>V-Order</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>Bronze</td><td>Off</td></tr>
+<tr><td>Silver</td><td>Only for tables Direct Lake reads directly (table property)</td></tr>
+<tr><td>Gold</td><td>On for Direct Lake tables, or use <code>readHeavyForPBI</code></td></tr>
+</tbody>
+</table>
+</div>
+<pre><code>ALTER TABLE silver.my_table SET TBLPROPERTIES (<span class="string">'delta.parquet.vorder.enabled'</span> = <span class="string">'true'</span>);</code></pre>
+<hr>
+<div class="callout">
+<h3>Direct Lake considerations</h3>
+<ul>
+<li><strong>Deletion vectors slow cold start, and they're now on by default.</strong> Direct Lake loads them all. Purge them with OPTIMIZE.</li>
+<li><strong>Time OPTIMIZE around framing.</strong> With automatic updates on (the default), the model reframes whenever a table changes, so run OPTIMIZE straight after the load. If you've turned automatic updates off, finish OPTIMIZE before your scheduled refresh.</li>
+<li><strong>Row groups:</strong> Microsoft <a href="https://learn.microsoft.com/en-us/fabric/fundamentals/table-maintenance-optimization#power-bi-direct-lake" target="_blank" rel="noopener noreferrer">says</a> Direct Lake <em>"generally performs best with row groups between 1 million and 16 million rows."</em> There's a native-writer setting, <code>spark.sql.parquet.native.writer.maxRowGroupRowCount</code>, but Microsoft advises touching it only after analysis shows row-group sizing is the problem.</li>
+<li><strong>My reasoning, not a documented claim:</strong> every rewritten file invalidates its transcoded VertiPaq segments. On Runtime 1.3, every OPTIMIZE on a liquid clustered table under 100 GB rewrote the whole table and therefore invalidated all of it. Incremental clustering should mean far less re-transcoding, not just less Spark work.</li>
+<li>Use <a href="https://learn.microsoft.com/en-us/fabric/fundamentals/direct-lake-understand-storage#analyzing-delta-table-updates" target="_blank" rel="noopener noreferrer"><strong>Delta Analyzer</strong></a> to look at row groups and segments when a model is slow.</li>
+</ul>
+</div>
+<hr>
+<h2 id="assessing-your-tables">Assessing Your Tables</h2>
+<p>If you've never maintained your tables, you <em>can</em> just run OPTIMIZE on everything: on Runtime 2.0, Fast Optimize makes it nearly free on tables that are already healthy. The reason to look first is the unhealthy ones. A neglected table's first OPTIMIZE rewrites most of it, and a long list of those run back-to-back is a large CU spike on a shared capacity. An assessment tells you where those big rewrites are, so you can prioritise and stagger them, and it surfaces partitioned tables and old protocols worth revisiting. This snippet reads metadata only, so it runs in seconds regardless of table size. It compares each table against <strong>its own ATFS target</strong> rather than a fixed per-layer constant, and it shows each table's clustering and protocol.</p>
+<pre><code>from pyspark.sql import functions as F, types as T
+
+def to_mb(value, default=128.0):
+    <span class="string">""</span><span class="string">"Parse a Delta size string such as '128m' or '1g' into MB."</span><span class="string">""</span>
+    if not value:
+        return default
+    v = str(value).strip().lower()
+    units = {<span class="string">"k"</span>: 1 / 1024, <span class="string">"m"</span>: 1.0, <span class="string">"g"</span>: 1024.0}
+    return float(v[:-1]) * units[v[-1]] if v[-1] in units else float(v) / 1_048_576
+
+rows = []
+<span class="comment"># Schema-enabled Lakehouses: SHOW TABLES only lists the current schema, so loop over every schema</span>
+tables = [<span class="string">f"`{s[0]}`.`{t.tableName}`"</span>
+          for s in spark.sql(<span class="string">"SHOW SCHEMAS"</span>).collect()
+          for t in spark.sql(<span class="string">f"SHOW TABLES IN `{s[0]}`"</span>).collect()
+          if not t.isTemporary]
+for name in tables:
+    try:
+        d = spark.sql(<span class="string">f"DESCRIBE DETAIL {name}"</span>).first().asDict()
+        props = d.get(<span class="string">"properties"</span>) or {}
+        n, size = d.get(<span class="string">"numFiles"</span>) or 0, d.get(<span class="string">"sizeInBytes"</span>) or 0
+        avg_mb = round(size / n / 1_048_576, 1) if n else 0.0
+        target_mb = to_mb(props.get(<span class="string">"delta.targetFileSize.adaptive"</span>) or props.get(<span class="string">"delta.targetFileSize"</span>))
+        if n &lt;= 1:
+            status = <span class="string">"Skip: single file"</span>
+        elif avg_mb &gt;= target_mb / 2:
+            status = <span class="string">"Healthy"</span>
+        elif avg_mb &gt;= target_mb / 4:
+            status = <span class="string">"Review"</span>
+        else:
+            status = <span class="string">"Needs OPTIMIZE"</span>
+        rows.append((name, n, round(size / 1_073_741_824, 3), avg_mb, target_mb,
+                     <span class="string">", "</span>.join(d.get(<span class="string">"clusteringColumns"</span>) or []) or None,
+                     bool(d.get(<span class="string">"partitionColumns"</span>)),
+                     <span class="string">f"{d['minReaderVersion']}/{d['minWriterVersion']}"</span>,
+                     <span class="string">"deletionVectors"</span> in (d.get(<span class="string">"tableFeatures"</span>) or []),
+                     status))
+    except Exception as e:
+        rows.append((name, None, None, None, None, None, None, None, None, <span class="string">f"Error: {e}"</span>))
+
+schema = T.StructType([
+    T.StructField(<span class="string">"table"</span>, T.StringType()),
+    T.StructField(<span class="string">"num_files"</span>, T.LongType()),
+    T.StructField(<span class="string">"size_gb"</span>, T.DoubleType()),
+    T.StructField(<span class="string">"avg_file_mb"</span>, T.DoubleType()),
+    T.StructField(<span class="string">"target_mb"</span>, T.DoubleType()),
+    T.StructField(<span class="string">"cluster_by"</span>, T.StringType()),
+    T.StructField(<span class="string">"partitioned"</span>, T.BooleanType()),
+    T.StructField(<span class="string">"protocol"</span>, T.StringType()),
+    T.StructField(<span class="string">"deletion_vectors"</span>, T.BooleanType()),
+    T.StructField(<span class="string">"status"</span>, T.StringType()),
+])
+display(spark.createDataFrame(rows, schema).orderBy(F.col(<span class="string">"avg_file_mb"</span>).asc_nulls_last()))</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>What it tells you</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><code>avg_file_mb</code> vs <code>target_mb</code></td><td>Files averaging under half the table's own target suggest fragmentation. An average can hide skew, so treat "Review" as a prompt to look closer.</td></tr>
+<tr><td><code>cluster_by</code>/<code>partitioned</code></td><td>Partitioned tables without concurrent-DML needs are candidates for liquid clustering.</td></tr>
+<tr><td><code>protocol</code>/<code>deletion_vectors</code></td><td><code>1/2</code> or no deletion vectors usually means a table created before Runtime 2.0 or by a non-Spark writer.</td></tr>
+<tr><td><code>status</code></td><td>Your triage order.</td></tr>
+</tbody>
+</table>
+</div>
+<p>For deletion-vector build-up, check history since the last OPTIMIZE:</p>
+<pre><code>from pyspark.sql import functions as F
+
+def dvs_since_last_optimize(table):
+    added = 0
+    for r in spark.sql(<span class="string">f"DESCRIBE HISTORY {table}"</span>).orderBy(F.desc(<span class="string">"version"</span>)).collect():
+        if r.operation == <span class="string">"OPTIMIZE"</span>:
+            break
+        m = r.operationMetrics or {}
+        added += int(m.get(<span class="string">"numDeletionVectorsAdded"</span>, 0)) + int(m.get(<span class="string">"numTargetDeletionVectorsAdded"</span>, 0))
+    return added</code></pre>
+<p>Treat this as a trend indicator rather than an exact count of outstanding deletion vectors. It stops at the most recent OPTIMIZE commit, including Auto Compaction runs, and OPTIMIZE only purges files with more than 5% of rows deleted, so some deletion vectors can survive it. A number that keeps climbing between runs is the signal to schedule an OPTIMIZE.</p>
+<p>For liquid clustered tables, <code>clusteringQuality()</code> (Scala) reports, per cluster column, the number of files, average and maximum depth (how many files overlap a given value, 1 is ideal), overlap ratio (0 is ideal) and skipping effectiveness (1 is ideal):</p>
+<pre><code>%%spark
+import io.delta.tables.DeltaTable
+display(DeltaTable.forName(spark, <span class="string">"silver.orders"</span>).clusteringQuality())</code></pre>
+<p>It's a good reminder that "clustered" doesn't mean "skippable". On a small test table with one clustered file and ten unclustered appends, every file spanned the full key range: <code>avg_depth 11</code>, <code>overlap_ratio 1</code>, <code>skipping_effectiveness 0</code>. No query on that key could skip a single file until OPTIMIZE clustered the new data.</p>
+<p><strong>Clearing a backlog:</strong> run a one-off OPTIMIZE on the "Needs OPTIMIZE" tables (Silver and Gold first), VACUUM them, then enable Auto Compaction so you don't end up back here. That's also the order <a href="https://learn.microsoft.com/en-us/fabric/fundamentals/table-maintenance-optimization#resolve-layout-and-maintenance-issues" target="_blank" rel="noopener noreferrer">Microsoft's remediation guidance</a> gives.</p>
+<hr>
+<h2 id="implementation-guide">Implementation Guide</h2>
+<h3>Your utility notebook on Runtime 2.0</h3>
+<p>It gets much shorter:</p>
+<pre><code><span class="comment"># Auto Compaction: still off by default. Prefer the table property</span>
+<span class="comment"># (delta.autoOptimize.autoCompact) for tables written by more than one notebook or tool.</span>
+spark.conf.set(<span class="string">"spark.databricks.delta.autoCompact.enabled"</span>, <span class="string">"true"</span>)
+
+<span class="comment"># Evaluate Auto Compaction at checkpoints (every 10 commits) instead of after every commit</span>
+spark.conf.set(<span class="string">"spark.microsoft.delta.autoCompact.onCheckpointOnly.enabled"</span>, <span class="string">"true"</span>)
+
+<span class="comment"># V-Order: explicit baseline; override per table or in Gold notebooks</span>
+spark.conf.set(<span class="string">"spark.sql.parquet.vorder.default"</span>, <span class="string">"false"</span>)</code></pre>
+<p>What's gone, and why:</p>
+<ul>
+<li><strong>ATFS, File-Level Target and Fast Optimize</strong>: on by default in Runtime 2.0. Keep them only if the same notebook also runs on 1.3.</li>
+<li><strong><code>optimizeWrite.enabled = true</code></strong>: forcing it overrides <code>writeHeavy</code>'s partitioned-only behaviour for every table. Leave it unset and enable it per table where it helps.</li>
+</ul>
+<h3>Pipeline order</h3>
+<ol>
+<li>Load.</li>
+<li>OPTIMIZE where you've decided to schedule it (update-heavy MERGE targets, backlog tables).</li>
+<li>Direct Lake picks up the result (automatically, or at your scheduled refresh if automatic updates are off).</li>
+<li>VACUUM on its own, slower cadence.</li>
+</ol>
+<figure class="diagram">
+<svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;min-width:560px;" role="img" aria-label="Timeline: with automatic updates on, the Direct Lake model reframes after the load and again after OPTIMIZE, so run OPTIMIZE straight after the load; with automatic updates off, finish OPTIMIZE before the scheduled refresh">
+<rect width="800" height="280" fill="#0d1117" stroke="#1f2937" stroke-width="1" rx="4"/>
+<text x="20" y="30" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="12" fill="#e5e7eb" font-weight="bold">Automatic updates on (default)</text>
+<rect x="20" y="44" width="160" height="46" rx="2" fill="#111827" stroke="#6b7280" stroke-width="1"/>
+<text x="100" y="64" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#e5e7eb">Load commits</text>
+<text x="100" y="80" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#9ca3af">adds deletion vectors</text>
+<line x1="180" y1="67" x2="204" y2="67" stroke="#6b7280" stroke-width="1.5"/>
+<path d="M203,62 L210,67 L203,72 z" fill="#6b7280"/>
+<rect x="210" y="44" width="170" height="46" rx="2" fill="#2a1a05" stroke="#d97706" stroke-width="1"/>
+<text x="295" y="64" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#e5e7eb">Model reframes</text>
+<text x="295" y="80" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#9ca3af">loads every DV</text>
+<line x1="380" y1="67" x2="404" y2="67" stroke="#6b7280" stroke-width="1.5"/>
+<path d="M403,62 L410,67 L403,72 z" fill="#6b7280"/>
+<rect x="410" y="44" width="160" height="46" rx="2" fill="#111827" stroke="#6b7280" stroke-width="1"/>
+<text x="490" y="64" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#e5e7eb">OPTIMIZE commits</text>
+<text x="490" y="80" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#9ca3af">purges DVs</text>
+<line x1="570" y1="67" x2="594" y2="67" stroke="#6b7280" stroke-width="1.5"/>
+<path d="M593,62 L600,67 L593,72 z" fill="#6b7280"/>
+<rect x="600" y="44" width="180" height="46" rx="2" fill="#052e16" stroke="#10b981" stroke-width="1"/>
+<text x="690" y="64" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#e5e7eb">Model reframes</text>
+<text x="690" y="80" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#9ca3af">clean version</text>
+<path d="M20,100 V106 H570 V100" fill="none" stroke="#d97706" stroke-width="1"/>
+<text x="295" y="122" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#9ca3af">⚠ users query the DV-heavy version in this window: run OPTIMIZE straight after the load</text>
+<text x="20" y="172" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="12" fill="#e5e7eb" font-weight="bold">Automatic updates off</text>
+<rect x="20" y="186" width="160" height="46" rx="2" fill="#111827" stroke="#6b7280" stroke-width="1"/>
+<text x="100" y="206" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#e5e7eb">Load commits</text>
+<text x="100" y="222" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#9ca3af">adds deletion vectors</text>
+<line x1="180" y1="209" x2="204" y2="209" stroke="#6b7280" stroke-width="1.5"/>
+<path d="M203,204 L210,209 L203,214 z" fill="#6b7280"/>
+<rect x="210" y="186" width="170" height="46" rx="2" fill="#111827" stroke="#6b7280" stroke-width="1"/>
+<text x="295" y="206" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#e5e7eb">OPTIMIZE commits</text>
+<text x="295" y="222" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#9ca3af">purges DVs</text>
+<line x1="380" y1="209" x2="404" y2="209" stroke="#6b7280" stroke-width="1.5"/>
+<path d="M403,204 L410,209 L403,214 z" fill="#6b7280"/>
+<rect x="410" y="186" width="370" height="46" rx="2" fill="#052e16" stroke="#10b981" stroke-width="1"/>
+<text x="595" y="206" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#e5e7eb">Scheduled refresh frames</text>
+<text x="595" y="222" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#9ca3af">users only ever see the clean version</text>
+<text x="20" y="260" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="10" fill="#9ca3af">✓ finish OPTIMIZE before the scheduled refresh</text>
+</svg>
+<figcaption>Where OPTIMIZE belongs relative to Direct Lake framing. VACUUM runs separately, on a slower schedule.</figcaption>
+</figure>
+<h3 id="data-factory">If your pipelines write Delta tables with Data Factory</h3>
+<p>This one surprised me, and it's the most practical Runtime 2.0 issue I found.</p>
+<div class="callout">
+<p><strong>Copy activity Upsert and Copy job Merge fail on tables created by Spark on Runtime 2.0.</strong></p>
+<p>Every table Spark creates on Runtime 2.0 is written at protocol writer 7, and Spark explicitly lists the legacy <code>appendOnly</code> feature in it. The Delta writer used by Copy's Upsert and Merge (<code>Microsoft.DI.Delta</code>) doesn't support that feature and rejects the table:</p>
+<pre><code>ErrorCode=FailedToUpsertDataIntoDeltaTable ... UnsupportedTableFeatureException,
+Message=Table requires writer feature(s) 'appendOnly' which are not supported by this SDK version.</code></pre>
+<ul>
+<li>It's not the deletion vectors themselves. Copy's writer handles those.</li>
+<li>It affects <strong>every Spark-created Runtime 2.0 table</strong>, and any Runtime 1.3 table where you enabled deletion vectors (or another table feature) from Spark.</li>
+<li>It also affects <strong>every liquid clustered table</strong>, regardless of who created it (<code>'domainMetadata', 'clustering'</code>).</li>
+<li><strong>Copy job's Merge fails identically.</strong> That's the tool <a href="https://learn.microsoft.com/en-us/fabric/data-factory/what-is-copy-job" target="_blank" rel="noopener noreferrer">Microsoft recommends</a> for incremental loads.</li>
+<li><code>appendOnly</code> can't be dropped (<code>DELTA_FEATURE_DROP_NONREMOVABLE_FEATURE</code>), so once a table lists it, Copy can never upsert into it.</li>
+<li>Failed runs write nothing. Append still works.</li>
+</ul>
+</div>
+<p>What I'd do instead, and what my team already does: <strong>use Copy to land files (for example Parquet in the Lakehouse <code>Files</code> area), then MERGE into the Delta table from a Spark notebook.</strong> Copy never writes Delta, so none of this applies, and Spark is the only engine writing each table.</p>
+<p>If you'd rather not hand-write MERGEs, the same principle works with declarative tools that run on Spark: dbt incremental models through the <a href="https://github.com/microsoft/dbt-fabricspark" target="_blank" rel="noopener noreferrer">Fabric Spark adapter</a>, or <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/materialized-lake-views/overview-materialized-lake-view" target="_blank" rel="noopener noreferrer">Materialized Lake Views</a>, which can even ingest the landed CSV or Parquet files directly. What matters is that Spark, not Copy, writes the Delta tables. One catch with Materialized Lake Views: they only refresh incrementally when their source Delta tables have Change Data Feed enabled, otherwise each refresh is either skipped or a full rebuild.</p>
+<p>A few other things I found while testing Copy, all on 2 October 2026:</p>
+<ul>
+<li><strong>Copy's merge writer writes deletion vectors even when the table says not to.</strong> On a table with <code>delta.enableDeletionVectors = false</code>, a Copy activity Upsert upgraded the protocol and wrote deletion vectors. On a Copy job–created table where the property isn't set, an incremental Merge did the same. The <a href="https://github.com/delta-io/delta/blob/master/PROTOCOL.md#deletion-vectors" target="_blank" rel="noopener noreferrer">Delta protocol</a> is explicit: <em>"Writers must only write new Deletion Vectors (DVs) when this property is set to <code>true</code>."</em> Spark reads the data correctly either way. But if you turned deletion vectors off on a table so that <code>delta-rs</code>, Polars or an external reader can use it, a Copy Upsert or Merge can switch it to deletion vectors anyway, and those readers will start failing.</li>
+<li><strong>Copy changes table properties.</strong> On the table it upgraded, and on tables Copy job creates, it set <code>delta.logRetentionDuration</code> to 168 hours: 7 days of history instead of the <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/delta-lake-time-travel#understand-retention-and-availability" target="_blank" rel="noopener noreferrer">30-day default</a>. It only seemed to fill in properties that weren't already set (it left an explicitly enabled Change Data Feed alone), so a retention you've set explicitly should survive, though I didn't test that property specifically. Tables relying on the <em>default</em> 30 days lose 23 days of history and time travel without warning. If that matters to you, set retention explicitly on every table, and check tables Copy has written to.</li>
+<li><strong>Copy-created tables use a different protocol.</strong> Copy activity creates tables at <code>1/2</code> without deletion vectors, so a single Lakehouse can end up with a mix of protocols depending on which tool created each table.</li>
+<li><strong>The documentation contradicts itself here too.</strong> The <a href="https://learn.microsoft.com/en-us/fabric/fundamentals/delta-lake-interoperability#delta-lake-features-and-fabric-experiences" target="_blank" rel="noopener noreferrer">Delta Lake interoperability matrix</a> says Pipelines don't support deletion vectors and write <code>1/2</code>, while the <a href="https://learn.microsoft.com/en-us/fabric/data-factory/connector-lakehouse-copy-activity#delta-lake-table-support" target="_blank" rel="noopener noreferrer">Copy activity page</a> says deletion vectors and liquid clustering are supported as a destination. Neither is quite right.</li>
+</ul>
+<h3>Other compatibility notes</h3>
+<ul>
+<li><strong>Python notebooks</strong> (<code>delta-rs</code>, Polars) can't write or OPTIMIZE liquid clustered tables, can't read deletion vectors, and won't for some time. Cole put <code>delta-rs</code> support at "multiple years" away (<a href="https://www.reddit.com/r/MicrosoftFabric/comments/1vsw40t/experts_engines_hi_were_the_microsoft_fabric/" target="_blank" rel="noopener noreferrer">AMA</a>, <a href="https://github.com/delta-io/delta-rs/issues/2043" target="_blank" rel="noopener noreferrer">delta-rs#2043</a>). Use PySpark notebooks for anything touching these tables.</li>
+<li><strong>Dataflow Gen2</strong> can <a href="https://learn.microsoft.com/en-us/fabric/fundamentals/delta-lake-interoperability#delta-lake-features-and-fabric-experiences" target="_blank" rel="noopener noreferrer">read liquid clustered tables but not write them</a>. Its incremental-refresh destinations <a href="https://learn.microsoft.com/en-us/fabric/fundamentals/table-maintenance-optimization#use-the-spark-runtime-defaults" target="_blank" rel="noopener noreferrer">don't support OPTIMIZE or REORG</a>.</li>
+<li><strong>OPTIMIZE is Spark-only.</strong> The SQL analytics endpoint and Warehouse can't run it.</li>
+<li><a href="https://learn.microsoft.com/en-us/fabric/data-engineering/delta-lake-concurrency-control" target="_blank" rel="noopener noreferrer"><strong>Concurrency</strong></a>: OPTIMIZE uses snapshot isolation, so it doesn't conflict with concurrent blind INSERTs. Two OPTIMIZEs, or OPTIMIZE plus DML on the same files, do conflict. Auto Compaction avoids this by running in the writer's own session, which is another reason to prefer it over a separately scheduled job.</li>
+</ul>
+<hr>
+<h2 id="upgrading-from-runtime-1-3-checklist">Upgrading from Runtime 1.3: Checklist</h2>
+<ul class="checklist">
+<li><strong>Switch the workspace default or Environment item to Runtime 2.0</strong>, and <strong>publish</strong> the Environment. An unpublished runtime change silently leaves your sessions on the old runtime, as I discovered. Confirm with <code>print(spark.version)</code>: Runtime 2.0 is Spark 4.1.x, Runtime 1.3 is 3.5.x.</li>
+<li><a href="https://learn.microsoft.com/en-us/fabric/data-engineering/runtime-2-0" target="_blank" rel="noopener noreferrer"><strong>Python 3.13 breaks Environment libraries.</strong></a> Remove the libraries, publish, re-add them, publish again.</li>
+<li><strong>Remove the 1.3 workarounds:</strong> ATFS, File-Level Target and Fast Optimize settings (and make sure nothing sets them to <code>false</code>), and any <code>autoCompact.enabled = false</code> overrides you added for liquid clustered tables.</li>
+<li><strong>If anything reads your tables with <code>delta-rs</code> or Polars</strong>, turn deletion vectors off on the new tables it reads.</li>
+<li><strong>Liquid clustered tables need no migration.</strong> Optionally run <code>OPTIMIZE FULL</code> once on large or heavily queried ones to replace Runtime 1.3's layout.</li>
+<li><strong>Decide about deletion vectors on existing tables.</strong> Runtime 2.0 only enables them on new tables.</li>
+<li><strong>Check pipelines that Upsert or Merge with Copy activity or Copy job</strong> into tables Spark creates or alters.</li>
+<li><strong>Re-evaluate partitioned tables</strong> for liquid clustering (keep partitioning only for concurrent DML on disjoint data).</li>
+<li><strong>Remove <code>delta.targetFileSize</code> pins</strong> you can't justify.</li>
+<li><strong>Run the defaults snippet</strong> <a href="#runtime-2-0-at-a-glance">from the top of this guide</a> in your own environment.</li>
+</ul>
+<hr>
+<h2 id="what-s-still-your-decision">What's Still Your Decision</h2>
+<p>Runtime 2.0 has made most of the old configuration decisions for you. These are the ones it hasn't:</p>
+<ul>
+<li><strong>Liquid clustering, Z-Order or partitioning.</strong> Liquid clustering by default, partitioning only for concurrent DML on disjoint data.</li>
+<li><strong>Auto Compaction or scheduled OPTIMIZE.</strong> Auto Compaction by default, plus scheduled OPTIMIZE for update-heavy MERGE targets, timed around Direct Lake framing.</li>
+<li><strong>V-Order.</strong> Only where Direct Lake reads the table.</li>
+<li><strong>Native Execution Engine.</strong> Turn it on.</li>
+</ul>
+<hr>
+<h2 id="the-cheat-sheet">The Cheat Sheet</h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Auto Compaction</th>
+<th>Optimize Write</th>
+<th>V-Order</th>
+<th>Clustering</th>
+<th>Deletion vectors</th>
+<th>Scheduled OPTIMIZE</th>
+<th>VACUUM retention</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>Bronze</td><td>On (table property)</td><td>Default, on for streaming</td><td>Off</td><td>Liquid clustering on the merge key for MERGE targets</td><td>Keep (default)</td><td>Update-heavy MERGE targets</td><td>7 days</td></tr>
+<tr><td>Silver</td><td>On (table property)</td><td>Default, on for streaming</td><td>Only where Direct Lake reads it</td><td>Liquid clustering by default</td><td>Keep (default)</td><td>Update-heavy MERGE targets</td><td>14–30 days</td></tr>
+<tr><td>Gold</td><td>On (table property)</td><td>Default</td><td>On for Direct Lake, or <code>readHeavyForPBI</code></td><td>Liquid clustering by default</td><td>Keep, purge with OPTIMIZE</td><td>Straight after loads (before scheduled refresh if automatic updates are off)</td><td>7–14 days</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="where-the-docs-disagree">Where the Docs Disagree</h2>
+<p>Microsoft's documentation still contradicts itself in places. Here are the conflicts I found, and what the runtime actually does:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>One page says</th>
+<th>Another says</th>
+<th>What I measured</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>File-Level Compaction Target default</td><td>"Not enabled by default" (<a href="https://learn.microsoft.com/en-us/fabric/data-engineering/table-compaction#file-level-compaction-targets" target="_blank" rel="noopener noreferrer">Table Compaction</a>)</td><td>"Enabled by default starting in Runtime 2.0" (<a href="https://learn.microsoft.com/en-us/fabric/data-engineering/tune-file-size#understand-performance-impact" target="_blank" rel="noopener noreferrer">Tune File Size</a>)</td><td>On by default</td></tr>
+<tr><td>Fast Optimize on liquid clustered tables</td><td>"Not applicable to liquid clustering" (<a href="https://learn.microsoft.com/en-us/fabric/data-engineering/table-compaction#fast-optimize" target="_blank" rel="noopener noreferrer">Table Compaction</a>)</td><td>"Compatible starting in Runtime 2.0" (<a href="https://learn.microsoft.com/en-us/fabric/data-engineering/liquid-clustering#interaction-with-other-features" target="_blank" rel="noopener noreferrer">Liquid Clustering</a>)</td><td>It applies, and skips small bins</td></tr>
+<tr><td>Fast Optimize default</td><td>Not stated on Learn</td><td>On by default (Cole, <a href="https://www.reddit.com/r/MicrosoftFabric/comments/1vsw40t/experts_engines_hi_were_the_microsoft_fabric/" target="_blank" rel="noopener noreferrer">AMA</a>)</td><td>On by default</td></tr>
+<tr><td>Delta version in Runtime 2.0</td><td>Delta 4.1 (<a href="https://learn.microsoft.com/en-us/fabric/data-engineering/liquid-clustering#incremental-liquid-clustering" target="_blank" rel="noopener noreferrer">Liquid Clustering</a>, <a href="https://learn.microsoft.com/en-us/fabric/data-engineering/delta-lake-vacuum" target="_blank" rel="noopener noreferrer">VACUUM</a> pages)</td><td>Delta 4.2 (<a href="https://learn.microsoft.com/en-us/fabric/data-engineering/runtime-2-0" target="_blank" rel="noopener noreferrer">Runtime 2.0 page</a>)</td><td>Delta 4.2.0</td></tr>
+<tr><td><code>readHeavyForSpark</code> and V-Order</td><td>Enables V-Order (<a href="https://learn.microsoft.com/en-us/fabric/data-engineering/delta-optimization-and-v-order#control-v-order-writes" target="_blank" rel="noopener noreferrer">V-Order page</a>)</td><td>Doesn't (<a href="https://learn.microsoft.com/en-us/fabric/data-engineering/configure-resource-profile-configurations" target="_blank" rel="noopener noreferrer">Resource Profiles page</a>)</td><td>Doesn't</td></tr>
+<tr><td>Pipelines and deletion vectors</td><td>Not supported (<a href="https://learn.microsoft.com/en-us/fabric/fundamentals/delta-lake-interoperability#delta-lake-features-and-fabric-experiences" target="_blank" rel="noopener noreferrer">interoperability matrix</a>)</td><td>Supported as source and destination (<a href="https://learn.microsoft.com/en-us/fabric/data-factory/connector-lakehouse-copy-activity#delta-lake-table-support" target="_blank" rel="noopener noreferrer">Copy activity page</a>)</td><td>Read and Append work, Upsert/Merge fail on Spark-created tables</td></tr>
+<tr><td>Runtime 2.0 as default for new workspaces</td><td>"Planned" (<a href="https://learn.microsoft.com/en-us/fabric/data-engineering/runtime-2-0" target="_blank" rel="noopener noreferrer">Runtime 2.0 page</a>)</td><td>No other page</td><td>Already the default</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="what-to-watch">What to Watch</h2>
+<ul>
+<li><strong>Lakehouse Maintenance activity</strong> losing its schema-enabled and Private Link limitations.</li>
+<li><strong>An automatic maintenance option</strong>, along the lines of Databricks' <a href="https://docs.databricks.com/aws/en/optimizations/predictive-optimization" target="_blank" rel="noopener noreferrer">predictive optimisation</a>.</li>
+<li><strong>Copy activity and Copy job writer support</strong> for <code>appendOnly</code> and liquid clustering features.</li>
+<li><strong>Auto Compaction becoming less synchronous.</strong> Cole mentioned plans for this at the <a href="https://www.reddit.com/r/MicrosoftFabric/comments/1vsw40t/experts_engines_hi_were_the_microsoft_fabric/" target="_blank" rel="noopener noreferrer">AMA</a>.</li>
+<li><strong>No plans for <code>CLUSTER BY AUTO</code></strong>, per Cole at the <a href="https://www.reddit.com/r/MicrosoftFabric/comments/1vsw40t/experts_engines_hi_were_the_microsoft_fabric/" target="_blank" rel="noopener noreferrer">AMA</a>.</li>
+<li><strong><code>delta-rs</code> liquid clustering support</strong> for Python notebooks (<a href="https://github.com/delta-io/delta-rs/issues/2043" target="_blank" rel="noopener noreferrer">delta-rs#2043</a>).</li>
+</ul>
+<hr>
+<h2 id="where-the-documentation-lives">Where the Documentation Lives</h2>
+<p><strong>Fabric maintenance and configuration:</strong></p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/fabric/fundamentals/table-maintenance-optimization" target="_blank" rel="noopener noreferrer">Cross-Workload Table Maintenance and Optimization</a>: Microsoft's overall strategy. It was revised in August and September 2026, so anything quoting its earlier 400 MB targets or "run OPTIMIZE aggressively", including my original guide, cites superseded guidance.</li>
+<li><a href="https://learn.microsoft.com/en-us/fabric/data-engineering/table-compaction" target="_blank" rel="noopener noreferrer">Table Compaction</a>: Auto Compaction, Fast Optimize, File-Level Target</li>
+<li><a href="https://learn.microsoft.com/en-us/fabric/data-engineering/tune-file-size" target="_blank" rel="noopener noreferrer">Tune File Size</a>: ATFS, Optimize Write</li>
+<li><a href="https://learn.microsoft.com/en-us/fabric/data-engineering/liquid-clustering" target="_blank" rel="noopener noreferrer">Liquid Clustering</a>: incremental clustering, Runtime 1.3 vs 2.0</li>
+<li><a href="https://learn.microsoft.com/en-us/fabric/data-engineering/delta-lake-partitioning" target="_blank" rel="noopener noreferrer">Partitioning for Delta tables</a></li>
+<li><a href="https://learn.microsoft.com/en-us/fabric/data-engineering/delta-lake-concurrency-control" target="_blank" rel="noopener noreferrer">Concurrency control for Delta tables</a></li>
+<li><a href="https://learn.microsoft.com/en-us/fabric/data-engineering/delta-lake-deletion-vectors" target="_blank" rel="noopener noreferrer">Deletion vectors for Delta tables</a></li>
+<li><a href="https://learn.microsoft.com/en-us/fabric/data-engineering/delta-lake-vacuum" target="_blank" rel="noopener noreferrer">VACUUM Delta tables</a></li>
+<li><a href="https://learn.microsoft.com/en-us/fabric/data-engineering/delta-lake-time-travel" target="_blank" rel="noopener noreferrer">Query Delta tables with time travel</a>: retention defaults</li>
+<li><a href="https://learn.microsoft.com/en-us/fabric/data-engineering/delta-optimization-and-v-order" target="_blank" rel="noopener noreferrer">Delta Optimization and V-Order</a></li>
+<li><a href="https://learn.microsoft.com/en-us/fabric/data-engineering/configure-resource-profile-configurations" target="_blank" rel="noopener noreferrer">Resource Profile Configurations</a></li>
+<li><a href="https://learn.microsoft.com/en-us/fabric/data-engineering/runtime-2-0" target="_blank" rel="noopener noreferrer">Runtime 2.0 in Fabric</a></li>
+<li><a href="https://learn.microsoft.com/en-us/fabric/fundamentals/delta-lake-interoperability" target="_blank" rel="noopener noreferrer">Delta Lake table format interoperability</a></li>
+<li><a href="https://learn.microsoft.com/en-us/fabric/data-factory/lakehouse-maintenance-activity" target="_blank" rel="noopener noreferrer">Lakehouse Maintenance Activity</a></li>
+<li><a href="https://learn.microsoft.com/en-us/fabric/data-engineering/delta-lake-file-skipping" target="_blank" rel="noopener noreferrer">File skipping for Delta tables</a>: statistics on the first 32 columns</li>
+<li><a href="https://learn.microsoft.com/en-us/fabric/fundamentals/direct-lake-how-it-works" target="_blank" rel="noopener noreferrer">How Direct Lake works</a>: framing and automatic updates</li>
+<li><a href="https://learn.microsoft.com/en-us/fabric/data-engineering/materialized-lake-views/overview-materialized-lake-view" target="_blank" rel="noopener noreferrer">Materialized Lake Views</a></li>
+<li><a href="https://learn.microsoft.com/en-us/fabric/data-factory/connector-lakehouse-copy-activity" target="_blank" rel="noopener noreferrer">Configure Lakehouse in a copy activity</a> and <a href="https://learn.microsoft.com/en-us/fabric/data-factory/what-is-copy-job" target="_blank" rel="noopener noreferrer">What is Copy job</a></li>
+</ul>
+<p><strong>From the Fabric team:</strong></p>
+<ul>
+<li><a href="https://milescole.dev/data-engineering/2026/07/24/Incremental-Liquid-Clustering-Fabric-Runtime-2.html" target="_blank" rel="noopener noreferrer">Incremental Liquid Clustering in Fabric Runtime 2.0</a>, Miles Cole's deep dive, and his <a href="https://milescole.dev/playground/incremental-liquid-clustering/" target="_blank" rel="noopener noreferrer">interactive liquid clustering simulator</a></li>
+<li><a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Incremental-Liquid-Clustering-in-Microsoft-Fabric-Faster-smarter/ba-p/5189122" target="_blank" rel="noopener noreferrer">Incremental Liquid Clustering in Microsoft Fabric: Faster, smarter, and truly incremental</a>, Miles Cole (27 May 2026)</li>
+<li><a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Introducing-Optimized-Compaction-in-Fabric-Spark/ba-p/5172547" target="_blank" rel="noopener noreferrer">Introducing Optimized Compaction in Fabric Spark</a>, Miles Cole (October 2025)</li>
+<li><a href="https://christopherfinlan.com/2026/02/15/microsoft-fabric-table-maintenance-optimization-a-cross-workload-survival-guide/" target="_blank" rel="noopener noreferrer">Microsoft Fabric Table Maintenance Optimization: A Cross-Workload Survival Guide</a>, Christopher Finlan (February 2026, predates Runtime 2.0 GA)</li>
+<li><a href="https://www.reddit.com/r/MicrosoftFabric/comments/1vsw40t/experts_engines_hi_were_the_microsoft_fabric/" target="_blank" rel="noopener noreferrer">Fabric Spark team AMA</a> on r/MicrosoftFabric (25 August 2026), and Miles Cole's <a href="https://www.reddit.com/r/MicrosoftFabric/comments/1tpio6g/announcing_incremental_liquid_clustering/" target="_blank" rel="noopener noreferrer">incremental liquid clustering thread</a> (May 2026)</li>
+<li><a href="https://github.com/MicrosoftDocs/fabric-docs/commit/2e2cc1c5e8c6f536d95e0066da132ab46380cdbf" target="_blank" rel="noopener noreferrer">Docs change: "Simplify data layout guidance based on benchmarking"</a>, the 26 August revision that removed the fixed file-size targets</li>
+</ul>
+<p><strong>Open source:</strong></p>
+<ul>
+<li><a href="https://github.com/delta-io/delta/blob/master/PROTOCOL.md" target="_blank" rel="noopener noreferrer">Delta Lake protocol specification</a></li>
+<li><a href="https://docs.delta.io/latest/delta-utility.html" target="_blank" rel="noopener noreferrer">Delta Lake utility commands</a></li>
+<li><a href="https://docs.delta.io/delta-clustering/" target="_blank" rel="noopener noreferrer">Delta Lake liquid clustering</a>: cluster-key limits and statistics requirement</li>
+</ul>
+<hr>
+<h2 id="final-thoughts">Final Thoughts</h2>
+<p>Runtime 2.0 is the release where Fabric's maintenance story grew up. Most of the configuration I told you to set is now the default, liquid clustering finally works the way it was always meant to, and the documentation, while still contradicting itself in places, is far better than it was a year ago.</p>
+<p>Three things I'd leave you with:</p>
+<p><strong>First, rewrite your utility notebook.</strong> Most of it is now redundant. Enable Auto Compaction (as a table property where you can), keep an explicit V-Order baseline, and remove the rest.</p>
+<p><strong>Second, use liquid clustering by default, and keep a scheduled OPTIMIZE for the tables that need it.</strong> On my test table, Runtime 2.0 rewrote 1–3% of the table where Runtime 1.3 rewrote all of it. Migration is automatic. But Auto Compaction still doesn't purge deletion vectors from update-heavy MERGE targets on its own, so those still need a scheduled OPTIMIZE.</p>
+<p><strong>Third, test what the documentation tells you.</strong> In a day of testing I found seven places where Microsoft's own pages disagreed with each other or with the runtime, and a Data Factory incompatibility that will break pipelines upserting into Runtime 2.0 tables. None of it is hard to check.</p>
+<p>And as before: treat maintenance as cost control, not just performance. Fabric SKUs double at every tier, and the difference between a well-maintained platform and a neglected one may be the difference between your current SKU and the next one up.</p>
+
+            <hr>
+
+            <p><em>Brad Coles is a Senior Consultant and Data Engineering Capability Lead at <a href="https://www.synechron.com/en-au" target="_blank" rel="noopener noreferrer">Synechron Australia</a>, specialising in Microsoft Fabric and modern data platform engineering. Connect on <a href="https://www.linkedin.com/in/brad-coles/" target="_blank" rel="noopener noreferrer">LinkedIn</a>.</em></p>
+
+            <div style="margin-top: 1.5rem; padding: 1.5rem; border: 1px solid var(--accent-dim); background: var(--bg-card); text-align: center; font-size: 0.9rem;">
+                <p>If this article helped you, <a href="../support.html" style="color: var(--accent-bright); text-decoration: none; font-weight: 700;">click here to see some ways you can support me</a>.</p>
+            </div>
+        </article>
+
+        <footer>
+            <p>&copy; 2026 Brad Coles. <a href="../index.html" style="color: var(--accent-bright); text-decoration: none;">Back to Portfolio</a></p>
+        </footer>
+    </div>
+</body>
+</html>
