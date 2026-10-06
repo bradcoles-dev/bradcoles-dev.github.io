@@ -383,10 +383,13 @@
             </div>
             <h1>Delta Table Maintenance in Microsoft Fabric: The Runtime 2.0 Edition</h1>
             <p class="blog-subtitle">Delta table maintenance in Microsoft Fabric after Runtime 2.0 GA: what's now automatic, what's still your job, and what I found when I tested it.</p>
-            <p class="blog-byline">By Brad Coles | Senior Consultant &amp; Data Engineering Capability Lead, Synechron Australia</p>
+            <p class="blog-byline">By Brad Coles | Associate Director - Data Engineering Capability Lead ANZ, Synechron Australia</p>
         </header>
 
         <article>
+<div class="callout">
+<p><strong>Accuracy notice:</strong> This post was written in October 2026 and reflects the state of Microsoft Fabric Runtime 2.0 at that time. Fabric is a rapidly evolving platform - defaults may change, documentation may be corrected, and documented limitations may be resolved. Before making decisions based on this post, verify current behaviour against the <a href="https://learn.microsoft.com/en-us/fabric/fundamentals/table-maintenance-optimization" target="_blank" rel="noopener noreferrer">official Microsoft documentation</a> and test it in your own environment. Where this post identifies gaps, contradictions or limitations, check whether they have been addressed in a recent Fabric release.</p>
+</div>
 <p>Earlier this year I published <a href="fabric-delta-table-maintenance.html">Delta Table Maintenance in Microsoft Fabric: A 2026 Practitioner's Guide</a>, written for Runtime 1.3, the current runtime at the time, with notes on the Runtime 2.0 Preview. I wrote it because Fabric is sold as SaaS, and most teams reasonably assume that table maintenance is taken care of for them. Unfortunately it isn't, and at the time the official documentation was thin, scattered and inconsistent.</p>
 <p><a href="https://learn.microsoft.com/en-us/fabric/data-engineering/runtime-2-0" target="_blank" rel="noopener noreferrer">Runtime 2.0</a> went GA on 14 August 2026, and it's now the default runtime for new workspaces. Much of my old advice is now defaults - I'd like to take credit for the good work of Miles Cole and Fabric's Spark team, though I know better, at least it's a good endorsement of my previous article if nothing else! Adaptive file sizing, Fast Optimize, deletion vectors and incremental liquid clustering are all on by default now. The big ticket improvement, incremental liquid clustering, removes the full-table rewrite that made liquid clustering impractical on Runtime 1.3.</p>
 <p>For better or worse, in Runtime 2.0 <strong>Fabric still doesn't maintain your Delta tables for you.</strong> OPTIMIZE doesn't run on a schedule - auto-compact makes up some ground here but is disabled by default - and there's no auto-VACUUM.</p>
@@ -1261,7 +1264,7 @@ Message=Table requires writer feature(s) 'appendOnly' which are not supported by
 
             <hr>
 
-            <p><em>Brad Coles is a Senior Consultant and Data Engineering Capability Lead at <a href="https://www.synechron.com/en-au" target="_blank" rel="noopener noreferrer">Synechron Australia</a>, specialising in Microsoft Fabric and modern data platform engineering. Connect on <a href="https://www.linkedin.com/in/brad-coles/" target="_blank" rel="noopener noreferrer">LinkedIn</a>.</em></p>
+            <p><em>Brad Coles is an Associate Director and Data Engineering Capability Lead ANZ at <a href="https://www.synechron.com/en-au" target="_blank" rel="noopener noreferrer">Synechron Australia</a>, specialising in Microsoft Fabric and modern data platform engineering. Connect on <a href="https://www.linkedin.com/in/brad-coles/" target="_blank" rel="noopener noreferrer">LinkedIn</a>.</em></p>
 
             <div style="margin-top: 1.5rem; padding: 1.5rem; border: 1px solid var(--accent-dim); background: var(--bg-card); text-align: center; font-size: 0.9rem;">
                 <p>If this article helped you, <a href="../support.html" style="color: var(--accent-bright); text-decoration: none; font-weight: 700;">click here to see some ways you can support me</a>.</p>

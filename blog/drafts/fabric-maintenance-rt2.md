@@ -2,11 +2,13 @@
 
 ### Delta table maintenance in Microsoft Fabric after Runtime 2.0 GA: what's now automatic, what's still your job, and what I found when I tested it
 
-**By Brad Coles | Senior Consultant & Data Engineering Capability Lead, Synechron Australia**
+**By Brad Coles | Associate Director - Data Engineering Capability Lead ANZ, Synechron Australia**
 
 **Published 6 October 2026**
 
 ---
+
+> **Accuracy notice:** This post was written in October 2026 and reflects the state of Microsoft Fabric Runtime 2.0 at that time. Fabric is a rapidly evolving platform - defaults may change, documentation may be corrected, and documented limitations may be resolved. Before making decisions based on this post, verify current behaviour against the [official Microsoft documentation](https://learn.microsoft.com/en-us/fabric/fundamentals/table-maintenance-optimization) and test it in your own environment. Where this post identifies gaps, contradictions or limitations, check whether they have been addressed in a recent Fabric release.
 
 Earlier this year I published [Delta Table Maintenance in Microsoft Fabric: A 2026 Practitioner's Guide](https://bradcoles.dev/blog/fabric-delta-table-maintenance.html), written for Runtime 1.3, the current runtime at the time, with notes on the Runtime 2.0 Preview. I wrote it because Fabric is sold as SaaS, and most teams reasonably assume that table maintenance is taken care of for them. Unfortunately it isn't, and at the time the official documentation was thin, scattered and inconsistent.
 
@@ -746,7 +748,7 @@ And as before: treat maintenance as cost control, not just performance. Fabric S
 
 ---
 
-*Brad Coles is a Senior Consultant and Data Engineering Capability Lead at Synechron Australia, specialising in Microsoft Fabric and modern data platform engineering. [linkedin.com/in/brad-coles](https://www.linkedin.com/in/brad-coles/)*
+*Brad Coles is an Associate Director and Data Engineering Capability Lead ANZ at Synechron Australia, specialising in Microsoft Fabric and modern data platform engineering. [linkedin.com/in/brad-coles](https://www.linkedin.com/in/brad-coles/)*
 
 <!-- Link references -->
 [ama]: <https://www.reddit.com/r/MicrosoftFabric/comments/1vsw40t/experts_engines_hi_were_the_microsoft_fabric/> "r/MicrosoftFabric: Experts + Engines, Fabric Spark team AMA (25 Aug 2026)"
