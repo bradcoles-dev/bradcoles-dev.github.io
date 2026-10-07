@@ -31,6 +31,7 @@
     <meta property="twitter:image" content="https://bradcoles.dev/preview.png">
 
     <title>Microsoft Fabric Mirroring: Before You Commit | Brad Coles</title>
+    <link rel="canonical" href="https://bradcoles.dev/blog/fabric-mirroring.html">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Press+Start+2P&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -330,6 +331,91 @@
 
             th, td {
                 padding: 0.5rem 0.75rem;
+            }
+        }
+
+        /* Related articles */
+        .related-articles {
+            margin-top: 3rem;
+        }
+
+        .related-articles h2 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin: 0 0 1rem;
+            padding: 0;
+            border: none;
+        }
+
+        .related-articles ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+            gap: 1rem;
+        }
+
+        .related-articles li {
+            margin: 0;
+        }
+
+        .related-articles a {
+            display: block;
+            height: 100%;
+            padding: 1rem 1.25rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent-dim);
+            color: var(--text-primary);
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            line-height: 1.4;
+            text-decoration: none;
+            transition: border-color 0.2s ease, color 0.2s ease;
+        }
+
+        .related-articles a:hover,
+        .related-articles a:focus-visible {
+            border-color: var(--accent);
+            color: var(--accent-bright);
+        }
+
+        /* Newsletter sign-up (Substack) - shared block, keep identical across pages */
+        .newsletter-signup {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-top: 3px solid var(--accent);
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .newsletter-signup .newsletter-pitch {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-align: center;
+            margin: 0 0 1rem;
+        }
+
+        .newsletter-signup iframe {
+            display: block;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 768px) {
+            .newsletter-signup {
+                padding: 1.25rem 1rem;
+            }
+
+            .newsletter-signup .newsletter-pitch {
+                font-size: 1rem;
             }
         }
     </style>
@@ -2255,6 +2341,19 @@
                 <p>If this article helped you, <a href="../support.html" style="color: var(--accent-bright); text-decoration: none; font-weight: 700;">click here to see some ways you can support me</a>.</p>
             </div>
         </article>
+
+        <aside class="related-articles" aria-labelledby="related-heading">
+            <h2 id="related-heading">Related</h2>
+            <ul>
+                <li><a href="fabric-private-links.html">Can You Actually Build a Production Fabric Platform with Private Links?</a></li>
+                <li><a href="fabric-maintenance-runtime-2.html">Delta Table Maintenance in Microsoft Fabric: The Runtime 2.0 Edition</a></li>
+            </ul>
+        </aside>
+
+        <div class="newsletter-signup" aria-label="Newsletter sign-up">
+            <p class="newsletter-pitch">Practical data engineering, from someone building it day to day. New articles straight to your inbox.</p>
+            <iframe src="https://bradcolesdev.substack.com/embed" title="Subscribe to the newsletter on Substack" width="100%" height="150" style="border:none; background:transparent;" frameborder="0" scrolling="no"></iframe>
+        </div>
 
         <footer>
             <p>&copy; 2026 Brad Coles. <a href="../index.html" style="color: var(--accent-bright); text-decoration: none;">Back to Portfolio</a></p>

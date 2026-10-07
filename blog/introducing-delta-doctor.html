@@ -31,6 +31,7 @@
     <meta property="twitter:image" content="https://bradcoles.dev/preview.png">
 
     <title>Introducing delta-doctor | Brad Coles</title>
+    <link rel="canonical" href="https://bradcoles.dev/blog/introducing-delta-doctor.html">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Press+Start+2P&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -293,6 +294,91 @@
                 font-size: 1.5rem;
             }
         }
+
+        /* Related articles */
+        .related-articles {
+            margin-top: 3rem;
+        }
+
+        .related-articles h2 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin: 0 0 1rem;
+            padding: 0;
+            border: none;
+        }
+
+        .related-articles ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+            gap: 1rem;
+        }
+
+        .related-articles li {
+            margin: 0;
+        }
+
+        .related-articles a {
+            display: block;
+            height: 100%;
+            padding: 1rem 1.25rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent-dim);
+            color: var(--text-primary);
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            line-height: 1.4;
+            text-decoration: none;
+            transition: border-color 0.2s ease, color 0.2s ease;
+        }
+
+        .related-articles a:hover,
+        .related-articles a:focus-visible {
+            border-color: var(--accent);
+            color: var(--accent-bright);
+        }
+
+        /* Newsletter sign-up (Substack) - shared block, keep identical across pages */
+        .newsletter-signup {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-top: 3px solid var(--accent);
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .newsletter-signup .newsletter-pitch {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-align: center;
+            margin: 0 0 1rem;
+        }
+
+        .newsletter-signup iframe {
+            display: block;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 768px) {
+            .newsletter-signup {
+                padding: 1.25rem 1rem;
+            }
+
+            .newsletter-signup .newsletter-pitch {
+                font-size: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -306,7 +392,7 @@
             </div>
             <h1>Introducing <a href="https://deltadoctor.dev" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none; border-bottom: 2px solid var(--accent);">delta-doctor</a>: automated Delta table maintenance for Microsoft Fabric Lakehouses</h1>
             <p class="blog-subtitle">Seven production-ready notebooks that implement the Delta maintenance recommendations from my earlier guide, ready to import directly into your Fabric Lakehouse workspace.</p>
-            <p class="blog-byline">By Brad Coles | Senior Consultant &amp; Data Engineering Capability Lead, Synechron Australia</p>
+            <p class="blog-byline">By Brad Coles | Associate Director - Data Engineering Capability Lead ANZ, Synechron Australia</p>
         </header>
 
         <article>
@@ -510,12 +596,25 @@
 
             <hr>
 
-            <p><em>Brad Coles is a Senior Consultant and Data Engineering Capability Lead at <a href="https://www.synechron.com/en-au" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Synechron Australia</a>, specialising in Microsoft Fabric and modern data platform engineering. Connect on <a href="https://www.linkedin.com/in/brad-coles/" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">LinkedIn</a>.</em></p>
+            <p><em>Brad Coles is an Associate Director and Data Engineering Capability Lead ANZ at <a href="https://www.synechron.com/en-au" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Synechron Australia</a>, specialising in Microsoft Fabric and modern data platform engineering. Connect on <a href="https://www.linkedin.com/in/brad-coles/" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">LinkedIn</a>.</em></p>
 
             <div style="margin-top: 1.5rem; padding: 1.5rem; border: 1px solid var(--accent-dim); background: var(--bg-card); text-align: center; font-size: 0.9rem;">
                 <p>If this article helped you, <a href="../support.html" style="color: var(--accent-bright); text-decoration: none; font-weight: 700;">click here to see some ways you can support me</a>.</p>
             </div>
         </article>
+
+        <aside class="related-articles" aria-labelledby="related-heading">
+            <h2 id="related-heading">Related</h2>
+            <ul>
+                <li><a href="fabric-maintenance-runtime-2.html">Delta Table Maintenance in Microsoft Fabric: The Runtime 2.0 Edition</a></li>
+                <li><a href="fabric-delta-table-maintenance.html">Delta Table Maintenance in Microsoft Fabric: A 2026 Practitioner's Guide</a></li>
+            </ul>
+        </aside>
+
+        <div class="newsletter-signup" aria-label="Newsletter sign-up">
+            <p class="newsletter-pitch">Practical data engineering, from someone building it day to day. New articles straight to your inbox.</p>
+            <iframe src="https://bradcolesdev.substack.com/embed" title="Subscribe to the newsletter on Substack" width="100%" height="150" style="border:none; background:transparent;" frameborder="0" scrolling="no"></iframe>
+        </div>
 
         <footer>
             <p>&copy; 2026 Brad Coles. <a href="../index.html" style="color: var(--accent-bright); text-decoration: none;">Back to Portfolio</a></p>
