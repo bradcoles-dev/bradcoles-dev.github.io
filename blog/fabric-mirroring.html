@@ -16,7 +16,7 @@
       gtag('config', 'G-E8BDECYXD8');
     </script>
 
-    <!-- Open Graph / Facebook -->
+    <!-- Open Graph/Facebook -->
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://bradcoles.dev/blog/fabric-mirroring.html">
     <meta property="og:title" content="Microsoft Fabric Mirroring: Before You Commit">
@@ -491,7 +491,7 @@
                     <text x="134" y="184" fill="#60a5fa" font-size="9" font-family="'JetBrains Mono', monospace">data moves</text>
                     <rect x="15" y="202" width="210" height="50" rx="4" fill="#111827" stroke="#3b82f6" stroke-width="1.5"/>
                     <text x="120" y="221" text-anchor="middle" fill="#e5e7eb" font-size="11" font-family="'JetBrains Mono', monospace">OneLake</text>
-                    <text x="120" y="240" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="'JetBrains Mono', monospace">Delta / Parquet — queries hit Fabric</text>
+                    <text x="120" y="240" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="'JetBrains Mono', monospace">Delta/Parquet: queries hit Fabric</text>
                     <text x="120" y="272" text-anchor="middle" fill="#10b981" font-size="9.5" font-family="'JetBrains Mono', monospace">Source not queried at report time</text>
                     <text x="120" y="287" text-anchor="middle" fill="#4b5563" font-size="8.5" font-family="'JetBrains Mono', monospace">10 native connectors</text>
 
@@ -510,7 +510,7 @@
                     <text x="383" y="171" fill="#4b5563" font-size="9" font-family="'JetBrains Mono', monospace">source</text>
                     <rect x="255" y="202" width="210" height="50" rx="4" fill="#111827" stroke="#10b981" stroke-width="1.5"/>
                     <text x="360" y="221" text-anchor="middle" fill="#e5e7eb" font-size="11" font-family="'JetBrains Mono', monospace">OneLake</text>
-                    <text x="360" y="240" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="'JetBrains Mono', monospace">Shortcuts — no data copied</text>
+                    <text x="360" y="240" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="'JetBrains Mono', monospace">Shortcuts: no data copied</text>
                     <text x="360" y="272" text-anchor="middle" fill="#10b981" font-size="9.5" font-family="'JetBrains Mono', monospace">Query perf = source speed</text>
                     <text x="360" y="287" text-anchor="middle" fill="#4b5563" font-size="8.5" font-family="'JetBrains Mono', monospace">Databricks &amp; Dremio only</text>
 
@@ -532,7 +532,7 @@
                     <text x="600" y="272" text-anchor="middle" fill="#10b981" font-size="9.5" font-family="'JetBrains Mono', monospace">You control change detection</text>
                     <text x="600" y="287" text-anchor="middle" fill="#4b5563" font-size="8.5" font-family="'JetBrains Mono', monospace">Any source can feed the pipeline</text>
                 </svg>
-                <figcaption><strong>Database mirroring</strong> continuously replicates data to OneLake via a native connector — queries hit Fabric, not the source. <strong>Metadata mirroring</strong> creates OneLake shortcuts that point to the source catalog; no data is copied, and queries return to the source at runtime. <strong>Open mirroring</strong> accepts Parquet files written to a landing zone by any custom writer — no native connector required.</figcaption>
+                <figcaption><strong>Database mirroring</strong> continuously replicates data to OneLake via a native connector. Queries hit Fabric, not the source. <strong>Metadata mirroring</strong> creates OneLake shortcuts that point to the source catalog; no data is copied, and queries return to the source at runtime. <strong>Open mirroring</strong> accepts Parquet files written to a landing zone by any custom writer, with no native connector required.</figcaption>
             </figure>
 
             <div class="table-wrapper">
@@ -728,11 +728,11 @@
             </p>
 
             <p>
-                <strong>CI/CD is supported (GA), with one manual step — and likely a full initial load.</strong> Mirrored databases can be <a href="https://learn.microsoft.com/en-us/fabric/mirroring/mirrored-database-cicd" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">committed to Git and deployed through Fabric deployment pipelines</a>. The database definition is stored as a <code>{name}.MirroredDatabase</code> folder containing <code>mirroring.json</code>. The caveat: mirroring does not start automatically after a deployment pipeline runs. You must manually start replication in each target workspace.
+                <strong>CI/CD is supported (GA), with one manual step, and likely a full initial load.</strong> Mirrored databases can be <a href="https://learn.microsoft.com/en-us/fabric/mirroring/mirrored-database-cicd" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">committed to Git and deployed through Fabric deployment pipelines</a>. The database definition is stored as a <code>{name}.MirroredDatabase</code> folder containing <code>mirroring.json</code>. The caveat: mirroring does not start automatically after a deployment pipeline runs. You must manually start replication in each target workspace.
             </p>
 
             <p>
-                Deployment pipelines deploy the item definition — connection settings and table selection — not the underlying Delta data in OneLake. The target workspace receives a configured but empty mirrored database item with no existing replication state. Starting mirroring after deployment triggers a full initial load from current source state — not an incremental pickup from where the source workspace left off. This is confirmed behaviour: Microsoft's documentation states that restarting mirroring "results in all data being replicated from the start" and that "each time you stop and start, the entire table is fetched again" (confirmed in the <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-managed-instance-faq" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Azure SQL MI FAQ</a> and consistent with documented reseed behaviour across other connectors). For large databases, this means the target workspace has no data until the initial seed completes — factor this into promotion planning.
+                Deployment pipelines deploy the item definition (connection settings and table selection), not the underlying Delta data in OneLake. The target workspace receives a configured but empty mirrored database item with no existing replication state. Starting mirroring after deployment triggers a full initial load from current source state, not an incremental pickup from where the source workspace left off. This is confirmed behaviour: Microsoft's documentation states that restarting mirroring "results in all data being replicated from the start" and that "each time you stop and start, the entire table is fetched again" (confirmed in the <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-managed-instance-faq" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Azure SQL MI FAQ</a> and consistent with documented reseed behaviour across other connectors). For large databases, this means the target workspace has no data until the initial seed completes, so factor this into promotion planning.
             </p>
 
             <p>
@@ -864,7 +864,7 @@
                         <tr>
                             <td>OneLake write transactions (landing zone writes)</td>
                             <td><strong style="color:#f59e0b !important">Yes</strong></td>
-                            <td>Applies to Open Mirroring; files &lt; 4 MB cost one transaction each — see below</td>
+                            <td>Applies to Open Mirroring; files &lt; 4 MB cost one transaction each (see below)</td>
                         </tr>
                         <tr>
                             <td>Query compute (SQL endpoint, Spark, Power BI)</td>
@@ -945,7 +945,7 @@
             </p>
 
             <p>
-                <strong>Definition 2 - Change event stream.</strong> A sequence of all source changes (inserts, updates, deletes) in commit order, preserved indefinitely as a queryable or replayable record. CDC platforms - Debezium, Azure Data Factory CDC, event streaming pipelines - produce this. Mirroring uses CDC-equivalent mechanisms under the hood to keep the replica current, but it exposes only the resulting state, not the raw change events. The <a href="https://learn.microsoft.com/en-us/fabric/mirroring/extended-capabilities" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Delta change data feed</a> — an opt-in paid extended capability, now billed at standard Fabric capacity rates — moves somewhat closer to this: it captures inserts, updates, and deletes incrementally and is available across all mirroring sources including Oracle, Snowflake, Azure SQL, and Open Mirroring. It is still a derived feature rather than the raw underlying change stream, but it is a meaningful step toward incremental change processing without a separate CDC pipeline.
+                <strong>Definition 2 - Change event stream.</strong> A sequence of all source changes (inserts, updates, deletes) in commit order, preserved indefinitely as a queryable or replayable record. CDC platforms - Debezium, Azure Data Factory CDC, event streaming pipelines - produce this. Mirroring uses CDC-equivalent mechanisms under the hood to keep the replica current, but it exposes only the resulting state, not the raw change events. The <a href="https://learn.microsoft.com/en-us/fabric/mirroring/extended-capabilities" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Delta change data feed</a> (an opt-in paid extended capability, now billed at standard Fabric capacity rates) moves somewhat closer to this: it captures inserts, updates, and deletes incrementally and is available across all mirroring sources including Oracle, Snowflake, Azure SQL, and Open Mirroring. It is still a derived feature rather than the raw underlying change stream, but it is a meaningful step toward incremental change processing without a separate CDC pipeline.
             </p>
 
             <p>
@@ -953,7 +953,7 @@
             </p>
 
             <figure class="diagram-wrapper">
-                <svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;" aria-label="Comparison table showing three raw layer definitions — current-state replica, change event stream, and immutable store — across data model, mutability, and query model dimensions">
+                <svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;" aria-label="Comparison table showing three raw layer definitions (current-state replica, change event stream, and immutable store) across data model, mutability, and query model dimensions">
                     <rect width="720" height="320" fill="#0d1117"/>
 
                     <!-- Label column header -->
@@ -998,7 +998,7 @@
                     <text x="128" y="127" font-family="'JetBrains Mono', monospace" font-size="10" fill="#bfdbfe">reflecting source now</text>
 
                     <rect x="313" y="91" width="187" height="70" fill="#1a1200" stroke="#d97706" stroke-width="1" rx="2"/>
-                    <text x="323" y="113" font-family="'JetBrains Mono', monospace" font-size="10" fill="#fde68a">Insert / update / delete</text>
+                    <text x="323" y="113" font-family="'JetBrains Mono', monospace" font-size="10" fill="#fde68a">Insert/update/delete</text>
                     <text x="323" y="127" font-family="'JetBrains Mono', monospace" font-size="10" fill="#fde68a">events in commit order</text>
 
                     <rect x="508" y="91" width="202" height="70" fill="#061a10" stroke="#10b981" stroke-width="1" rx="2"/>
@@ -1191,7 +1191,7 @@
             </p>
 
             <p>
-                <strong>Oracle <code>NUMBER</code> without explicit precision or scale triggers <code>Invalid Decimal Precision or Scale. Precision: 38, Scale: 127</code>, blocking the entire table.</strong> The root cause is an outdated Oracle client/ODP driver on the On-Premises Data Gateway machine — not a fundamental mirroring limitation. Microsoft has <a href="https://learn.microsoft.com/en-us/fabric/mirroring/oracle-limitations#cause" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">published a resolution</a>: install the latest Oracle Client for Microsoft Tools (ODP driver) on the gateway VM, restart the gateway service, and restart mirroring. If upgrading the Oracle client is not feasible in your environment, affected tables must be handled outside mirroring via pipelines or copy jobs.
+                <strong>Oracle <code>NUMBER</code> without explicit precision or scale triggers <code>Invalid Decimal Precision or Scale. Precision: 38, Scale: 127</code>, blocking the entire table.</strong> The root cause is an outdated Oracle client/ODP driver on the On-Premises Data Gateway machine, not a fundamental mirroring limitation. Microsoft has <a href="https://learn.microsoft.com/en-us/fabric/mirroring/oracle-limitations#cause" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">published a resolution</a>: install the latest Oracle Client for Microsoft Tools (ODP driver) on the gateway VM, restart the gateway service, and restart mirroring. If upgrading the Oracle client is not feasible in your environment, affected tables must be handled outside mirroring via pipelines or copy jobs.
             </p>
 
             <p>
@@ -1248,7 +1248,7 @@
             </p>
 
             <p>
-                <strong>Gateway support for sources behind firewalls (distinct from the Block Internet scenario).</strong> Separately from the private link constraint above, Azure SQL Database and Snowflake now support replication through On-Premises Data Gateway and VNet Data Gateway for sources that are behind a firewall but where the tenant-level "Block Public Internet Access" setting is not enabled. This expands gateway support beyond Oracle and SQL Server, which were previously the only connectors that used a gateway path. Azure SQL Managed Instance gateway support has since shipped — VNet data gateway or on-premises data gateway can be used when the instance is not publicly accessible, per the <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-managed-instance-faq" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">SQL MI FAQ</a>.
+                <strong>Gateway support for sources behind firewalls (distinct from the Block Internet scenario).</strong> Separately from the private link constraint above, Azure SQL Database and Snowflake now support replication through On-Premises Data Gateway and VNet Data Gateway for sources that are behind a firewall but where the tenant-level "Block Public Internet Access" setting is not enabled. This expands gateway support beyond Oracle and SQL Server, which were previously the only connectors that used a gateway path. Azure SQL Managed Instance gateway support has since shipped. VNet data gateway or on-premises data gateway can be used when the instance is not publicly accessible, per the <a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-managed-instance-faq" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">SQL MI FAQ</a>.
             </p>
 
             <p>
@@ -1268,11 +1268,11 @@
                         <tr>
                             <td>Azure SQL Database</td>
                             <td>SQL Change Feed</td>
-                            <td>None — no CDC required</td>
+                            <td>None (no CDC required)</td>
                         </tr>
                         <tr>
                             <td>Azure SQL MI</td>
-                            <td>SQL Change Feed (newer) / CDC (SQL 2022 policy)</td>
+                            <td>SQL Change Feed (newer)/CDC (SQL 2022 policy)</td>
                             <td>Depends on update policy</td>
                         </tr>
                         <tr>
@@ -1283,7 +1283,7 @@
                         <tr>
                             <td>SQL Server 2025</td>
                             <td>Change Event Stream</td>
-                            <td>CDC must <em>not</em> be enabled — incompatible</td>
+                            <td>CDC must <em>not</em> be enabled (incompatible)</td>
                         </tr>
                         <tr>
                             <td>PostgreSQL</td>
@@ -1308,7 +1308,7 @@
                         <tr>
                             <td>Cosmos DB</td>
                             <td>Cosmos DB change feed</td>
-                            <td>Built-in — no configuration required</td>
+                            <td>Built-in: no configuration required</td>
                         </tr>
                         <tr>
                             <td>BigQuery</td>
@@ -1318,7 +1318,7 @@
                         <tr>
                             <td>SAP</td>
                             <td>SAP Datasphere change capture</td>
-                            <td>Handled by SAP Datasphere — no direct source-side config; Datasphere must be separately licensed</td>
+                            <td>Handled by SAP Datasphere (no direct source-side config); Datasphere must be separately licensed</td>
                         </tr>
                     </tbody>
                 </table>
@@ -1385,7 +1385,7 @@
 
                     <!-- PHASE 1 HEADER -->
                     <rect x="10" y="10" width="700" height="28" rx="2" fill="#172554" stroke="#3b82f6" stroke-width="1"/>
-                    <text x="360" y="28" text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="700" font-family="'JetBrains Mono', monospace">Phase 1 — Source Assessment</text>
+                    <text x="360" y="28" text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="700" font-family="'JetBrains Mono', monospace">Phase 1: Source Assessment</text>
 
                     <!-- D1: Has native connector? (cx=200, cy=82) -->
                     <polygon points="200,60 258,82 200,104 142,82" fill="#111827" stroke="#3b82f6" stroke-width="1.5"/>
@@ -1450,7 +1450,7 @@
 
                     <!-- PHASE 2 HEADER -->
                     <rect x="10" y="345" width="700" height="28" rx="2" fill="#14291a" stroke="#10b981" stroke-width="1"/>
-                    <text x="360" y="363" text-anchor="middle" fill="#10b981" font-size="11" font-weight="700" font-family="'JetBrains Mono', monospace">Phase 2 — Requirements Fit</text>
+                    <text x="360" y="363" text-anchor="middle" fill="#10b981" font-size="11" font-weight="700" font-family="'JetBrains Mono', monospace">Phase 2: Requirements Fit</text>
 
                     <!-- D4: All requirements met? (cx=360, cy=452, hw=95, hh=32) -->
                     <polygon points="360,420 455,452 360,484 265,452" fill="#111827" stroke="#10b981" stroke-width="1.5"/>
@@ -1480,7 +1480,7 @@
                     <text x="553" y="562" text-anchor="middle" fill="#9ca3af" font-size="8.5" font-family="'JetBrains Mono', monospace">or hybrid approach</text>
                     <text x="553" y="574" text-anchor="middle" fill="#4b5563" font-size="8" font-family="'JetBrains Mono', monospace">mirroring does not fit</text>
                 </svg>
-                <figcaption>Follow the blue path down Phase 1: if your source has a native connector and clears blockers and config approval, proceed to Phase 2. Any "No" exit routes via the amber bus to the Open Mirroring viability check (purple diamond). If Open Mirroring is also not viable, the outcome is traditional pipeline only. Phase 2 requirements — current-state reporting, no replay, no RLS auto-propagation, no SLA — apply equally to both paths.</figcaption>
+                <figcaption>Follow the blue path down Phase 1: if your source has a native connector and clears blockers and config approval, proceed to Phase 2. Any "No" exit routes via the amber bus to the Open Mirroring viability check (purple diamond). If Open Mirroring is also not viable, the outcome is traditional pipeline only. Phase 2 requirements (current-state reporting, no replay, no RLS auto-propagation, no SLA) apply equally to both paths.</figcaption>
             </figure>
 
             <h3>Phase 1: Source assessment</h3>
@@ -1526,7 +1526,7 @@
             <p>Check these before going further. Any one of them may end the native mirroring evaluation:</p>
 
             <ul>
-                <li><strong>Oracle:</strong> <code>NUMBER</code> columns without explicit precision/scale can cause table-level failures — resolvable by upgrading the Oracle Client for Microsoft Tools (ODP driver) on the gateway VM; On-Premises Data Gateway required in all environments including cloud-hosted Oracle</li>
+                <li><strong>Oracle:</strong> <code>NUMBER</code> columns without explicit precision/scale can cause table-level failures, resolvable by upgrading the Oracle Client for Microsoft Tools (ODP driver) on the gateway VM; On-Premises Data Gateway required in all environments including cloud-hosted Oracle</li>
                 <li><strong>MySQL:</strong> Burstable compute tier unsupported; only one database per server can be mirrored; tables cannot be added or removed after initial setup</li>
                 <li><strong>SQL Server:</strong> Availability group secondaries not supported - connection must be to the primary</li>
                 <li><strong>Any source:</strong> If your Fabric tenant has "Block Public Internet Access" enabled, check the <a href="https://learn.microsoft.com/en-us/fabric/security/security-private-links-overview" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">private link support list</a> - most connectors will enter a paused state</li>
@@ -1548,28 +1548,28 @@
                     <tbody>
                         <tr>
                             <td>Azure SQL Database</td>
-                            <td>None — Change Feed is built-in</td>
+                            <td>None: Change Feed is built-in</td>
                             <td>Zero</td>
                         </tr>
                         <tr>
                             <td>SQL Server 2025</td>
-                            <td>None — Change Event Stream is built-in</td>
+                            <td>None: Change Event Stream is built-in</td>
                             <td>Zero</td>
                         </tr>
                         <tr>
                             <td>Cosmos DB</td>
-                            <td>None — change feed is built-in</td>
+                            <td>None: change feed is built-in</td>
                             <td>Zero</td>
                         </tr>
                         <tr>
                             <td>SQL Server 2016–2022</td>
                             <td>CDC must be enabled on the database</td>
-                            <td>Moderate — log space, active management</td>
+                            <td>Moderate: log space, active management</td>
                         </tr>
                         <tr>
                             <td>PostgreSQL</td>
                             <td><code>wal_level = logical</code> required</td>
-                            <td>Low — server restart may be required</td>
+                            <td>Low: server restart may be required</td>
                         </tr>
                         <tr>
                             <td>MySQL</td>
@@ -1579,17 +1579,17 @@
                         <tr>
                             <td>Oracle</td>
                             <td>Archive log mode + supplemental logging + LogMiner access</td>
-                            <td>High — significant DBA engagement typically required</td>
+                            <td>High: significant DBA engagement typically required</td>
                         </tr>
                         <tr>
                             <td>BigQuery</td>
                             <td>CDC must be enabled per table</td>
-                            <td>Low — but Google charges for CDC compute and Storage Write API</td>
+                            <td>Low, but Google charges for CDC compute and Storage Write API</td>
                         </tr>
                         <tr>
                             <td>SAP</td>
                             <td>Handled by SAP Datasphere</td>
-                            <td>High — Datasphere must be separately licensed and configured</td>
+                            <td>High: Datasphere must be separately licensed and configured</td>
                         </tr>
                     </tbody>
                 </table>
@@ -1700,7 +1700,7 @@
                             <td style="color:#f59e0b">Built-in if designed for it</td>
                         </tr>
                         <tr>
-                            <td><strong>Source RLS / column security propagated</strong></td>
+                            <td><strong>Source RLS/column security propagated</strong></td>
                             <td style="color:#ef4444">No</td>
                             <td style="color:#ef4444">No</td>
                             <td>Depends</td>
@@ -1767,7 +1767,7 @@
             </p>
 
             <p>
-                <strong>What to watch.</strong> The <a href="https://learn.microsoft.com/en-us/fabric/mirroring/extended-capabilities" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">extended capabilities</a> (Delta change data feed, view mirroring) are now billed at standard Fabric capacity rates — billing was enabled as of March 2026. These are opt-in features; charges apply only when enabled and only for actual processing activity. If you built on these capabilities when they were free, factor the ongoing cost into your capacity budget. SQL Server 2025 and the Change Event Stream architecture (<a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-database" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">available on Azure SQL Database and SQL MI</a>) are meaningfully better than CDC-based mirroring for older SQL Server versions - prefer the newer architecture where there is a choice of source version.
+                <strong>What to watch.</strong> The <a href="https://learn.microsoft.com/en-us/fabric/mirroring/extended-capabilities" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">extended capabilities</a> (Delta change data feed, view mirroring) are now billed at standard Fabric capacity rates. Billing was enabled as of March 2026. These are opt-in features; charges apply only when enabled and only for actual processing activity. If you built on these capabilities when they were free, factor the ongoing cost into your capacity budget. SQL Server 2025 and the Change Event Stream architecture (<a href="https://learn.microsoft.com/en-us/fabric/mirroring/azure-sql-database" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">available on Azure SQL Database and SQL MI</a>) are meaningfully better than CDC-based mirroring for older SQL Server versions - prefer the newer architecture where there is a choice of source version.
             </p>
 
             <hr>
@@ -1907,7 +1907,7 @@
                             <td><strong>Primary key required?</strong></td>
                             <td style="color:#ef4444">No [a]</td>
                             <td style="color:#ef4444">No [b]</td>
-                            <td>No (2025) / Yes (2016–22)</td>
+                            <td>No (2025)/Yes (2016–22)</td>
                             <td style="color:#ef4444">No</td>
                             <td><strong style="color:#10b981 !important">Yes</strong></td>
                             <td style="color:#ef4444">No [c]</td>
@@ -2074,7 +2074,7 @@
                             <td><strong>Add column</strong></td>
                             <td style="color:#10b981">Auto</td>
                             <td style="color:#10b981">Auto</td>
-                            <td>Auto (2025) / <strong>Error</strong> (2016–22)</td>
+                            <td>Auto (2025)/<strong>Error</strong> (2016–22)</td>
                             <td><strong style="color:#f59e0b !important">Stop/restart</strong></td>
                             <td><strong style="color:#f97316 !important">Disrupts replication</strong></td>
                             <td style="color:#10b981">✓ (partial)</td>
@@ -2110,7 +2110,7 @@
                             <td>-</td>
                         </tr>
                         <tr>
-                            <td><strong>Alter / add primary key</strong></td>
+                            <td><strong>Alter/add primary key</strong></td>
                             <td><strong style="color:#ef4444 !important">Blocked</strong></td>
                             <td><strong style="color:#ef4444 !important">Blocked</strong></td>
                             <td><strong style="color:#ef4444 !important">Blocked</strong></td>
@@ -2173,7 +2173,7 @@
                             <td>N/A</td>
                         </tr>
                         <tr>
-                            <td><strong>Column / OLS propagated</strong></td>
+                            <td><strong>Column/OLS propagated</strong></td>
                             <td><strong style="color:#ef4444 !important">No</strong></td>
                             <td><strong style="color:#ef4444 !important">No</strong></td>
                             <td><strong style="color:#ef4444 !important">No</strong></td>

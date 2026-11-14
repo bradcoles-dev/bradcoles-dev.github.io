@@ -16,7 +16,7 @@
       gtag('config', 'G-E8BDECYXD8');
     </script>
 
-    <!-- Open Graph / Facebook -->
+    <!-- Open Graph/Facebook -->
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://bradcoles.dev/blog/introducing-delta-doctor.html">
     <meta property="og:title" content="Introducing delta-doctor: automated Delta table maintenance for Microsoft Fabric Lakehouses">
@@ -539,7 +539,7 @@
             <h2>Design decisions worth knowing</h2>
 
             <p>
-                <strong>OPTIMIZE is gated.</strong> Every OPTIMIZE call first reads table metadata via <code>DESCRIBE DETAIL</code> — no data scan, runs in milliseconds. If average file size is already within 80% of the layer target, the table is skipped. Microsoft's <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Introducing-Optimized-Compaction-in-Fabric-Spark/ba-p/5172547" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Fast Optimize</a> handles bin-level evaluation within each run. On a well-maintained Lakehouse, most tables are skipped and the orchestrator run costs almost nothing. Oversized tables (average file size exceeding 2× the layer target) are also skipped; OPTIMIZE can't shrink files that are already too large, so <code>doctor_treatment_rebaseline_orchestrator</code> handles those via a full REORG + OPTIMIZE rewrite.
+                <strong>OPTIMIZE is gated.</strong> Every OPTIMIZE call first reads table metadata via <code>DESCRIBE DETAIL</code> (no data scan, runs in milliseconds). If average file size is already within 80% of the layer target, the table is skipped. Microsoft's <a href="https://community.fabric.microsoft.com/t5/Fabric-Updates-Blog/Introducing-Optimized-Compaction-in-Fabric-Spark/ba-p/5172547" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Fast Optimize</a> handles bin-level evaluation within each run. On a well-maintained Lakehouse, most tables are skipped and the orchestrator run costs almost nothing. Oversized tables (average file size exceeding 2× the layer target) are also skipped; OPTIMIZE can't shrink files that are already too large, so <code>doctor_treatment_rebaseline_orchestrator</code> handles those via a full REORG + OPTIMIZE rewrite.
             </p>
 
             <p>
@@ -551,7 +551,7 @@
             </p>
 
             <p>
-                <strong>Direct Lake is accounted for.</strong> Gold-layer VACUUM requires <code>direct_lake_confirmed = True</code> — the notebook raises a <code>ValueError</code> if it's not set. This is a manual flag, not an automated check. The expected sequence is: refresh your Direct Lake semantic model, confirm it has re-framed to the latest Delta commit, then run the notebook with <code>direct_lake_confirmed = True</code>. Worth noting: the flag asserts the refresh happened — it doesn't verify it. VACUUM removing files a Direct Lake model still references causes query errors until the next refresh; the gate forces that confirmation to be an explicit decision rather than a silent default.
+                <strong>Direct Lake is accounted for.</strong> Gold-layer VACUUM requires <code>direct_lake_confirmed = True</code>, and the notebook raises a <code>ValueError</code> if it's not set. This is a manual flag, not an automated check. The expected sequence is: refresh your Direct Lake semantic model, confirm it has re-framed to the latest Delta commit, then run the notebook with <code>direct_lake_confirmed = True</code>. Worth noting: the flag asserts the refresh happened, but it doesn't verify it. VACUUM removing files a Direct Lake model still references causes query errors until the next refresh; the gate forces that confirmation to be an explicit decision rather than a silent default.
             </p>
 
             <p>
@@ -567,7 +567,7 @@
             <h2>Getting started</h2>
 
             <p>
-                Download the seven <code>.ipynb</code> files from the <a href="https://github.com/bradcoles-dev/delta-doctor/releases/tag/v0.1" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">v0.1 release</a>, import them into your Fabric workspace, and start with <code>doctor_diagnosis_table_health</code>. Pass your Lakehouse GUID as a parameter and run it — you'll have a full picture of your Lakehouse health before touching anything.
+                Download the seven <code>.ipynb</code> files from the <a href="https://github.com/bradcoles-dev/delta-doctor/releases/tag/v0.1" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">v0.1 release</a>, import them into your Fabric workspace, and start with <code>doctor_diagnosis_table_health</code>. Pass your Lakehouse GUID as a parameter and run it. You'll have a full picture of your Lakehouse health before touching anything.
             </p>
 
             <p>
@@ -575,7 +575,7 @@
             </p>
 
             <p>
-                Full documentation and a deployment walkthrough are at <a href="https://deltadoctor.dev" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">deltadoctor.dev</a>. Before running the treatment or prevention notebooks against a production Lakehouse, work through the <a href="https://github.com/bradcoles-dev/delta-doctor/blob/main/validation/deployment-validation.md" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">deployment validation guide</a> in the repo — a structured acceptance test suite covering expected outputs, error cases, and a sign-off checklist for each notebook.
+                Full documentation and a deployment walkthrough are at <a href="https://deltadoctor.dev" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">deltadoctor.dev</a>. Before running the treatment or prevention notebooks against a production Lakehouse, work through the <a href="https://github.com/bradcoles-dev/delta-doctor/blob/main/validation/deployment-validation.md" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">deployment validation guide</a> in the repo: a structured acceptance test suite covering expected outputs, error cases, and a sign-off checklist for each notebook.
             </p>
 
             <hr>
@@ -583,11 +583,11 @@
             <h2>What's next</h2>
 
             <p>
-                The plan for v0.2 is health history logging — <code>doctor_diagnosis_table_health</code> gains an optional parameter to append each run's snapshot to a Delta table. Over time that builds a per-table health trend, aimed at feeding a Power BI Direct Lake dashboard and a control table for per-table layer overrides in mixed-layer Lakehouses. These are directions, not commitments — the full roadmap is <a href="https://github.com/bradcoles-dev/delta-doctor?tab=readme-ov-file#roadmap" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">in the repo</a>.
+                The plan for v0.2 is health history logging: <code>doctor_diagnosis_table_health</code> gains an optional parameter to append each run's snapshot to a Delta table. Over time that builds a per-table health trend, aimed at feeding a Power BI Direct Lake dashboard and a control table for per-table layer overrides in mixed-layer Lakehouses. These are directions, not commitments. The full roadmap is <a href="https://github.com/bradcoles-dev/delta-doctor?tab=readme-ov-file#roadmap" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">in the repo</a>.
             </p>
 
             <p>
-                Beyond that, the aim is a pip-installable Python package (v1.0), and eventually a Fabric-native app built on <a href="https://www.microsoft.com/en-us/microsoft-fabric/features/rayfin" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Rayfin</a> — Microsoft's open-source SDK for building code-first extensions that run natively inside a Fabric workspace, announced at Build 2026. A Rayfin app would deploy directly into your workspace with no external data transfer and governance inherited automatically — so you can run diagnosis and apply fixes through a proper UI without touching notebook code.
+                Beyond that, the aim is a pip-installable Python package (v1.0), and eventually a Fabric-native app built on <a href="https://www.microsoft.com/en-us/microsoft-fabric/features/rayfin" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Rayfin</a>, Microsoft's open-source SDK for building code-first extensions that run natively inside a Fabric workspace, announced at Build 2026. A Rayfin app would deploy directly into your workspace with no external data transfer and governance inherited automatically, so you can run diagnosis and apply fixes through a proper UI without touching notebook code.
             </p>
 
             <p>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Fabric IQ's Data Agent nailed every question I could support with data — until I asked one I knew it couldn't. Instead of admitting the gap, it guessed. Here's what fixed it.">
+    <meta name="description" content="Fabric IQ's Data Agent nailed every question I could support with data, until I asked one I knew it couldn't. Instead of admitting the gap, it guessed. Here's what fixed it.">
     <meta name="keywords" content="Microsoft Fabric, Fabric IQ, Ontology, Data Agent, Semantic Model, Data Engineering, Agent Instructions, Modern Portfolio Theory">
     <meta name="author" content="Brad Coles">
 
@@ -16,18 +16,18 @@
       gtag('config', 'G-E8BDECYXD8');
     </script>
 
-    <!-- Open Graph / Facebook -->
+    <!-- Open Graph/Facebook -->
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://bradcoles.dev/blog/fabric-iq-gold-ontology-not-enough.html">
     <meta property="og:title" content="Fabric IQ: Gold Data and Ontology Aren't Enough">
-    <meta property="og:description" content="Fabric IQ's Data Agent nailed every question I could support with data — until I asked one I knew it couldn't. Instead of admitting the gap, it guessed. Here's what fixed it.">
+    <meta property="og:description" content="Fabric IQ's Data Agent nailed every question I could support with data, until I asked one I knew it couldn't. Instead of admitting the gap, it guessed. Here's what fixed it.">
     <meta property="og:image" content="https://bradcoles.dev/preview.png">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://bradcoles.dev/blog/fabric-iq-gold-ontology-not-enough.html">
     <meta property="twitter:title" content="Fabric IQ: Gold Data and Ontology Aren't Enough">
-    <meta property="twitter:description" content="Fabric IQ's Data Agent nailed every question I could support with data — until I asked one I knew it couldn't. Instead of admitting the gap, it guessed. Here's what fixed it.">
+    <meta property="twitter:description" content="Fabric IQ's Data Agent nailed every question I could support with data, until I asked one I knew it couldn't. Instead of admitting the gap, it guessed. Here's what fixed it.">
     <meta property="twitter:image" content="https://bradcoles.dev/preview.png">
 
     <title>Fabric IQ: Gold Data and Ontology Aren't Enough | Brad Coles</title>
@@ -426,7 +426,7 @@
 
         <article>
             <p>
-                Fabric IQ is everywhere. I can't open LinkedIn at the moment without seeing a mention of it. Clients are talking about it. But most of its components are still in Preview — and if you wait until GA, you've already missed the boat. So I've been playing around with Fabric IQ and its various components myself. There's still some things to iron out, but less than I expected.
+                Fabric IQ is everywhere. I can't open LinkedIn at the moment without seeing a mention of it. Clients are talking about it. But most of its components are still in Preview, and if you wait until GA, you've already missed the boat. So I've been playing around with Fabric IQ and its various components myself. There's still some things to iron out, but less than I expected.
             </p>
 
             <hr>
@@ -434,13 +434,13 @@
             <h2>Sticking to my lane</h2>
 
             <p>
-                I'm no Ontologist, and I don't pretend to be. But it's important for a good data engineer to know where their process fits in the stream, and what happens up- and down-stream from them. So I decided to stick to my lane — building a data platform on the Microsoft stack using Spark Notebooks for ingestion, dbt for transformation, and a Lakehouse to store my medallion architecture, with a separate schema per layer. This was all accelerated by Claude Code, which handled 90% of the dbt — the technical code-writing is no longer a barrier, but that's not what this article is about.
+                I'm no Ontologist, and I don't pretend to be. But it's important for a good data engineer to know where their process fits in the stream, and what happens up- and down-stream from them. So I decided to stick to my lane: building a data platform on the Microsoft stack using Spark Notebooks for ingestion, dbt for transformation, and a Lakehouse to store my medallion architecture, with a separate schema per layer. This was all accelerated by Claude Code, which handled 90% of the dbt. The technical code-writing is no longer a barrier, but that's not what this article is about.
             </p>
 
             <h2>Finance over freezers</h2>
 
             <p>
-                Microsoft's Fabric IQ tutorial suggests using freezer sales data. No offence to whitegoods enthusiasts, I found that rather dry. I have a background in Finance — a decade in funds management, a graduate certificate in commerce, and several years working as a consulting actuarial analyst. So instead, I decided to use Yahoo Finance's public dataset to help build an investment portfolio using modern portfolio theory.
+                Microsoft's Fabric IQ tutorial suggests using freezer sales data. No offence to whitegoods enthusiasts, I found that rather dry. I have a background in Finance: a decade in funds management, a graduate certificate in commerce, and several years working as a consulting actuarial analyst. So instead, I decided to use Yahoo Finance's public dataset to help build an investment portfolio using modern portfolio theory.
             </p>
 
             <h2>The hypothesis</h2>
@@ -456,7 +456,7 @@
             <h2>Putting it to the test</h2>
 
             <p>
-                I spun up Fabric's Data Agent, hooked it up to my ontology, and started firing off questions. I scrutinised each answer and compared it to the Lakehouse's delta tables, and the Data Agent was spot on — full marks.
+                I spun up Fabric's Data Agent, hooked it up to my ontology, and started firing off questions. I scrutinised each answer and compared it to the Lakehouse's delta tables, and the Data Agent was spot on. Full marks.
             </p>
 
             <p>
@@ -488,7 +488,7 @@
             <h2>An inconsistent tell</h2>
 
             <p>
-                I isolated the question and gave the agent high-level instructions on how it should go about calculating the answer — and this time, it correctly admitted it did not have the data to answer.
+                I isolated the question and gave the agent high-level instructions on how it should go about calculating the answer, and this time, it correctly admitted it did not have the data to answer.
             </p>
 
             <div class="qa-block">
@@ -512,17 +512,17 @@
             </div>
 
             <p>
-                Same underlying gap in the data. Two different behaviours. That inconsistency was the real problem — not that the agent <em>could</em> be wrong, but that whether it guessed or admitted defeat seemed to come down to how the question was phrased, not what data actually existed.
+                Same underlying gap in the data. Two different behaviours. That inconsistency was the real problem: not that the agent <em>could</em> be wrong, but that whether it guessed or admitted defeat seemed to come down to how the question was phrased, not what data actually existed.
             </p>
 
             <h2>Borrowing from Shopify</h2>
 
             <p>
-                The following day I read an article about how Shopify hit the same wall with <a href="https://shopify.engineering/sidekick-curation" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Sidekick</a>, their text-to-query agent. Its production logs only ever captured successful queries, so the model had no training signal for "no" — refusal was never something it had seen demonstrated as correct. Their fix was a four-judge LLM ensemble that required unanimous consensus before a query could be labelled unanswerable, then fed those curated refusals back into retraining.
+                The following day I read an article about how Shopify hit the same wall with <a href="https://shopify.engineering/sidekick-curation" target="_blank" rel="noopener noreferrer" style="color: var(--accent-bright);">Sidekick</a>, their text-to-query agent. Its production logs only ever captured successful queries, so the model had no training signal for "no". Refusal was never something it had seen demonstrated as correct. Their fix was a four-judge LLM ensemble that required unanimous consensus before a query could be labelled unanswerable, then fed those curated refusals back into retraining.
             </p>
 
             <p>
-                I couldn't retrain my Fabric Data Agent the way Shopify retrained Sidekick — I didn't train it in the first place. But I could still give it a signal for "no," just through its instructions instead.
+                I couldn't retrain my Fabric Data Agent the way Shopify retrained Sidekick. I didn't train it in the first place. But I could still give it a signal for "no," just through its instructions instead.
             </p>
 
             <h2>Teaching my agent to say no</h2>
@@ -558,11 +558,11 @@
             </p>
 
             <p>
-                As this article has shown, a well-built Gold layer and ontology aren't enough on their own. My Data Agent didn't fail because it lacked data — it failed because it had no instruction to prefer admitting a gap over guessing a plausible-sounding answer. That's a lesson you only get from testing the edges, not from the modelling.
+                As this article has shown, a well-built Gold layer and ontology aren't enough on their own. My Data Agent didn't fail because it lacked data. It failed because it had no instruction to prefer admitting a gap over guessing a plausible-sounding answer. That's a lesson you only get from testing the edges, not from the modelling.
             </p>
 
             <p>
-                One thing I want to test next: right now every unanswerable question gets the same flat refusal. Shopify's taxonomy for Sidekick splits that into <em>missing capability</em>, <em>ambiguous</em>, and <em>wrong skill</em> — worth trying on my own instructions, since a vague question probably deserves a clarifying question, not the same "I don't have this" response as a genuinely missing metric.
+                One thing I want to test next: right now every unanswerable question gets the same flat refusal. Shopify's taxonomy for Sidekick splits that into <em>missing capability</em>, <em>ambiguous</em>, and <em>wrong skill</em>, which is worth trying on my own instructions, since a vague question probably deserves a clarifying question, not the same "I don't have this" response as a genuinely missing metric.
             </p>
 
             <hr>

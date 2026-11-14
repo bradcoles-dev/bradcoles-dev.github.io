@@ -237,7 +237,7 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 
 ### 13. Em Dash Overuse
 
-**Problem:** LLMs use em dashes (—) more than humans, mimicking "punchy" sales writing.
+**Problem:** LLMs use em dashes (—) more than humans, mimicking "punchy" sales writing. Don't use em dashes in Brad's blogs or site pages at all: use a comma, colon, full stop or parentheses instead. The only exception is text quoted verbatim (e.g. an AI agent's actual output).
 
 **Before:**
 > The term is primarily promoted by Dutch institutions—not by the people themselves. You don't say "Netherlands, Europe" as an address—yet this mislabeling continues—even in official documents.
@@ -322,6 +322,18 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 **After:**
 > Snowflake renames things often (SnowSQL became Snowflake CLI). The loop is orient, teach, then quiz.
 > - **No:** proceed.
+
+---
+
+### 18b. Spaced Slashes (" / ")
+
+**Problem:** A slash with spaces either side (" / ") is a hallmark of AI-generated content. Write it closed up ("/") in prose, headings, table cells, SVG text and HTML comments. The only exception is code, where " / " is division.
+
+**Before:**
+> Insert / update / delete events arrive via VPN / ExpressRoute.
+
+**After:**
+> Insert/update/delete events arrive via VPN/ExpressRoute.
 
 ---
 
