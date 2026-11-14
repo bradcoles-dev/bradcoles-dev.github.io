@@ -440,9 +440,9 @@
             </p>
 
             <ul>
-                <li><strong>Long passive content doesn't stick for me.</strong> I'd watch an hour of video and keep very little of it.</li>
-                <li><strong>Cold diagnostic tests measured nothing.</strong> I took a practice test before studying, and every answer was a guess. All I learned was that I didn't know Snowflake yet, and it was demotivating.</li>
-                <li><strong>Question banks don't match the real exam.</strong> Pass reports kept saying third-party banks are nothing like the real exam in style. When I checked bank answers against the Snowflake docs, several were outdated or wrong.</li>
+                <li>Long passive content doesn't stick for me. I'd watch an hour of video and keep very little of it.</li>
+                <li>Cold diagnostic tests measured nothing. I took a practice test before studying, and every answer was a guess. All I learned was that I didn't know Snowflake yet, and it was demotivating.</li>
+                <li>Question banks don't match the real exam. Pass reports kept saying third-party banks are nothing like the real exam in style. When I checked bank answers against the Snowflake docs, several were outdated or wrong.</li>
             </ul>
 
             <p>
@@ -501,10 +501,10 @@
             </p>
 
             <ul>
-                <li><strong>Only teach what's in the official study guide, using current product names.</strong> Snowflake renames things often (SnowSQL &rarr; Snowflake CLI, Cortex LLM functions &rarr; AI SQL functions), so a table of old and new names gets checked against the docs.</li>
-                <li><strong>Ground every claim in <a href="https://docs.snowflake.com" target="_blank" rel="noopener noreferrer">docs.snowflake.com</a>, with a link.</strong> No link means unverified. This caught the tutor out more than once, and it caught the question banks out even more.</li>
-                <li><strong>Use analogies from the platform I actually know.</strong> Fabric and Delta, not Databricks, and they have to be current (liquid clustering, not Z-order).</li>
-                <li><strong>Skip generic data-engineering basics.</strong> Teach the Snowflake-specific differences.</li>
+                <li>Only teach what's in the official study guide, using current product names. Snowflake renames things often (SnowSQL &rarr; Snowflake CLI, Cortex LLM functions &rarr; AI SQL functions), so a table of old and new names gets checked against the docs.</li>
+                <li>Ground every claim in <a href="https://docs.snowflake.com" target="_blank" rel="noopener noreferrer">docs.snowflake.com</a>, with a link. No link means unverified. This caught the tutor out more than once, and it caught the question banks out even more.</li>
+                <li>Use analogies from the platform I actually know, which is Fabric and Delta. They have to be current too, so liquid clustering rather than Z-order.</li>
+                <li>Skip generic data-engineering basics. Teach the Snowflake-specific differences.</li>
             </ul>
 
             <h2>The study loop</h2>
@@ -514,14 +514,14 @@
             </p>
 
             <ol>
-                <li><strong>Warm-up (5 min):</strong> 3&ndash;5 spaced-review questions from the miss log, due on a 1 &rarr; 3 &rarr; 7 &rarr; 14 day schedule.</li>
-                <li><strong>Orient + guess:</strong> one plain-English line per topic, with a Fabric analogy and a flag on anything Snowflake-only. Then 2&ndash;3 unscored prediction questions ("Guess: does a cloned stream keep its pending records?"). Guessing before being taught primes you for the answer, and it costs nothing because it isn't scored.</li>
-                <li><strong>Teach:</strong> short chunks, each with a quick check question, a doc link and an optional SQL snippet to run in a trial account.</li>
-                <li><strong>Fact sweep:</strong> one card of 3&ndash;4 facts taken from the feature's docs overview page, then quick recall questions.</li>
-                <li><strong>Explain it back:</strong> I summarise the objective from memory, without scrolling up.</li>
-                <li><strong>Quiz:</strong> 10 questions in the style of the official sample questions (scenario, constraint, four almost-right options). 7 on today's topic and 3 interleaved from earlier ones. I rate my confidence on every answer: 1 = guess, 2 = unsure, 3 = sure.</li>
-                <li><strong>Repair:</strong> for every miss, and every correct guess, I get why I was wrong, why each distractor is wrong, and a variant question. Then it goes into the miss log.</li>
-                <li><strong>Close out:</strong> update the tracker, add a QuickRef block, rebuild the dashboards.</li>
+                <li>Warm-up (5 min): 3&ndash;5 spaced-review questions from the miss log, due on a 1 &rarr; 3 &rarr; 7 &rarr; 14 day schedule.</li>
+                <li>Orient + guess: one plain-English line per topic, with a Fabric analogy and a flag on anything Snowflake-only. Then 2&ndash;3 unscored prediction questions ("Guess: does a cloned stream keep its pending records?"). Guessing before being taught primes you for the answer, and it costs nothing because it isn't scored.</li>
+                <li>Teach: short chunks, each with a quick check question, a doc link and an optional SQL snippet to run in a trial account.</li>
+                <li>Fact sweep: one card of 3&ndash;4 facts taken from the feature's docs overview page, then quick recall questions.</li>
+                <li>Explain it back: I summarise the objective from memory, without scrolling up.</li>
+                <li>Quiz: 10 questions in the style of the official sample questions (scenario, constraint, four almost-right options). 7 on today's topic and 3 interleaved from earlier ones. I rate my confidence on every answer: 1 = guess, 2 = unsure, 3 = sure.</li>
+                <li>Repair: for every miss, and every correct guess, I get why I was wrong, why each distractor is wrong, and a variant question. Then it goes into the miss log.</li>
+                <li>Close out: update the tracker, add a QuickRef block, rebuild the dashboards.</li>
             </ol>
 
             <h3>The confidence rating was the most useful part</h3>
@@ -531,8 +531,8 @@
             </p>
 
             <ul>
-                <li><strong>Wrong at confidence 3</strong> = my mental model is wrong. Those got flagged 🔥 and extra time.</li>
-                <li><strong>Right at confidence 1</strong> = lucky. Those went into the miss log as if they were misses.</li>
+                <li>Wrong at confidence 3 = my mental model is wrong. Those got a fire flag in the tracker and extra time.</li>
+                <li>Right at confidence 1 = lucky. Those went into the miss log as if they were misses.</li>
                 <li>Over time, it showed that my "sure" answers were very reliable. On my last full practice test, confidence-3 answers were 90% right. That's what gave me the nerve to sit the exam when my overall scores were borderline.</li>
             </ul>
 
@@ -585,7 +585,7 @@
             </p>
 
             <ul>
-                <li>A full third-party mock after each domain, scored by official objective (taught / untaught / doubtful key checked against the docs), not by the bank's own tags.</li>
+                <li>A full third-party mock after each domain, scored against the official objectives (taught / untaught / doubtful key checked against the docs). I ignored the bank's own topic tags.</li>
                 <li>The official practice exam as the main go/no-go signal.</li>
                 <li>A final check the night before: sit only if a timed set came in at 75% or more. Otherwise reschedule, which was free with online proctoring.</li>
             </ul>
@@ -628,7 +628,7 @@
             </div>
 
             <p>
-                That's around 70&ndash;80% in practice, and a pass with 55 points to spare. (The real score is scaled, so it isn't percent correct.) The official practice exam felt easier than the banks but scored the same. My misses there were mostly "I half-knew it and picked the runner-up", not pure guesses. That told me the last few days should go into firming up near-misses and reading questions slowly, not cramming more trivia.
+                That's around 70&ndash;80% in practice, and a pass with 55 points to spare. (The real score is scaled, so it isn't percent correct.) The official practice exam felt easier than the banks but scored the same. Most of my misses there were "I half-knew it and picked the runner-up". Very few were pure guesses. That told me to spend the last few days firming up near-misses and reading questions slowly. Cramming more trivia wouldn't help.
             </p>
 
             <h2>The one big miss</h2>
@@ -671,8 +671,8 @@
             <h3>Keep</h3>
 
             <ul>
-                <li>Instructions in a file, not a pasted prompt. The tutor never forgot the rules or where I was up to.</li>
-                <li>Orient &rarr; teach &rarr; quiz, never cold testing.</li>
+                <li>Instructions live in a file. The tutor never forgot the rules or where I was up to.</li>
+                <li>Orient &rarr; teach &rarr; quiz. Nothing tested cold.</li>
                 <li>Confidence ratings on every answer.</li>
                 <li>A miss log with spaced review, where every miss is classified as not taught, not recalled or slip.</li>
                 <li>Docs links for every claim, and the docs win over any question bank.</li>
@@ -683,12 +683,12 @@
 
             <ul>
                 <li>Turn pass-report hot topics into lessons from day one.</li>
-                <li>Start spaced review of the backlog at full volume, not "a few a day".</li>
+                <li>Start spaced review of the backlog at full volume from the first week.</li>
                 <li>Protect against illness gaps. My eleven sick days cost more in retention than in coverage, so a light daily review would have helped even while I was unwell.</li>
             </ul>
 
             <p>
-                <strong>On AI tutors in general:</strong> Claude was a very good tutor when it was held to the docs. It made mistakes: wrong distractors, a misremembered default, overconfident conclusions from small samples. But the setup made those mistakes visible, and most of them were caught. Treat it as a well-read, tireless study partner who has to show its sources, not an oracle.
+                <strong>On AI tutors in general:</strong> Claude was a very good tutor when it was held to the docs. It made mistakes: wrong distractors, a misremembered default, overconfident conclusions from small samples. But the setup made those mistakes visible, and most of them were caught. Treat it as a well-read, tireless study partner who has to show its sources.
             </p>
 
             <h2>Try it yourself</h2>
