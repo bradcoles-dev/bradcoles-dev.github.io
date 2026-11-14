@@ -311,6 +311,20 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 
 ---
 
+### 18a. Arrow Characters (→)
+
+**Problem:** The arrow character (→, `&rarr;`, `&#x2192;`) is a hallmark of AI-generated content. Never use it anywhere in Brad's blogs or posts: not in prose, lists, link text ("Read article →"), table cells, SVG text, or HTML comments. Use words or punctuation instead: "to", "became", "then", a comma sequence, or a colon after a list label. Arrowheads drawn as SVG shapes or markers in diagrams are fine.
+
+**Before:**
+> Snowflake renames things often (SnowSQL → Snowflake CLI). The loop is orient → teach → quiz.
+> - **No →** proceed.
+
+**After:**
+> Snowflake renames things often (SnowSQL became Snowflake CLI). The loop is orient, teach, then quiz.
+> - **No:** proceed.
+
+---
+
 ## COMMUNICATION PATTERNS
 
 ### 19. Collaborative Communication Artifacts

@@ -101,6 +101,7 @@ Lead with the problem or observation, not the solution or announcement.
 - **Links in the post body** — triggers suspicion and reduces engagement. Put URLs in a top-level comment.
 - **No discussion prompt** — posts without a question rarely generate the early comments needed for ranking.
 - **Generic titles** — "Need help" or "Quick question" get skipped immediately.
+- **Arrow characters (→)** — a hallmark of AI content that Reddit readers spot instantly. Use words ("to", "then", "became") or a colon instead.
 - **Posting at the wrong time** — even strong content dies if nobody is online.
 - **Asking for upvotes** — vote manipulation, can get the post removed.
 - **Deleting and reposting** — triggers negative signals; revise the approach and try another day instead.

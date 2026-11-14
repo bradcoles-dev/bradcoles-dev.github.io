@@ -81,6 +81,7 @@ The goal is curiosity or recognition — make the reader think "I need to know t
 - Short paragraphs. One idea per paragraph.
 - Numbered lists for steps or ranked items. Bullets for parallel items.
 - No emojis.
+- No arrow characters (→). They're a hallmark of AI content; use words ("to", "then", "became") or a colon instead.
 - Bold sparingly — only for a term or finding that genuinely needs emphasis.
 - No headers (they read as corporate, not personal).
 

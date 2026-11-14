@@ -523,7 +523,7 @@
                     <line x1="600" y1="96" x2="600" y2="120" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#t1-ap)"/>
                     <rect x="510" y="122" width="180" height="36" rx="3" fill="#0d1117" stroke="#1f2937" stroke-width="1"/>
                     <text x="600" y="138" text-anchor="middle" fill="#9ca3af" font-size="9.5" font-family="'JetBrains Mono', monospace">Custom Writer</text>
-                    <text x="600" y="152" text-anchor="middle" fill="#9ca3af" font-size="9.5" font-family="'JetBrains Mono', monospace">Parquet → Landing Zone</text>
+                    <text x="600" y="152" text-anchor="middle" fill="#9ca3af" font-size="9.5" font-family="'JetBrains Mono', monospace">Parquet to Landing Zone</text>
                     <line x1="600" y1="158" x2="600" y2="200" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#t1-ap)"/>
                     <text x="614" y="184" fill="#a78bfa" font-size="9" font-family="'JetBrains Mono', monospace">Fabric merges</text>
                     <rect x="495" y="202" width="210" height="50" rx="4" fill="#111827" stroke="#7c3aed" stroke-width="1.5"/>
@@ -740,7 +740,7 @@
             </p>
 
             <p>
-                <strong>The clearest downstream win: source-to-semantic with no transform layer.</strong> Not every reporting use case requires transforms. Operational dashboards, self-service analytics on source tables that are useful as-is, metrics that don't require heavy cross-domain joins - these can go from mirrored Delta tables directly to a Direct Lake Semantic Model. Source → mirrored database → Direct Lake Semantic Model: near-real-time, near-zero capacity cost, no Spark jobs or pipeline runs.
+                <strong>The clearest downstream win: source-to-semantic with no transform layer.</strong> Not every reporting use case requires transforms. Operational dashboards, self-service analytics on source tables that are useful as-is, metrics that don't require heavy cross-domain joins - these can go from mirrored Delta tables directly to a Direct Lake Semantic Model. Source to mirrored database to Direct Lake Semantic Model: near-real-time, near-zero capacity cost, no Spark jobs or pipeline runs.
             </p>
 
             <p>
@@ -1392,11 +1392,11 @@
                     <text x="200" y="78" text-anchor="middle" fill="#e5e7eb" font-size="9" font-family="'JetBrains Mono', monospace">Has native</text>
                     <text x="200" y="90" text-anchor="middle" fill="#e5e7eb" font-size="9" font-family="'JetBrains Mono', monospace">connector?</text>
 
-                    <!-- D1 → D2: Yes down -->
+                    <!-- D1 to D2: Yes down -->
                     <line x1="200" y1="104" x2="200" y2="163" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#fc-blue)"/>
                     <text x="211" y="137" fill="#3b82f6" font-size="9" font-family="'JetBrains Mono', monospace">Yes</text>
 
-                    <!-- D1 exit: None → bus right -->
+                    <!-- D1 exit: None to bus right -->
                     <line x1="258" y1="82" x2="425" y2="82" stroke="#d97706" stroke-width="1.5"/>
                     <text x="338" y="75" text-anchor="middle" fill="#d97706" font-size="9" font-family="'JetBrains Mono', monospace">None</text>
                     <circle cx="425" cy="82" r="3.5" fill="#d97706"/>
@@ -1406,11 +1406,11 @@
                     <text x="200" y="181" text-anchor="middle" fill="#e5e7eb" font-size="9" font-family="'JetBrains Mono', monospace">Hard</text>
                     <text x="200" y="193" text-anchor="middle" fill="#e5e7eb" font-size="9" font-family="'JetBrains Mono', monospace">blockers?</text>
 
-                    <!-- D2 → D3: No down -->
+                    <!-- D2 to D3: No down -->
                     <line x1="200" y1="207" x2="200" y2="268" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#fc-blue)"/>
                     <text x="211" y="241" fill="#3b82f6" font-size="9" font-family="'JetBrains Mono', monospace">No</text>
 
-                    <!-- D2 exit: Yes → bus right -->
+                    <!-- D2 exit: Yes to bus right -->
                     <line x1="258" y1="185" x2="425" y2="185" stroke="#d97706" stroke-width="1.5"/>
                     <text x="338" y="178" text-anchor="middle" fill="#d97706" font-size="9" font-family="'JetBrains Mono', monospace">Yes</text>
                     <circle cx="425" cy="185" r="3.5" fill="#d97706"/>
@@ -1420,11 +1420,11 @@
                     <text x="200" y="286" text-anchor="middle" fill="#e5e7eb" font-size="9" font-family="'JetBrains Mono', monospace">Config</text>
                     <text x="200" y="298" text-anchor="middle" fill="#e5e7eb" font-size="9" font-family="'JetBrains Mono', monospace">approved?</text>
 
-                    <!-- D3 exit: No → bus bottom -->
+                    <!-- D3 exit: No to bus bottom -->
                     <line x1="258" y1="290" x2="425" y2="290" stroke="#d97706" stroke-width="1.5"/>
                     <text x="338" y="283" text-anchor="middle" fill="#d97706" font-size="9" font-family="'JetBrains Mono', monospace">No</text>
 
-                    <!-- BUS VERTICAL (x=425, y=82→290) + arrow to D_OM -->
+                    <!-- BUS VERTICAL (x=425, y=82-290) + arrow to D_OM -->
                     <line x1="425" y1="82" x2="425" y2="290" stroke="#d97706" stroke-width="1.5"/>
                     <line x1="425" y1="290" x2="478" y2="290" stroke="#d97706" stroke-width="1.5" marker-end="url(#fc-amber)"/>
                     <text x="436" y="225" fill="#d97706" font-size="8" font-family="'JetBrains Mono', monospace">Phase 1</text>
@@ -1435,14 +1435,14 @@
                     <text x="545" y="286" text-anchor="middle" fill="#e5e7eb" font-size="9" font-family="'JetBrains Mono', monospace">Open Mirroring</text>
                     <text x="545" y="298" text-anchor="middle" fill="#e5e7eb" font-size="9" font-family="'JetBrains Mono', monospace">viable?</text>
 
-                    <!-- D_OM No → right → Traditional Phase 1 outcome -->
+                    <!-- D_OM No: right to Traditional Phase 1 outcome -->
                     <line x1="610" y1="290" x2="622" y2="290" stroke="#6b7280" stroke-width="1.5" marker-end="url(#fc-grey)"/>
                     <text x="611" y="283" fill="#6b7280" font-size="8" font-family="'JetBrains Mono', monospace">No</text>
                     <rect x="624" y="272" width="88" height="36" rx="3" fill="#1c1917" stroke="#6b7280" stroke-width="1"/>
                     <text x="668" y="287" text-anchor="middle" fill="#9ca3af" font-size="8.5" font-family="'JetBrains Mono', monospace">Traditional</text>
                     <text x="668" y="300" text-anchor="middle" fill="#9ca3af" font-size="8.5" font-family="'JetBrains Mono', monospace">pipeline only</text>
 
-                    <!-- D3 Yes + D_OM Yes → down to Phase 2 (paths drawn before D4) -->
+                    <!-- D3 Yes + D_OM Yes: down to Phase 2 (paths drawn before D4) -->
                     <path d="M200,312 V420 H360" stroke="#3b82f6" stroke-width="1.5" fill="none"/>
                     <text x="211" y="368" fill="#3b82f6" font-size="9" font-family="'JetBrains Mono', monospace">Yes</text>
                     <path d="M545,312 V420 H360" stroke="#a78bfa" stroke-width="1.5" fill="none"/>
@@ -1460,11 +1460,11 @@
                     <!-- Steps 5–8 annotation below D4 -->
                     <text x="360" y="499" text-anchor="middle" fill="#374151" font-size="8" font-family="'JetBrains Mono', monospace">current-state only · no replay · no RLS · no SLA guarantee</text>
 
-                    <!-- D4 Yes → left + down → Mirroring outcome -->
+                    <!-- D4 Yes: left + down to Mirroring outcome -->
                     <path d="M360,484 H167 V525" stroke="#10b981" stroke-width="1.5" fill="none" marker-end="url(#fc-green)"/>
                     <text x="264" y="478" text-anchor="middle" fill="#10b981" font-size="9" font-family="'JetBrains Mono', monospace">Yes</text>
 
-                    <!-- D4 No → right + down → Traditional/Hybrid outcome -->
+                    <!-- D4 No: right + down to Traditional/Hybrid outcome -->
                     <path d="M455,452 H553 V525" stroke="#6b7280" stroke-width="1.5" fill="none" marker-end="url(#fc-grey)"/>
                     <text x="499" y="445" text-anchor="middle" fill="#6b7280" font-size="9" font-family="'JetBrains Mono', monospace">No (any)</text>
 
@@ -1604,8 +1604,8 @@
             <ul>
                 <li>Can you read changes from the source using existing mechanisms - Change Tracking, RowVersion, date-modified timestamps, triggers?</li>
                 <li>Can you run a process that writes Parquet files to OneLake?</li>
-                <li><strong>Yes to both →</strong> Open Mirroring is your path. No source-side CDC configuration required.</li>
-                <li><strong>No →</strong> Traditional pipeline or CDC stack. Mirroring in any form is not available for this source.</li>
+                <li><strong>Yes to both:</strong> Open Mirroring is your path. No source-side CDC configuration required.</li>
+                <li><strong>No:</strong> Traditional pipeline or CDC stack. Mirroring in any form is not available for this source.</li>
             </ul>
 
             <hr>
@@ -1617,29 +1617,29 @@
             <h4>5. What is the reporting use case?</h4>
 
             <ul>
-                <li><strong>Operational reporting on current source state, minimal or no transforms →</strong> source-to-semantic with Direct Lake; this is mirroring's clearest win. Proceed.</li>
-                <li><strong>Reporting that requires transforms (cleaning, joins, aggregations) →</strong> mirroring handles ingestion; plan compute budget for transform layers separately. Near-real-time end-to-end requires Spark Structured Streaming or high-frequency micro-batches - neither is free. Decide whether that compute cost is justified before committing.</li>
+                <li><strong>Operational reporting on current source state, minimal or no transforms:</strong> source-to-semantic with Direct Lake; this is mirroring's clearest win. Proceed.</li>
+                <li><strong>Reporting that requires transforms (cleaning, joins, aggregations):</strong> mirroring handles ingestion; plan compute budget for transform layers separately. Near-real-time end-to-end requires Spark Structured Streaming or high-frequency micro-batches - neither is free. Decide whether that compute cost is justified before committing.</li>
             </ul>
 
             <h4>6. Do you need a replayable raw layer?</h4>
 
             <ul>
-                <li><strong>Yes, and unwilling or unable to maintain one alongside the mirror →</strong> mirroring alone is insufficient. Use a traditional pipeline, or use mirroring for current-state reporting while maintaining a separate raw capture layer - see the raw layer section above.</li>
-                <li><strong>No, or able to maintain a raw capture layer separately →</strong> proceed.</li>
+                <li><strong>Yes, and unwilling or unable to maintain one alongside the mirror:</strong> mirroring alone is insufficient. Use a traditional pipeline, or use mirroring for current-state reporting while maintaining a separate raw capture layer - see the raw layer section above.</li>
+                <li><strong>No, or able to maintain a raw capture layer separately:</strong> proceed.</li>
             </ul>
 
             <h4>7. Do you need source-level RLS or column security to propagate automatically?</h4>
 
             <ul>
-                <li><strong>Yes →</strong> mirroring is the wrong tool regardless of source. Security policies are not propagated; they must be rebuilt at the Fabric layer.</li>
-                <li><strong>No →</strong> proceed.</li>
+                <li><strong>Yes:</strong> mirroring is the wrong tool regardless of source. Security policies are not propagated; they must be rebuilt at the Fabric layer.</li>
+                <li><strong>No:</strong> proceed.</li>
             </ul>
 
             <h4>8. Do you need a guaranteed, SLA-backed latency?</h4>
 
             <ul>
-                <li><strong>Yes →</strong> mirroring has no published SLA. Use a scheduled pipeline for predictable, measurable timing.</li>
-                <li><strong>Near-real-time is sufficient, SLA not required →</strong> mirroring is a fit.</li>
+                <li><strong>Yes:</strong> mirroring has no published SLA. Use a scheduled pipeline for predictable, measurable timing.</li>
+                <li><strong>Near-real-time is sufficient, SLA not required:</strong> mirroring is a fit.</li>
             </ul>
 
             <hr>
