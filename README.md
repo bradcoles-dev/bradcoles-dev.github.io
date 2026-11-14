@@ -17,7 +17,8 @@ bradcoles-dev.github.io/
 │   ├── fabric-mirroring.html
 │   ├── fabric-delta-table-maintenance.html
 │   ├── fabric-private-links.html
-│   └── ai-augmented-engineering.html
+│   ├── ai-augmented-engineering.html
+│   └── snowpro-core-claude-study-partner.html
 ├── images/                 # Image assets
 │   └── Head_shot-removebg-preview.png  # Profile headshot image
 ├── _config.yml             # Jekyll configuration (GitHub Pages)

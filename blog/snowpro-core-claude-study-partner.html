@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="805/1000 on the first attempt, about five weeks after starting Snowflake properly. This post covers the setup, the study loop, what didn't work, and how I decided I was ready.">
+    <meta name="keywords" content="Snowflake, SnowPro Core, COF-C03, Certification, Claude, Claude Code, AI Tutor, Spaced Repetition, Study Method, Data Engineering">
+    <meta name="author" content="Brad Coles">
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E8BDECYXD8"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-E8BDECYXD8');
+    </script>
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://bradcoles.dev/blog/snowpro-core-claude-study-partner.html">
+    <meta property="og:title" content="How I used Claude as a study partner to pass SnowPro Core">
+    <meta property="og:description" content="805/1000 on the first attempt, about five weeks after starting Snowflake properly. This post covers the setup, the study loop, what didn't work, and how I decided I was ready.">
+    <meta property="og:image" content="https://bradcoles.dev/preview.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://bradcoles.dev/blog/snowpro-core-claude-study-partner.html">
+    <meta property="twitter:title" content="How I used Claude as a study partner to pass SnowPro Core">
+    <meta property="twitter:description" content="805/1000 on the first attempt, about five weeks after starting Snowflake properly. This post covers the setup, the study loop, what didn't work, and how I decided I was ready.">
+    <meta property="twitter:image" content="https://bradcoles.dev/preview.png">
+
+    <title>How I used Claude as a study partner to pass SnowPro Core | Brad Coles</title>
+    <link rel="canonical" href="https://bradcoles.dev/blog/snowpro-core-claude-study-partner.html">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Press+Start+2P&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0e1a;
+            --bg-card: #111827;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent: #3b82f6;
+            --accent-bright: #60a5fa;
+            --accent-dim: #1e40af;
+            --border: #1f2937;
+            --code-bg: #0d1117;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+                linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            padding: 3rem 0 2rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .back-link {
+            display: inline-block;
+            color: var(--accent-bright);
+            text-decoration: none;
+            margin-bottom: 2rem;
+            font-size: 0.875rem;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: var(--text-primary);
+        }
+
+        .back-link::before {
+            content: '← ';
+        }
+
+        .blog-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .blog-date,
+        .blog-category {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .blog-category {
+            color: var(--accent-bright);
+            border-color: var(--accent-dim);
+        }
+
+        h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .blog-subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        .blog-byline {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0;
+        }
+
+        h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-top: 3rem;
+            margin-bottom: 1rem;
+            color: var(--accent-bright);
+        }
+
+        h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        article {
+            margin-top: 2rem;
+            line-height: 1.8;
+        }
+
+        article p {
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        article a {
+            color: var(--accent-bright);
+        }
+
+        article ul, article ol {
+            margin: 1.5rem 0 1.5rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        article li {
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+
+        article strong {
+            color: var(--accent-bright);
+            font-weight: 700;
+        }
+
+        article em {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        article p > code,
+        article li > code,
+        article td > code {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            padding: 0.1rem 0.4rem;
+            font-size: 0.85em;
+            color: var(--accent-bright);
+            font-family: 'JetBrains Mono', monospace;
+            overflow-wrap: anywhere;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+
+        th {
+            background: var(--code-bg);
+            color: var(--accent-bright);
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border: 1px solid var(--border);
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            vertical-align: top;
+        }
+
+        tr:nth-child(even) td {
+            background: rgba(17, 24, 39, 0.6);
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 3rem 0;
+        }
+
+        .callout {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .diagram {
+            margin: 2rem 0;
+        }
+
+        .diagram img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border: 1px solid var(--border);
+        }
+
+        .diagram figcaption {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-top: 0.75rem;
+            font-style: italic;
+            line-height: 1.5;
+        }
+
+        footer {
+            padding: 3rem 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-secondary);
+            margin-top: 4rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            article ul, article ol {
+                margin-left: 1.25rem;
+            }
+        }
+
+        /* Related articles */
+        .related-articles {
+            margin-top: 3rem;
+        }
+
+        .related-articles h2 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin: 0 0 1rem;
+            padding: 0;
+            border: none;
+        }
+
+        .related-articles ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+            gap: 1rem;
+        }
+
+        .related-articles li {
+            margin: 0;
+        }
+
+        .related-articles a {
+            display: block;
+            height: 100%;
+            padding: 1rem 1.25rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent-dim);
+            color: var(--text-primary);
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            line-height: 1.4;
+            text-decoration: none;
+            transition: border-color 0.2s ease, color 0.2s ease;
+        }
+
+        .related-articles a:hover,
+        .related-articles a:focus-visible {
+            border-color: var(--accent);
+            color: var(--accent-bright);
+        }
+
+        /* Newsletter sign-up (Substack) - shared block, keep identical across pages */
+        .newsletter-signup {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-top: 3px solid var(--accent);
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .newsletter-signup .newsletter-pitch {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-align: center;
+            margin: 0 0 1rem;
+        }
+
+        .newsletter-signup iframe {
+            display: block;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 768px) {
+            .newsletter-signup {
+                padding: 1.25rem 1rem;
+            }
+
+            .newsletter-signup .newsletter-pitch {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="../index.html" class="back-link">Back to Portfolio</a>
+            <div class="blog-meta">
+                <span class="blog-date">November 2026</span>
+                <span class="blog-category">Snowflake</span>
+                <span class="blog-category">Certification</span>
+                <span class="blog-category">AI</span>
+            </div>
+            <h1>How I used Claude as a study partner to pass SnowPro Core</h1>
+            <p class="blog-subtitle">805/1000 on the first attempt, about five weeks after starting Snowflake properly. This post covers the setup, the study loop, what didn't work, and how I decided I was ready.</p>
+            <p class="blog-byline">By Brad Coles | Associate Director - Data Engineering Capability Lead ANZ, Synechron Australia</p>
+        </header>
+
+        <article>
+            <p>
+                I passed the <a href="https://learn.snowflake.com/en/certifications/snowpro-core-c03/" target="_blank" rel="noopener noreferrer">SnowPro Core (COF-C03)</a> exam this morning with 805/1000 (the pass mark is 750), on my first attempt.
+            </p>
+
+            <p>
+                I'm a data engineer, and Snowflake was new to me. I know Microsoft Fabric well (Lakehouse, Warehouse, OneLake, Delta tables), but before this I'd done almost nothing in Snowflake. Structured study ran for about five weeks, from 8 October to 14 November, including an eleven-day gap when I was sick.
+            </p>
+
+            <p>
+                I didn't do this with a video course and a question bank. I used Claude Code as a tutor, with a setup that kept track of what I'd learned, what I kept getting wrong, and whether I was actually ready. This post covers how that worked, what I had to change along the way, and what I'd do differently.
+            </p>
+
+            <div class="callout">
+                A note on exam content: nothing here describes actual exam questions. It's about the method.
+            </div>
+
+            <h2>Why not just a course and a question bank?</h2>
+
+            <p>
+                I tried that first, in September, and it didn't work for me:
+            </p>
+
+            <ul>
+                <li><strong>Long passive content doesn't stick for me.</strong> I'd watch an hour of video and keep very little of it.</li>
+                <li><strong>Cold diagnostic tests measured nothing.</strong> I took a practice test before studying, and every answer was a guess. All I learned was that I didn't know Snowflake yet, and it was demotivating.</li>
+                <li><strong>Question banks don't match the real exam.</strong> Pass reports kept saying third-party banks are nothing like the real exam in style. When I checked bank answers against the Snowflake docs, several were outdated or wrong.</li>
+            </ul>
+
+            <p>
+                What I wanted was a tutor who knew the syllabus, taught in short interactive chunks, quizzed me in the official exam's style, and remembered my mistakes from one session to the next.
+            </p>
+
+            <h2>The setup</h2>
+
+            <p>
+                The starting point was Databricks' <a href="https://www.databricks.com/sites/default/files/2026-06/ai-prep-guide-any-databricks-certification.pdf" target="_blank" rel="noopener noreferrer">AI Prep Guide</a>, a guide to using an AI assistant to prepare for any Databricks certification. Its loop is "orient &rarr; diagnose &rarr; deep dive", and it expects you to paste a priming prompt at the start of every session. I adapted it for Snowflake and moved everything into files.
+            </p>
+
+            <p>
+                Claude Code reads a <code>CLAUDE.md</code> file in the project folder automatically, so the tutor setup is always loaded. No pasting. The project folder had:
+            </p>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>File</th>
+                            <th>What it does</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>CLAUDE.md</code></td>
+                            <td>Tutor instructions: the session loop, the rules, my background, and a table of renamed-product traps</td>
+                        </tr>
+                        <tr>
+                            <td><code>ObjectiveTracker.md</code></td>
+                            <td>Every sub-objective from the official study guide, with status, quiz score, date and a resume note. Read first in every session</td>
+                        </tr>
+                        <tr>
+                            <td><code>MissLog.md</code></td>
+                            <td>Every miss, with my reasoning, why it was wrong, a memory hook, and a spaced-review log</td>
+                        </tr>
+                        <tr>
+                            <td><code>QuickRef.md</code></td>
+                            <td>One short "rules + exceptions" block per objective, for rereading before mocks</td>
+                        </tr>
+                        <tr>
+                            <td><code>LessonsLearned.md</code></td>
+                            <td>What worked and what didn't. Most of this post comes from it</td>
+                        </tr>
+                        <tr>
+                            <td>Two Python scripts</td>
+                            <td>Turn the tracker and miss log into an HTML progress dashboard and a gamified version</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p>
+                A few rules in <code>CLAUDE.md</code> did a lot of work:
+            </p>
+
+            <ul>
+                <li><strong>Only teach what's in the official study guide, using current product names.</strong> Snowflake renames things often (SnowSQL &rarr; Snowflake CLI, Cortex LLM functions &rarr; AI SQL functions), so a table of old and new names gets checked against the docs.</li>
+                <li><strong>Ground every claim in <a href="https://docs.snowflake.com" target="_blank" rel="noopener noreferrer">docs.snowflake.com</a>, with a link.</strong> No link means unverified. This caught the tutor out more than once, and it caught the question banks out even more.</li>
+                <li><strong>Use analogies from the platform I actually know.</strong> Fabric and Delta, not Databricks, and they have to be current (liquid clustering, not Z-order).</li>
+                <li><strong>Skip generic data-engineering basics.</strong> Teach the Snowflake-specific differences.</li>
+            </ul>
+
+            <h2>The study loop</h2>
+
+            <p>
+                One sub-objective per session, about 65&ndash;80 minutes:
+            </p>
+
+            <ol>
+                <li><strong>Warm-up (5 min):</strong> 3&ndash;5 spaced-review questions from the miss log, due on a 1 &rarr; 3 &rarr; 7 &rarr; 14 day schedule.</li>
+                <li><strong>Orient + guess:</strong> one plain-English line per topic, with a Fabric analogy and a flag on anything Snowflake-only. Then 2&ndash;3 unscored prediction questions ("Guess: does a cloned stream keep its pending records?"). Guessing before being taught primes you for the answer, and it costs nothing because it isn't scored.</li>
+                <li><strong>Teach:</strong> short chunks, each with a quick check question, a doc link and an optional SQL snippet to run in a trial account.</li>
+                <li><strong>Fact sweep:</strong> one card of 3&ndash;4 facts taken from the feature's docs overview page, then quick recall questions.</li>
+                <li><strong>Explain it back:</strong> I summarise the objective from memory, without scrolling up.</li>
+                <li><strong>Quiz:</strong> 10 questions in the style of the official sample questions (scenario, constraint, four almost-right options). 7 on today's topic and 3 interleaved from earlier ones. I rate my confidence on every answer: 1 = guess, 2 = unsure, 3 = sure.</li>
+                <li><strong>Repair:</strong> for every miss, and every correct guess, I get why I was wrong, why each distractor is wrong, and a variant question. Then it goes into the miss log.</li>
+                <li><strong>Close out:</strong> update the tracker, add a QuickRef block, rebuild the dashboards.</li>
+            </ol>
+
+            <h3>The confidence rating was the most useful part</h3>
+
+            <p>
+                The rating turned a score into a diagnosis:
+            </p>
+
+            <ul>
+                <li><strong>Wrong at confidence 3</strong> = my mental model is wrong. Those got flagged 🔥 and extra time.</li>
+                <li><strong>Right at confidence 1</strong> = lucky. Those went into the miss log as if they were misses.</li>
+                <li>Over time, it showed that my "sure" answers were very reliable. On my last full practice test, confidence-3 answers were 90% right. That's what gave me the nerve to sit the exam when my overall scores were borderline.</li>
+            </ul>
+
+            <h2>What didn't work, and what I changed</h2>
+
+            <p>
+                Most of the value came from fixing things that weren't working. Each change below was triggered by evidence: a mock score, a pattern in the miss log, or me getting annoyed.
+            </p>
+
+            <p>
+                <strong>1. The tutor taught what it thought was important.</strong> After the first domain, independent practice questions showed that about 1 in 3 questions on topics I'd "learned" asked about facts never taught. The tutor had chosen coverage by judgment and leaned towards mechanisms and scenarios. <em>Fix:</em> build each lesson from the feature's docs overview page, plus a "fact sweep" card for defaults, limits, editions, privileges, cost drivers and UI surfaces.
+            </p>
+
+            <p>
+                <strong>2. Testing a fact before teaching it.</strong> The first fact sweep asked questions cold. <em>Fix:</em> teach-then-check. Nothing is tested before it has been on a card.
+            </p>
+
+            <p>
+                <strong>3. Fact cards that were just lists of names.</strong> "Trust Center (security posture)" teaches nothing you can reason with. <em>Fix:</em> every fact gets one line on what it does and one on when you'd use it. Fewer facts, explained.
+            </p>
+
+            <p>
+                <strong>4. Asking me to recall exact function names.</strong> The exam is multiple choice. It never asks you to write <code>SYSTEM$GET_PREDECESSOR_RETURN_VALUE</code> from memory. <em>Fix:</em> exact names are tested by recognition ("pick the real one from these plausible fakes"), and free recall is only for what a feature does. We also practised decoding names (<code>DATABASE_STORAGE_USAGE_HISTORY</code> = per database, storage, usage, history), which usually narrows four options to two. It doesn't settle near-identical names, and when the tutor oversold it, I pushed back.
+            </p>
+
+            <p>
+                <strong>5. Late third sessions.</strong> A session that started at 9 pm after two others scored fine on the night, and I'd forgotten nearly all of it by morning. <em>Fix:</em> a stop rule. Two sessions a day, and a shaky explain-back means stop before the quiz.
+            </p>
+
+            <p>
+                <strong>6. The tutor's own questions were sometimes wrong.</strong> A "wrong" option that was actually valid syntax. A question whose wording cued a distractor ("before re-running" made me think of a dry run). <em>Fix:</em> check every distractor and every stem against the docs before asking.
+            </p>
+
+            <p>
+                <strong>7. Reading too much into small samples.</strong> Early on, the tutor drew conclusions from 3&ndash;4 questions and called a gap in its own teaching my "reading slip". <em>Fix:</em> classify every miss as not taught, taught but not recalled, or reading slip, with evidence and sample sizes.
+            </p>
+
+            <p>
+                <strong>8. Rule-heavy topics felt like "a ton of overlapping rules".</strong> Access control and privileges especially. <em>Fix:</em> a QuickRef block per objective (core rules, exceptions, one picture), plus a cross-cutting "privilege patterns" card: five verbs (<code>USAGE</code> / <code>OPERATE</code> / <code>MONITOR</code> / <code>MODIFY</code> / <code>OWNERSHIP</code>) and "follow the data path", so I could reason out privileges rather than memorise them per feature.
+            </p>
+
+            <p>
+                <strong>9. The review backlog never moved.</strong> At 3&ndash;5 reviews a day, 51 items from September were never reached, and I missed many of them again on a retake. <em>Fix:</em> clear about 10 a day in quick free-recall batches.
+            </p>
+
+            <h2>Deciding whether I was ready</h2>
+
+            <p>
+                This was the hardest part. No practice signal is calibrated to the real exam, so I set a rule before seeing the results:
+            </p>
+
+            <ul>
+                <li>A full third-party mock after each domain, scored by official objective (taught / untaught / doubtful key checked against the docs), not by the bank's own tags.</li>
+                <li>The official practice exam as the main go/no-go signal.</li>
+                <li>A final check the night before: sit only if a timed set came in at 75% or more. Otherwise reschedule, which was free with online proctoring.</li>
+            </ul>
+
+            <p>
+                The signals stayed stubbornly around the line:
+            </p>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Signal</th>
+                            <th>Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Third-party mocks (mid-study)</td>
+                            <td>66&ndash;84% on taught objectives</td>
+                        </tr>
+                        <tr>
+                            <td>Official practice exam</td>
+                            <td>72.5%</td>
+                        </tr>
+                        <tr>
+                            <td>Mixed review, no topic warning</td>
+                            <td>~77&ndash;78%</td>
+                        </tr>
+                        <tr>
+                            <td>Final timed set (first half of a mock)</td>
+                            <td>80%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Real exam</strong></td>
+                            <td><strong>805/1000 (pass = 750)</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p>
+                That's around 70&ndash;80% in practice, and a pass with 55 points to spare. (The real score is scaled, so it isn't percent correct.) The official practice exam felt easier than the banks but scored the same. My misses there were mostly "I half-knew it and picked the runner-up", not pure guesses. That told me the last few days should go into firming up near-misses and reading questions slowly, not cramming more trivia.
+            </p>
+
+            <h2>The one big miss</h2>
+
+            <p>
+                The real exam had a noticeable number of questions on a feature I'd never studied: <a href="https://docs.snowflake.com/en/user-guide/data-quality-intro" target="_blank" rel="noopener noreferrer">Data Metric Functions</a>, Snowflake's built-in data-quality checks.
+            </p>
+
+            <p>
+                They aren't named in the official study guide, so my "only teach guide objectives" rule kept them out of every session. But my study plan had a list of "recurring hot topics" from public pass reports, and DMFs were first on that list. Nothing ever turned that list into a lesson.
+            </p>
+
+            <p>
+                The lesson: the guide's bullets are broader than their wording. Next time, I'll map every topic from pass reports onto the guide bullet it could sit under, and give each one at least one fact card.
+            </p>
+
+            <h2>Making it a bit of a game</h2>
+
+            <p>
+                Halfway through, I asked Claude to build a gamified dashboard from the same tracker data: XP, a streak, badges, a heatmap of objectives, a GitHub-style activity grid, and practice mocks as "boss fights". It sounds gimmicky, and it was a bit. But on the days I was tired, a streak counter and a "reviews due" number got me to do 10 minutes of review when I'd otherwise have done nothing.
+            </p>
+
+            <figure class="diagram">
+                <img src="../images/petey/game-dashboard-readiness.png" alt="Gamified study dashboard titled Quest - SnowPro Core on exam day: a 4-day streak, 350 XP today, 306 reviews done, 46 comebacks, 207 reviews due, an 82% exam readiness bar, and a heatmap of objectives by domain coloured strong, shaky or weak" loading="lazy">
+                <figcaption>Exam morning: streak, XP, the review backlog and an exam-readiness bar, with a heatmap of every objective by domain.</figcaption>
+            </figure>
+
+            <figure class="diagram">
+                <img src="../images/petey/game-dashboard-boss-fights.png" alt="Today's quests checklist, a GitHub-style study activity grid showing 25 study days, and a list of practice mocks as boss fights, each marked defeated or survived, ending with the real exam passed at 805/1000" loading="lazy">
+                <figcaption>Daily quests, the activity grid, and practice mocks as boss fights, ending with the real exam.</figcaption>
+            </figure>
+
+            <figure class="diagram">
+                <img src="../images/petey/game-dashboard-badges.png" alt="Badges panel with unlocked badges such as First flake, Perfect seven, Hat-trick, Backlog buster, Comeback, Ice cold, On a roll, Boss slayer and Domain 1 to 5 cleared, plus a How XP works list" loading="lazy">
+                <figcaption>Badges and the XP rules.</figcaption>
+            </figure>
+
+            <h2>What I'd keep, and what I'd change</h2>
+
+            <h3>Keep</h3>
+
+            <ul>
+                <li>Instructions in a file, not a pasted prompt. The tutor never forgot the rules or where I was up to.</li>
+                <li>Orient &rarr; teach &rarr; quiz, never cold testing.</li>
+                <li>Confidence ratings on every answer.</li>
+                <li>A miss log with spaced review, where every miss is classified as not taught, not recalled or slip.</li>
+                <li>Docs links for every claim, and the docs win over any question bank.</li>
+                <li>A readiness rule set before seeing the results.</li>
+            </ul>
+
+            <h3>Change</h3>
+
+            <ul>
+                <li>Turn pass-report hot topics into lessons from day one.</li>
+                <li>Start spaced review of the backlog at full volume, not "a few a day".</li>
+                <li>Protect against illness gaps. My eleven sick days cost more in retention than in coverage, so a light daily review would have helped even while I was unwell.</li>
+            </ul>
+
+            <p>
+                <strong>On AI tutors in general:</strong> Claude was a very good tutor when it was held to the docs. It made mistakes: wrong distractors, a misremembered default, overconfident conclusions from small samples. But the setup made those mistakes visible, and most of them were caught. Treat it as a well-read, tireless study partner who has to show its sources, not an oracle.
+            </p>
+
+            <h2>Try it yourself</h2>
+
+            <p>
+                None of this method is Snowflake-specific, so I've packaged it as a free, open-source kit: <a href="https://github.com/bradcoles-dev/cert-pt-petey" target="_blank" rel="noopener noreferrer">Cert PT ("Petey")</a>. It works for any exam with a published study guide and an official docs site (Snowflake, Microsoft, AWS, Databricks, GCP and others).
+            </p>
+
+            <ul>
+                <li>Create your own private copy with <strong>Use this template</strong>, drop your exam's study guide PDF into <code>guide/</code>, open Claude Code and run <code>/init-exam</code>. Petey reads the guide, asks a few questions (exam date, the platform you already know, which days you can study) and writes your tracker, miss log and study plan.</li>
+                <li>Then say "next objective" and the loop starts: teach, quiz with confidence, repair, spaced review.</li>
+                <li>Both dashboards are included, the plain one and the game view.</li>
+                <li>Everything in this post that I learnt the hard way (hot topics, recognition for names, the stop rules) is already built into the rules.</li>
+            </ul>
+
+            <p>
+                It doesn't ship any exam questions, and your progress stays out of git. If you try it, especially on a different vendor's exam, I'd love to hear how it went: open an issue or send a pull request.
+            </p>
+
+            <hr>
+
+            <p><em>Brad Coles is an Associate Director and Data Engineering Capability Lead ANZ at <a href="https://www.synechron.com/en-au" target="_blank" rel="noopener noreferrer">Synechron Australia</a>, specialising in Microsoft Fabric and modern data platform engineering. Connect on <a href="https://www.linkedin.com/in/brad-coles/" target="_blank" rel="noopener noreferrer">LinkedIn</a>.</em></p>
+
+            <div style="margin-top: 1.5rem; padding: 1.5rem; border: 1px solid var(--accent-dim); background: var(--bg-card); text-align: center; font-size: 0.9rem;">
+                <p>If this article helped you, <a href="../support.html" style="color: var(--accent-bright); text-decoration: none; font-weight: 700;">click here to see some ways you can support me</a>.</p>
+            </div>
+        </article>
+
+        <aside class="related-articles" aria-labelledby="related-heading">
+            <h2 id="related-heading">Related</h2>
+            <ul>
+                <li><a href="ai-augmented-engineering.html">Building My Portfolio with Claude: A Personal Upskilling Journey</a></li>
+                <li><a href="fabric-iq-gold-ontology-not-enough.html">Fabric IQ: Gold Data and Ontology Aren't Enough</a></li>
+            </ul>
+        </aside>
+
+        <div class="newsletter-signup" aria-label="Newsletter sign-up">
+            <p class="newsletter-pitch">Practical data engineering, from someone building it day to day. New articles straight to your inbox.</p>
+            <iframe src="https://bradcolesdev.substack.com/embed" title="Subscribe to the newsletter on Substack" width="100%" height="150" style="border:none; background:transparent;" frameborder="0" scrolling="no"></iframe>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 Brad Coles. <a href="../index.html" style="color: var(--accent-bright); text-decoration: none;">Back to Portfolio</a></p>
+        </footer>
+    </div>
+</body>
+</html>
