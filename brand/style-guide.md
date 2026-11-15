@@ -4,7 +4,7 @@ Internal reference for video, presentation, and demo assets. Extends the visual 
 
 ## 1. Brand Essence
 
-- **Positioning:** Senior Data Engineering Consultant specialising in Microsoft Fabric & Azure — pragmatic, hands-on, results-driven.
+- **Positioning:** Associate Director, Data Engineering Capability Lead ANZ, specialising in lakehouse architecture, table formats and query execution (platform-agnostic: Fabric, Snowflake, Databricks as evidence) — pragmatic, hands-on, results-driven.
 - **Voice:** Technical and competent, clear and concise, professional but approachable, focused on business impact, data-driven.
 - **On video:** Same voice as the blog — lead with the business/operational outcome, explain *why* before *how*, keep language plain even when the topic is deep.
 

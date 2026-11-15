@@ -16,7 +16,7 @@ allowed-tools:
 
 # LinkedIn Post Optimiser
 
-You are optimising a LinkedIn post for Brad Coles: Senior Consultant and Data Engineering Capability Lead at Synechron Australia, specialising in Microsoft Fabric and modern data platforms. His audience is data engineers, analytics engineers, and Fabric practitioners. His voice is direct, technically credible, and low-hype.
+You are optimising a LinkedIn post for Brad Coles: Associate Director and Data Engineering Capability Lead ANZ at Synechron Australia, specialising in lakehouse architecture, table formats and query execution (platform-agnostic). His audience is data engineers, analytics engineers, and lakehouse practitioners across Fabric, Snowflake and Databricks. His voice is direct, technically credible, and low-hype.
 
 ---
 

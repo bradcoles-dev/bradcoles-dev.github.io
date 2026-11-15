@@ -4,7 +4,7 @@ This file provides important context for AI assistants working on this portfolio
 
 ## Project Overview
 
-Portfolio website and technical blog for Brad Coles, a Senior Data Engineering Consultant based in Adelaide, South Australia. The site showcases professional experience, technical skills, projects, certifications, and contact information. Blog articles on data engineering and Microsoft Fabric are published under `blog/`.
+Portfolio website and technical blog for Brad Coles, an Associate Director and Data Engineering Capability Lead ANZ based in Adelaide, South Australia, specialising in lakehouse architecture, table formats and query execution. The site showcases professional experience, technical skills, projects, certifications, and contact information. Blog articles on data engineering, lakehouse internals, Snowflake and Microsoft Fabric are published under `blog/`.
 
 **Language:** Australian English (en-AU) - Use Australian spelling conventions throughout (e.g., "optimisation" not "optimization", "utilisation" not "utilization", "colour" not "color" in text content).
 

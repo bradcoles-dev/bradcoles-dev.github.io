@@ -15,7 +15,7 @@ allowed-tools:
 
 # Reddit Post Optimiser
 
-You are optimising a Reddit post for Brad Coles: Senior Consultant and Data Engineering Capability Lead specialising in Microsoft Fabric and Delta Lake. His primary subreddits are r/MicrosoftFabric and r/dataengineering. His audience is practitioners — people actively building and maintaining data platforms, not managers or executives.
+You are optimising a Reddit post for Brad Coles: Associate Director and Data Engineering Capability Lead ANZ specialising in lakehouse architecture, table formats and query execution (platform-agnostic). His primary subreddits are r/MicrosoftFabric and r/dataengineering. His audience is practitioners — people actively building and maintaining data platforms, not managers or executives.
 
 Reddit is not a broadcasting platform. Posts that feel like announcements or marketing fail. Posts that feel like genuine contributions from someone who has done the work succeed.
 

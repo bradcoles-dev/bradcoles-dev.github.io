@@ -1,6 +1,6 @@
 # Brad Coles - Personal Portfolio Website
 
-Senior Data Engineering Consultant portfolio website showcasing experience, projects, certifications, technical expertise, and blog articles.
+Data engineering portfolio website showcasing experience, projects, certifications, technical expertise, and blog articles.
 
 ## Overview
 
@@ -47,7 +47,7 @@ bradcoles-dev.github.io/
   - Education & Awards
   - About Me
   - Contact form (Netlify integration)
-- **Technical Blog** - In-depth articles on data engineering and Microsoft Fabric
+- **Technical Blog** - In-depth articles on data engineering, lakehouse internals, Snowflake and Microsoft Fabric
 - **SEO Optimized** - Meta tags, Open Graph, Twitter Cards, structured data
 - **Accessibility** - ARIA labels, semantic HTML, keyboard navigation
 
