@@ -17,6 +17,9 @@ The portfolio is a single `index.html` file with embedded CSS and JavaScript. Bl
 - Easy maintenance - no framework or dependencies
 - GitHub Pages compatibility - works out of the box
 
+### Homepage Blog Section
+The homepage Blog section always shows exactly the 3 most recent articles (including externally published pieces, e.g. Synechron insights). When adding a new card, remove the oldest one. The full list lives in `blog/index.html`.
+
 ### Styling Approach
 All CSS is embedded in the `<style>` tag rather than external stylesheet because:
 - Reduces HTTP requests
